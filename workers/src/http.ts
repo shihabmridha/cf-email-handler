@@ -1,9 +1,12 @@
 ﻿import { Hono } from 'hono'
-import { serveStatic } from 'hono/serve-static'
+import { cors } from 'hono/cors'
 
 const app = new Hono<{ Bindings: CloudflareBindings }>()
 
-app.get('/', async (c) => {
+app.use('/api/*', cors())
+app.post('/api/auth', async (c) => {
+    const body = await c.req.json();
+    console.log(body);
     return new Response('Hello world!')
 })
 

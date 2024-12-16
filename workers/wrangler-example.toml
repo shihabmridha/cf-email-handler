@@ -2,25 +2,20 @@
 name = "cf-email-handler"
 main = "src/index.ts"
 compatibility_date = "2024-12-05"
+assets = { directory = "dist/" }
 
-# Workers Logs
-# Docs: https://developers.cloudflare.com/workers/observability/logs/workers-logs/
-# Configuration: https://developers.cloudflare.com/workers/observability/logs/workers-logs/#enable-workers-logs
 [observability]
 enabled = true
 
-# Automatically place your workloads in an optimal location to minimize latency.
-# If you are running back-end logic in a Worker, running it closer to your back-end infrastructure
-# rather than the end user may result in better performance.
-# Docs: https://developers.cloudflare.com/workers/configuration/smart-placement/#smart-placement
 [placement]
 mode = "smart"
 
-# Variable bindings. These are arbitrary, plaintext strings (similar to environment variables)
-# Docs:
-# - https://developers.cloudflare.com/workers/wrangler/configuration/#environment-variables
-# Note: Use secrets to store sensitive data.
-# - https://developers.cloudflare.com/workers/configuration/secrets/
+[[d1_databases]]
+binding = "DB"
+database_name = "db-local"
+database_id = "D1-DATABASE-ID"
+
 [vars]
 DISCORD_HOOK_URL = "DISCORD_WEBHOOK_URL"
 EMAIL_FORWARD_TO = "example@email.com"
+AI_ENDPOINT="https://gateway.ai.cloudflare.com/v1/aa4860f2766d7f93f6685ce382da26f5/cf-email-handler/google-ai-studio"
