@@ -22,9 +22,19 @@ export default function HomePage() {
   const [error, setError] = useState('')
   const router = useRouter()
 
-  const handleLogin = () => {
-    // Placeholder login logic
-    if (username === 'user' && password === 'password') {
+  const handleLogin = async () => {
+    const res = await fetch(process.env.NEXT_PUBLIC_API_HOST + '/api/auth', {
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+      },
+      method: 'POST',
+      body: JSON.stringify({
+        email: username,
+        password: password
+      })
+    })
+    if (res.ok) {
       router.push('/draft')
     } else {
       setError('Invalid username or password')
