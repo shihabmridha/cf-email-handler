@@ -1,23 +1,4 @@
 ﻿import PostalMime from 'postal-mime';
-import {BaseAiSummarization, BaseAiTextGeneration} from "@cloudflare/workers-types/2023-07-01/index";
-
-async function streamToString(stream: ReadableStream<Uint8Array>) {
-    const reader = stream.getReader();
-    let result = '';
-
-    while (true) {
-        const {done, value} = await reader.read();
-
-        if (done) {
-            break;
-        }
-
-        const chunk = new TextDecoder().decode(value, {stream: true});
-        result += chunk;
-    }
-
-    return result;
-}
 
 export default {
     async email(message: ForwardableEmailMessage, env: CloudflareBindings, ctx: ExecutionContext) {

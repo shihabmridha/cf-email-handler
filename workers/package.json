@@ -6,12 +6,18 @@
     "cf-typegen": "wrangler types --env-interface CloudflareBindings"
   },
   "dependencies": {
+    "crypto-js": "^4.2.0",
     "hono": "^4.6.13",
     "postal-mime": "^2.3.2"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20241205.0",
+    "@eslint/js": "^9.17.0",
+    "@types/crypto-js": "^4.2.2",
     "@types/react-dom": "^19.0.2",
+    "eslint": "^9.17.0",
+    "globals": "^15.13.0",
+    "typescript-eslint": "^8.18.1",
     "wrangler": "^3.88.0"
   }
 }
