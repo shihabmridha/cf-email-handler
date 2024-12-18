@@ -1,6 +1,7 @@
 #:schema node_modules/wrangler/config-schema.json
 name = "cf-email-handler"
 main = "src/index.ts"
+compatibility_flags = [ "nodejs_compat" ]
 compatibility_date = "2024-12-05"
 assets = { directory = "dist/" }
 
@@ -20,3 +21,5 @@ DISCORD_HOOK_URL = "DISCORD_WEBHOOK_URL"
 EMAIL_FORWARD_TO = "example@email.com"
 AI_ENDPOINT="https://gateway.ai.cloudflare.com/v1/aa4860f2766d7f93f6685ce382da26f5/cf-email-handler/google-ai-studio"
 JWT_SECRET="secret"
+ADMIN_EMAIL="your@gmail.com"
+ADMIN_PASSWORD="password"

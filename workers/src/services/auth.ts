@@ -1,6 +1,7 @@
 import {HTTPException} from "hono/http-exception";
 import {createJwtToken, hashText} from "../lib/utils";
 import {UserRepository} from "../repositories/user";
+import {LoginDto} from "../dtos/auth";
 
 export class AuthService {
   private readonly userRepository: UserRepository;
@@ -11,13 +12,13 @@ export class AuthService {
     this.jwtSecret = jwtSecret;
   }
 
-  async login(email: string, password: string) {
-    const user = await this.userRepository.findByEmail(email);
+  async login(dto: LoginDto) {
+    const user = await this.userRepository.findByEmail(dto.email);
     if (!user) {
-      throw new HTTPException(404, {message: `User not found for email = ${email}`});
+      throw new HTTPException(404, {message: `User not found for email = ${dto.email}`});
     }
 
-    const hashedPassword = hashText(password, user.salt);
+    const hashedPassword = hashText(dto.password, user.salt);
 
     if (hashedPassword !== user.password) {
       throw new HTTPException(401, {message: 'Invalid credential'});

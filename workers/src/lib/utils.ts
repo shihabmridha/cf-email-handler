@@ -1,9 +1,10 @@
-import hmacSHA256 from 'crypto-js/hmac-sha256';
-import Base64 from 'crypto-js/enc-base64';
 import Utf8 from 'crypto-js/enc-utf8';
+import {createHmac, createHash, randomBytes, Hash} from 'node:crypto';
+import * as Buffer from 'node:buffer';
 
+// import Base64 from 'crypto-js/enc-base64';
 function base64Url(input: CryptoJS.lib.WordArray) {
-  const base64Url = Base64.stringify(input);
+  const base64Url = btoa(input);
 
   // Replace characters according to base64url specifications
   return base64Url.replace(/=+$/, '').replace(/\+/g, '-').replace(/\//g, '_');
@@ -16,25 +17,23 @@ export function createJwtToken(payload: object, secret: string) {
 
   const jwtHeader = JSON.stringify({ alg: 'HS256', typ: 'JWT' });
 
-  const encodedHeaders = base64Url(Utf8.parse(jwtHeader));
-  const encodedPlayload = base64Url(Utf8.parse(JSON.stringify(payload)));
+  const encodedHeaders = createHash('utf8').update(jwtHeader).digest('base64url');
+  const encodedPayload = createHash('utf8').update(JSON.stringify(payload)).digest('base64url');
+  // const encodedHeaders = base64Url(Utf8.parse(jwtHeader));
+  // const encodedPayload = base64Url(Utf8.parse(JSON.stringify(payload)));
 
-  const signature = hmacSHA256(`${encodedHeaders}.${encodedPlayload}`, secret);
-  const encodedSignature = base64Url(signature);
+  const encodedSignature = createHmac('sha256', secret).update(`${encodedHeaders}.${encodedPayload}`).digest('base64url');
 
-  const jwt = `${encodedHeaders}.${encodedPlayload}.${encodedSignature}`;
-
-  return jwt;
+  return `${encodedHeaders}.${encodedPayload}.${encodedSignature}`;
 }
 
 // Function to hash the password
 export function hashText(text: string, salt: string): string {
   const saltedText = text + salt;
-  const hashedText = CryptoJS.SHA256(saltedText).toString(CryptoJS.enc.Hex);
-  return hashedText;
-};
+  return createHash('sha256').update(saltedText).digest('hex');
+}
 
 // Function to generate a random salt
 export function generateSalt(): string {
-  return CryptoJS.lib.WordArray.random(16).toString(CryptoJS.enc.Hex); // 16 bytes = 32 hex characters
-};
+  return randomBytes(16).toString('hex');
+}
