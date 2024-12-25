@@ -4,7 +4,7 @@ import {redirect} from 'next/navigation';
 import React from "react";
 
 function checkAuth() {
-    const isAuthenticated = false;
+    const isAuthenticated = true;
     if (!isAuthenticated) {
         redirect('/home');
     }
