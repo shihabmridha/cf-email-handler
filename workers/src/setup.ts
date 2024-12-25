@@ -1,7 +1,7 @@
 ﻿import {$} from 'bun';
 import {parseArgs} from "util";
 import {generateSalt, hashText} from "./lib/utils";
-import {WranglerConfig} from "./interfaces/wrangler.config";
+import {WranglerConfig} from "./interfaces/wranglerConfig";
 
 const configFile = Bun.file('./wrangler.toml');
 const fileExists = await configFile.exists();

@@ -1,27 +1,39 @@
 ﻿import {DraftRepository} from "../repositories/draft";
 import {DraftDto} from "@/shared/dtos/draft";
 import {DraftEntity} from "../entities/draft";
-import {plainToInstance} from "class-transformer";
-import {transformToClass} from "../lib/utils";
+import {Mapper} from "../lib/mapper";
 
 export class DraftService {
   private readonly draftRepository: DraftRepository;
+
   constructor(db: D1Database) {
     this.draftRepository = new DraftRepository(db);
   }
 
   async getAll(): Promise<DraftDto[]> {
     const entities = await this.draftRepository.getAll();
-    return plainToInstance(DraftDto, entities);
+    return entities.map(e => {
+      const dto = Mapper.entityToDto(DraftDto, e);
+      dto.recipients = e.recipients ? JSON.parse(e.recipients) : null;
+
+      return dto;
+    });
   }
 
-  async create(dto: DraftDto): Promise<void> {
-    const entity = transformToClass(DraftEntity, dto);
-    console.log(entity);
-    await this.draftRepository.create(entity);
+  async create(dto: DraftDto): Promise<DraftDto> {
+    const entity = Mapper.dtoToEntity(DraftEntity, dto);
+    const newEntity = await this.draftRepository.create(entity);
+    return Mapper.entityToDto(DraftDto, newEntity);
   }
 
-  async update(id: string, dto: DraftDto): Promise<void> {
+  async update(id: string, dto: DraftDto): Promise<DraftDto> {
+    const entity = Mapper.dtoToEntity(DraftEntity, dto);
+    const updatedEntity = await this.draftRepository.update(parseInt(id), entity);
 
+    return Mapper.entityToDto(DraftDto, updatedEntity);
+  }
+
+  async delete(id: number): Promise<boolean> {
+    return this.draftRepository.delete(id);
   }
 }

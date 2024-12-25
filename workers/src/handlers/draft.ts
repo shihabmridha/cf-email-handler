@@ -15,9 +15,28 @@ app.post('/', async (c) => {
   const draftService = new DraftService(c.env.DB);
   const body = await c.req.json<DraftDto>();
 
-  await draftService.create(body);
+  const dto = await draftService.create(body);
 
-  return c.body(null, 201);
+  return c.json(dto, 201);
+});
+
+app.put('/:id', async (c) => {
+  const draftService = new DraftService(c.env.DB);
+  const id = c.req.param('id');
+  const body = await c.req.json<DraftDto>();
+
+  const dto = await draftService.update(id, body);
+
+  return c.json(dto, 201);
+});
+
+app.delete('/:id', async (c) => {
+  const draftService = new DraftService(c.env.DB);
+  const id = c.req.param('id');
+
+  await draftService.delete(parseInt(id));
+
+  return c.body(null, 204);
 });
 
 export default app;

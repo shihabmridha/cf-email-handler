@@ -1,6 +1,8 @@
 import {Buffer} from 'node:buffer';
 import {createHmac, createHash, randomBytes} from 'node:crypto';
 import {ClassConstructor, plainToInstance} from "class-transformer";
+import {BaseDto} from "@/shared/dtos/base";
+import {BaseEntity} from "../entities/base";
 
 export function base64Url(input: Buffer) {
   const base64Url = input.toString('base64');
@@ -26,8 +28,4 @@ export function createHmacString(payload: string, secret: string) {
 
   const digest = createHmac('sha256', secret).update(payload).digest();
   return digest.toString('base64');
-}
-
-export function transformToClass<T>(cls: ClassConstructor<T>, data: object): T {
-  return plainToInstance(cls, data, {excludeExtraneousValues: true});
 }

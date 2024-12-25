@@ -1,7 +1,8 @@
-import { UserEntity } from "../entities/user";
+import {UserEntity} from "../entities/user";
 
 export class UserRepository {
   private readonly DB: D1Database;
+
   constructor(db: D1Database) {
     this.DB = db;
   }

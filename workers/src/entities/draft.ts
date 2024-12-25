@@ -10,7 +10,7 @@ export class DraftEntity extends BaseEntity {
   sender?: string;
 
   @Expose()
-  @Transform(({value}) => !value ? null : value)
+  @Transform(({value}) => !value ? null : JSON.stringify(value))
   recipients?: string; // Stored as JSON array
 
   @Expose()

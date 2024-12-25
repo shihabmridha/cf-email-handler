@@ -1,6 +1,6 @@
 ﻿import {parseArgs} from "util";
 import {$} from "bun";
-import {WranglerConfig} from "./interfaces/wrangler.config";
+import {WranglerConfig} from "./interfaces/wranglerConfig";
 
 // @ts-expect-error Bypass error
 import config from '../wrangler.toml';
