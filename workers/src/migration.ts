@@ -25,12 +25,21 @@ const {values} = parseArgs({
 
 
 try {
+  if (values.action === 'create' && !values.name) {
+    throw new Error('Please provide a name for the migration.');
+  }
+
   const dbName = wranglerConfig.d1_databases[0].database_name;
   const output = values.action === 'create'
     ? await $`wrangler d1 migrations ${values.action} ${dbName} ${values.name} ${values.remote ? '--remote' : ''}`.text()
     : await $`wrangler d1 migrations ${values.action} ${dbName} ${values.remote ? '--remote' : ''}`.text();
 
   console.log(output);
+
+  if (values.action === 'create') {
+    const capitalizedName = values.name!.charAt(0).toUpperCase() + values.name!.slice(1);
+    await Bun.write(`./src/entities/${values.name}.ts`, `import {BaseEntity} from "./base";\n\nexport class ${capitalizedName}Entity extends BaseEntity {}`);
+  }
 
   // @ts-expect-error Avoid ts error
 } catch (err: Error) {
