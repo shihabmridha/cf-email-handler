@@ -39,6 +39,9 @@ try {
   if (values.action === 'create') {
     const capitalizedName = values.name!.charAt(0).toUpperCase() + values.name!.slice(1);
     await Bun.write(`./src/entities/${values.name}.ts`, `import {BaseEntity} from "./base";\n\nexport class ${capitalizedName}Entity extends BaseEntity {}`);
+
+    const repositoryTemplate = `export class ${capitalizedName}Repository {\n\tprivate readonly DB: D1Database;\n\n\tconstructor(db: D1Database) {\n\t\tthis.DB = db;\n\t}\n}`;
+    await Bun.write(`./src/repositories/${values.name!.toLowerCase()}.ts`, repositoryTemplate);
   }
 
   // @ts-expect-error Avoid ts error
