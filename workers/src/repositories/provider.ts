@@ -15,9 +15,9 @@ export class ProviderRepository {
   }
 
   async create(provider: ProviderEntity): Promise<ProviderEntity> {
-    const sql = `INSERT INTO providers (userId, smtp, api) VALUES (?, ?, ?)`;
+    const sql = `INSERT INTO providers (userId, domain, smtp, api) VALUES (?, ?, ?, ?)`;
     const response = await this.DB.prepare(sql)
-      .bind(provider.userId, provider.smtp, provider.api)
+      .bind(provider.userId, provider.domain, provider.smtp, provider.api)
       .run();
 
     if (!response.success) {
@@ -28,9 +28,9 @@ export class ProviderRepository {
   }
 
   async update(id: number, provider: ProviderEntity): Promise<ProviderEntity> {
-    const sql = `UPDATE providers SET smtp = ?, api = ? WHERE id = ?`;
+    const sql = `UPDATE providers SET smtp = ?, api = ?, domain = ? WHERE id = ?`;
     const response = await this.DB.prepare(sql)
-      .bind(provider.smtp, provider.api, id)
+      .bind(provider.smtp, provider.api, provider.domain, id)
       .run();
 
     if (!response.success) {

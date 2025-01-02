@@ -1,9 +1,8 @@
 import {HTTPException} from "hono/http-exception";
-import {base64Url, createHmacString, hashText, dtoToEntity} from "../lib/utils";
+import {base64Url, createHmacString, hashText} from "../lib/utils";
 import {UserRepository} from "../repositories/user";
 import {LoginDto} from "@/shared/dtos/auth";
 import {Buffer} from "node:buffer";
-import {UserDto} from "@/shared/dtos/user";
 
 export class AuthService {
   private readonly userRepository: UserRepository;

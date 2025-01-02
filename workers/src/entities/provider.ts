@@ -6,6 +6,9 @@ export class ProviderEntity extends BaseEntity {
   userId: number = 0;
 
   @Expose()
+  domain: string = '';
+
+  @Expose()
   @Transform(({value}) => !value ? null : JSON.stringify(value))
   smtp?: string; // Stored as JSON
 
