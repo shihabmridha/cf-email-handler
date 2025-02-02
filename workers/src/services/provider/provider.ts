@@ -1,7 +1,7 @@
-﻿import {ProviderRepository} from "../repositories/provider";
+﻿import {ProviderRepository} from "../../repositories/provider";
 import {ProviderDto} from "@/shared/dtos/provider";
-import {Mapper} from "../lib/mapper";
-import {ProviderEntity} from "../entities/provider";
+import {Mapper} from "../../lib/mapper";
+import {ProviderEntity} from "../../entities/provider";
 
 export class ProviderService {
   private readonly providerRepository: ProviderRepository;
