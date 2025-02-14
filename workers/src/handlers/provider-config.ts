@@ -1,19 +1,19 @@
 ﻿import {Hono} from "hono";
-import {ProviderService} from "../services/provider";
-import {ProviderDto} from "@/shared/dtos/provider";
+import {ProviderConfigService} from "../services/provider/config";
+import {ProviderConfigDto} from "@/shared/dtos/provider";
 
 const app = new Hono<{ Bindings: CloudflareBindings }>();
 
 app.get('/', async (c) => {
-  const providerService = new ProviderService(c.env.DB);
+  const providerService = new ProviderConfigService(c.env.DB);
   const providers = await providerService.getAll();
 
   return c.json({providers});
 });
 
 app.post('/', async (c) => {
-  const providerService = new ProviderService(c.env.DB);
-  const body = await c.req.json<ProviderDto>();
+  const providerService = new ProviderConfigService(c.env.DB);
+  const body = await c.req.json<ProviderConfigDto>();
 
   const dto = await providerService.create(body);
 
@@ -21,8 +21,8 @@ app.post('/', async (c) => {
 });
 
 app.put('/:id', async (c) => {
-  const providerService = new ProviderService(c.env.DB);
-  const body = await c.req.json<ProviderDto>();
+  const providerService = new ProviderConfigService(c.env.DB);
+  const body = await c.req.json<ProviderConfigDto>();
 
   const dto = await providerService.update(body.id, body);
 
@@ -30,7 +30,7 @@ app.put('/:id', async (c) => {
 });
 
 app.delete('/:id', async (c) => {
-  const providerService = new ProviderService(c.env.DB);
+  const providerService = new ProviderConfigService(c.env.DB);
   const id = c.req.param('id');
 
   await providerService.delete(parseInt(id));

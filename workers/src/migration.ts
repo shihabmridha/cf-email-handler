@@ -30,6 +30,7 @@ try {
   }
 
   const dbName = wranglerConfig.d1_databases[0].database_name;
+  console.log(`Running migration for database ${dbName}`);
   const output = values.action === 'create'
     ? await $`wrangler d1 migrations ${values.action} ${dbName} ${values.name} ${values.remote ? '--remote' : ''}`.text()
     : await $`wrangler d1 migrations ${values.action} ${dbName} ${values.remote ? '--remote' : ''}`.text();

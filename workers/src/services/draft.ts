@@ -4,14 +4,14 @@ import {DraftEntity} from "../entities/draft";
 import {Mapper} from "../lib/mapper";
 
 export class DraftService {
-  private readonly draftRepository: DraftRepository;
+  private readonly _draftRepository: DraftRepository;
 
   constructor(db: D1Database) {
-    this.draftRepository = new DraftRepository(db);
+    this._draftRepository = new DraftRepository(db);
   }
 
   async getAll(): Promise<DraftDto[]> {
-    const entities = await this.draftRepository.getAll();
+    const entities = await this._draftRepository.getAll();
     return entities.map(e => {
       const dto = Mapper.entityToDto(DraftDto, e);
       dto.recipients = e.recipients ? JSON.parse(e.recipients) : null;
@@ -22,18 +22,18 @@ export class DraftService {
 
   async create(dto: DraftDto): Promise<DraftDto> {
     const entity = Mapper.dtoToEntity(DraftEntity, dto);
-    const newEntity = await this.draftRepository.create(entity);
+    const newEntity = await this._draftRepository.create(entity);
     return Mapper.entityToDto(DraftDto, newEntity);
   }
 
   async update(id: string, dto: DraftDto): Promise<DraftDto> {
     const entity = Mapper.dtoToEntity(DraftEntity, dto);
-    const updatedEntity = await this.draftRepository.update(parseInt(id), entity);
+    const updatedEntity = await this._draftRepository.update(parseInt(id), entity);
 
     return Mapper.entityToDto(DraftDto, updatedEntity);
   }
 
   async delete(id: number): Promise<boolean> {
-    return this.draftRepository.delete(id);
+    return this._draftRepository.delete(id);
   }
 }

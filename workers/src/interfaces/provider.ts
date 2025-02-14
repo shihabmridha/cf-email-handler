@@ -1,4 +1,8 @@
-﻿export interface EmailProvider {
-  sendByApi(payload: object): Promise<boolean>;
-  sendBySmtp(payload: object): Promise<boolean>;
+﻿import { TransportContent } from "@/shared/dtos/transport";
+import {ApiTransportPayload} from "../services/provider/base";
+
+export interface Provider {
+  createApiPayload(content: TransportContent): ApiTransportPayload;
+  sendByApi(payload: TransportContent): Promise<boolean>;
+  sendBySmtp(payload: TransportContent): Promise<boolean>;
 }
