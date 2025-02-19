@@ -1,0 +1,26 @@
+#:schema node_modules/wrangler/config-schema.json
+name = "cf-email-handler"
+main = "src/index.ts"
+compatibility_flags = [ "nodejs_compat" ]
+compatibility_date = "2024-12-05"
+assets = { directory = "dist/" }
+
+[observability]
+enabled = true
+
+[placement]
+mode = "smart"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "db-local"
+database_id = "D1-DATABASE-ID"
+migrations_dir="migrations"
+
+[vars]
+DISCORD_HOOK_URL = "DISCORD_WEBHOOK_URL"
+EMAIL_FORWARD_TO = "example@email.com"
+AI_ENDPOINT="https://gateway.ai.cloudflare.com/v1/"
+JWT_SECRET="secret"
+ADMIN_EMAIL="your@gmail.com"
+ADMIN_PASSWORD="password"
