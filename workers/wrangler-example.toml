@@ -4,6 +4,10 @@ main = "src/index.ts"
 compatibility_flags = [ "nodejs_compat" ]
 compatibility_date = "2024-12-05"
 assets = { directory = "dist/" }
+workers_dev = false # Set true to enable workers.dev domain
+routes = [
+  { pattern = "subdomain.yourdomain.com", custom_domain = true }
+]
 
 [observability]
 enabled = true
@@ -20,7 +24,15 @@ migrations_dir="migrations"
 [vars]
 DISCORD_HOOK_URL = "DISCORD_WEBHOOK_URL"
 EMAIL_FORWARD_TO = "example@email.com"
-AI_ENDPOINT="https://gateway.ai.cloudflare.com/v1/"
+GEMINI_KEY="API_KEY"
+JWT_SECRET="secret"
+ADMIN_EMAIL="your@gmail.com"
+ADMIN_PASSWORD="password"
+
+[env.production.vars]
+DISCORD_HOOK_URL = "DISCORD_WEBHOOK_URL"
+EMAIL_FORWARD_TO = "example@email.com"
+GEMINI_KEY="API_KEY"
 JWT_SECRET="secret"
 ADMIN_EMAIL="your@gmail.com"
 ADMIN_PASSWORD="password"
