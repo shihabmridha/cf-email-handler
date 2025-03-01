@@ -47,7 +47,7 @@ try {
 
   // @ts-expect-error Avoid ts error
 } catch (err: Error) {
-  console.log(`Failed with code ${err.exitCode}`);
-  console.log(err.stdout.toString());
-  console.log(err.stderr.toString());
+  console.log(`Failed with code ${err?.exitCode}. Message: ${err?.message}`);
+  console.log(err?.stdout?.toString());
+  console.log(err?.stderr?.toString());
 }

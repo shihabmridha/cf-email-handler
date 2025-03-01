@@ -28,6 +28,7 @@ export class GeminiService implements LlmService{
         }]
       })
     });
+
     const data = await response.json<GeminiResponse>();
     return data.candidates[0].content.parts[0].text;
   }

@@ -1,6 +1,6 @@
 import { LlmService } from "../interfaces/llm";
 
-export class EmailSummaryAiService {
+export class EmailSummaryService {
   private readonly llm: LlmService;
   constructor(llm: LlmService) {
     this.llm = llm;

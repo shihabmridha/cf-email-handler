@@ -3,7 +3,7 @@
   "scripts": {
     "setup": "bun ./src/setup.ts",
     "dev": "wrangler dev",
-    "deploy": "wrangler deploy --minify",
+    "deploy": "wrangler deploy --minify --env production",
     "mg:new": "bun ./src/migration.ts --action create",
     "mg:ls": "bun ./src/migration.ts --action list",
     "mg:up": "bun ./src/migration.ts --action apply",
