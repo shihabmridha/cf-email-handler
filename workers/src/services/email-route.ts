@@ -1,17 +1,18 @@
-import {EmailRouteDto} from "@/shared/dtos/email-route";
-import { EmailRouteRepository } from "../repositories/email-route";
-import { Mapper } from "../lib/mapper";
-import { EmailRouteEntity } from "../entities/email-route";
+import { HTTPException } from 'hono/http-exception';
+import { EmailRouteDto } from '@/shared/dtos/email-route';
+import { EmailType } from '@/shared/enums/email-type';
+import { Mapper } from '../lib/mapper';
+import { EmailRouteEntity } from '../entities/email-route';
+import { Configuration } from '../config';
+import { IEmailRouteRepository } from '../interfaces/repositories/email-route';
 
-export class EmailRoute {
-  private readonly _emailRouteRepository: EmailRouteRepository;
-  constructor(db: D1Database) {
-    this._emailRouteRepository = new EmailRouteRepository(db);
-  }
+export class EmailRouteService {
+  private readonly _emailRouteRepository: IEmailRouteRepository<EmailRouteEntity>;
+  private readonly _config: Configuration;
 
-  async create(dto: EmailRouteDto): Promise<void> {
-    const entity = Mapper.dtoToEntity(EmailRouteEntity, dto);
-    await this._emailRouteRepository.create(entity);
+  constructor(config: Configuration, emailRouteRepository: IEmailRouteRepository<EmailRouteEntity>) {
+    this._config = config;
+    this._emailRouteRepository = emailRouteRepository;
   }
 
   async getAll(): Promise<EmailRouteDto[]> {
@@ -19,19 +20,50 @@ export class EmailRoute {
     return entities.map(e => Mapper.entityToDto(EmailRouteDto, e));
   }
 
-  async update(id: string, dto: EmailRouteDto): Promise<void> {
+  async create(dto: EmailRouteDto): Promise<void> {
+    if (!dto.userId) {
+      throw new HTTPException(400, { message: 'User ID is required' });
+    }
+
+    if (dto.email === '' || dto.destination === '') {
+      throw new HTTPException(400, { message: 'Email and Destination is required' });
+    }
+
+    if (!dto.type || dto.type === EmailType.UNKNOWN) {
+      throw new HTTPException(400, { message: 'Type is required' });
+    }
+
+    dto.enabled = true;
+
     const entity = Mapper.dtoToEntity(EmailRouteEntity, dto);
-    await this._emailRouteRepository.update(parseInt(id), entity);
+    await this._emailRouteRepository.create(entity);
   }
 
-  async delete(id: string): Promise<void> {
-    await this._emailRouteRepository.delete(parseInt(id));
+  async update(id: number, dto: EmailRouteDto): Promise<void> {
+    if (!dto.userId) {
+      throw new HTTPException(400, { message: 'User ID is required' });
+    }
+
+    if (dto.email === '' || dto.destination === '') {
+      throw new HTTPException(400, { message: 'Email and Destination is required' });
+    }
+
+    if (dto.type === EmailType.UNKNOWN) {
+      throw new HTTPException(400, { message: 'Type is required' });
+    }
+
+    const entity = Mapper.dtoToEntity(EmailRouteEntity, dto);
+    await this._emailRouteRepository.update(id, entity);
   }
 
-  async getDestination(email: string): Promise<string | null> {
-    const routeEntity = await this._emailRouteRepository.getByEmail(email);
+  async delete(id: number): Promise<void> {
+    await this._emailRouteRepository.delete(id);
+  }
+
+  async getDestination(email: string, type: EmailType): Promise<string> {
+    const routeEntity = await this._emailRouteRepository.getByEmailAndType(email, type);
     if (!routeEntity) {
-      return null;
+      return this._config.emailForwardTo;
     }
 
     return routeEntity.destination;

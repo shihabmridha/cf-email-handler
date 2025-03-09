@@ -1,11 +1,20 @@
-﻿import {Hono} from "hono";
-import {MailService} from "../services/mail";
-import {SendMailDto} from "@/shared/dtos/mail";
+﻿import { Hono } from "hono";
+import { jwt } from 'hono/jwt';
+import { SendMailDto } from "@/shared/dtos/mail";
+import { AppContext } from '../interfaces/context';
 
-const app = new Hono<{ Bindings: CloudflareBindings }>();
+const app = new Hono<{ Bindings: AppContext }>();
+
+app.use('*', async (c, next) => {
+  const auth = jwt({
+    secret: c.env.JWT_SECRET,
+  });
+
+  return auth(c, next);
+});
 
 app.post('/send', async (c) => {
-  const mailService = new MailService(c.env.DB);
+  const mailService = c.env.container.getMailService();
   const body = await c.req.json<SendMailDto>();
 
   const dto = await mailService.send(body);

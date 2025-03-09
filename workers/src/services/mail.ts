@@ -1,12 +1,12 @@
 import { ProviderFactory } from "./provider/factory";
 import { ProviderConfigService } from "./provider/config";
-
 import { SendMailDto } from "@/shared/dtos/mail";
+
 export class MailService {
   private readonly _providerConfigService: ProviderConfigService;
 
-  constructor(db: D1Database) {
-    this._providerConfigService = new ProviderConfigService(db);
+  constructor(providerConfigService: ProviderConfigService) {
+    this._providerConfigService = providerConfigService;
   }
 
   async send(payload: SendMailDto): Promise<boolean> {

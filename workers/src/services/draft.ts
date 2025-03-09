@@ -1,13 +1,14 @@
-﻿import {DraftRepository} from "../repositories/draft";
-import {DraftDto} from "@/shared/dtos/draft";
-import {DraftEntity} from "../entities/draft";
-import {Mapper} from "../lib/mapper";
+﻿import { DraftRepository } from "../repositories/draft";
+import { DraftDto } from "@/shared/dtos/draft";
+import { DraftEntity } from "../entities/draft";
+import { Mapper } from "../lib/mapper";
+import { IDraftRepository } from '../interfaces/repositories/draft';
 
 export class DraftService {
-  private readonly _draftRepository: DraftRepository;
+  private readonly _draftRepository: IDraftRepository<DraftEntity>;
 
-  constructor(db: D1Database) {
-    this._draftRepository = new DraftRepository(db);
+  constructor(draftRepository: IDraftRepository<DraftEntity>) {
+    this._draftRepository = draftRepository;
   }
 
   async getAll(): Promise<DraftDto[]> {

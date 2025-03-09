@@ -1,11 +1,11 @@
-﻿import {BaseEntity} from "../entities/base";
-import {BaseDto} from "@/shared/dtos/base";
-import {ClassConstructor, plainToInstance} from "class-transformer";
+﻿import { BaseEntity } from "../entities/base";
+import { BaseDto } from "@/shared/dtos/base";
+import { ClassConstructor, plainToInstance } from "class-transformer";
 
 export class Mapper {
-  static dtoToEntity<T extends BaseEntity, K extends BaseDto >(classType: ClassConstructor<T>, plainObject: K): T;
-  static dtoToEntity<T extends BaseEntity, K extends BaseDto >(classType: ClassConstructor<T>, plainObject: K[]): T[];
-  static dtoToEntity<T extends BaseEntity, K extends BaseDto >(classType: ClassConstructor<T>, plainObject: K): T | T[] {
+  static dtoToEntity<T extends BaseEntity, K extends BaseDto>(classType: ClassConstructor<T>, plainObject: K): T;
+  static dtoToEntity<T extends BaseEntity, K extends BaseDto>(classType: ClassConstructor<T>, plainObject: K[]): T[];
+  static dtoToEntity<T extends BaseEntity, K extends BaseDto>(classType: ClassConstructor<T>, plainObject: K): T | T[] {
     return Array.isArray(plainObject)
       ? plainObject.map(obj => plainToInstance(classType, obj, { excludeExtraneousValues: true }))
       : plainToInstance(classType, plainObject, { excludeExtraneousValues: true });

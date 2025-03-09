@@ -1,22 +1,36 @@
 {
   "compilerOptions": {
-    "target": "ESNext",
-    "module": "ESNext",
-    "moduleResolution": "Bundler",
-    "strict": true,
+    "target": "esnext",
+    "module": "esnext",
+    "moduleResolution": "node",
     "skipLibCheck": true,
+    "experimentalDecorators": true,
+    "forceConsistentCasingInFileNames": true,
+    "noFallthroughCasesInSwitch": true,
+    "strict": true,
+    "noEmit": true,
+    "pretty": true,
+    "sourceMap": true,
+    "esModuleInterop": true,
     "lib": [
-      "ESNext"
+      "esnext"
     ],
     "types": [
-        "@cloudflare/workers-types/2023-07-01"
+      "@cloudflare/workers-types/2023-07-01"
     ],
-    "jsx": "react",
-    "experimentalDecorators": true,
     "paths": {
       "@/shared/*": [
         "../shared/*"
       ]
-    }
+    },
   },
+  "exclude": [
+    "node_modules",
+    "dist",
+  ],
+  "include": [
+    "src",
+    "tests",
+    "*.d.ts"
+  ]
 }

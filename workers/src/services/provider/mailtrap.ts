@@ -1,5 +1,5 @@
-﻿import {TransportApiConfig, TransportContent, TransportSmtpConfig} from "@/shared/dtos/transport";
-import {ApiTransportPayload, BaseProviderService} from "./base";
+﻿import { TransportApiConfig, TransportContent, TransportSmtpConfig } from "@/shared/dtos/transport";
+import { ApiTransportPayload, BaseProviderService } from "./base";
 
 export class MailTrapProviderService extends BaseProviderService {
   constructor(smtpConfig?: TransportSmtpConfig, apiConfig?: TransportApiConfig) {
@@ -8,9 +8,9 @@ export class MailTrapProviderService extends BaseProviderService {
 
   createApiPayload(content: TransportContent): ApiTransportPayload {
     return {
-      from: {email: content.from, name: content.fromName},
-      to: content.to.map(e => ({email: e})),
-      cc: content.cc?.map(e => ({email: e})),
+      from: { email: content.from, name: content.fromName },
+      to: content.to.map(e => ({ email: e })),
+      cc: content.cc?.map(e => ({ email: e })),
       subject: content.subject,
       text: content.text,
       html: content?.html,

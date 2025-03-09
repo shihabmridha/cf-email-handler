@@ -4,9 +4,9 @@ import { SmtpTransport } from "../transport/smtp";
 import { ApiTransport } from "../transport/api";
 
 export class ApiTransportPayload {
-  from: { email: string; name: string } = {email: "", name: ""};
-  to: { email: string }[] = [{email: ""}];
-  cc: { email: string }[] = [{email: ""}];
+  from: { email: string; name: string } = { email: "", name: "" };
+  to: { email: string }[] = [{ email: "" }];
+  cc: { email: string }[] = [{ email: "" }];
   subject: string = '';
   text: string = '';
   html?: string = '';

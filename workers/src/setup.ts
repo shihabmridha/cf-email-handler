@@ -1,13 +1,12 @@
-﻿import {$} from 'bun';
-import {parseArgs} from "util";
-import {generateSalt, hashText} from "./lib/utils";
-import {WranglerConfig} from "./interfaces/wrangler-config";
+﻿import { $ } from 'bun';
+import { parseArgs } from "util";
+import { generateSalt, hashText } from "./lib/utils";
+import { WranglerConfig } from "./interfaces/wrangler-config";
 
-// @ts-expect-error Bypass error
 import config from '../wrangler.toml';
 const wranglerConfig = config as WranglerConfig;
 
-const {values} = parseArgs({
+const { values } = parseArgs({
   args: Bun.argv,
   options: {
     remote: {

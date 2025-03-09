@@ -2,7 +2,6 @@
 import {$} from "bun";
 import {WranglerConfig} from "./interfaces/wrangler-config";
 
-// @ts-expect-error Bypass error
 import config from '../wrangler.toml';
 const wranglerConfig = config as WranglerConfig;
 

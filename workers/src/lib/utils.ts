@@ -1,8 +1,5 @@
-import {Buffer} from 'node:buffer';
-import {createHmac, createHash, randomBytes} from 'node:crypto';
-import {ClassConstructor, plainToInstance} from "class-transformer";
-import {BaseDto} from "@/shared/dtos/base";
-import {BaseEntity} from "../entities/base";
+import { Buffer } from 'node:buffer';
+import { createHash, randomBytes } from 'node:crypto';
 
 export function base64Url(input: Buffer) {
   const base64Url = input.toString('base64');
@@ -20,12 +17,26 @@ export function generateSalt(): string {
   return randomBytes(16).toString('hex');
 }
 
-// Get HMAC string in base64
-export function createHmacString(payload: string, secret: string) {
-  if (!payload) {
-    throw new Error('Empty payload');
-  }
 
-  const digest = createHmac('sha256', secret).update(payload).digest();
-  return digest.toString('base64');
+export async function cleanHtml(html: string): Promise<string> {
+  const cleanedHtml = new HTMLRewriter()
+    .on('style', {
+      element(element) {
+        element.remove();
+      }
+    })
+    .on('link[rel="stylesheet"]', {
+      element(element) {
+        element.remove();
+      }
+    })
+    .on('*', {
+      element(element) {
+        element.removeAttribute('style');
+        element.removeAttribute('class');
+      }
+    })
+    .transform(html);
+
+  return cleanedHtml;
 }
