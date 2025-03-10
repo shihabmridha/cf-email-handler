@@ -1,5 +1,5 @@
-import {Buffer} from 'node:buffer';
-import {createHash, randomBytes} from 'node:crypto';
+import { Buffer } from 'node:buffer';
+import { createHash, randomBytes } from 'node:crypto';
 
 export function base64Url(input: Buffer) {
   const base64Url = input.toString('base64');
@@ -18,8 +18,12 @@ export function generateSalt(): string {
 }
 
 
-export function cleanHtml(html: string): string {
-  return new HTMLRewriter()
+export async function cleanHtml(html: string): Promise<string> {
+  const originalResponse = new Response(html, {
+    headers: { 'Content-Type': 'text/html' },
+  });
+
+  const transformedResponse = new HTMLRewriter()
     .on('style', {
       element(element) {
         element.remove();
@@ -36,5 +40,7 @@ export function cleanHtml(html: string): string {
         element.removeAttribute('class');
       }
     })
-    .transform(html);
+    .transform(originalResponse);
+
+  return await transformedResponse.text();
 }
