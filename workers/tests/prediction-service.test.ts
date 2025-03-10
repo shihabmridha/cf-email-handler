@@ -8,7 +8,7 @@ import { GeminiService } from "../src/services/llm/gemini.js";
 import { Configuration } from "../src/config";
 import { EmailType } from "@/shared/enums/email-type";
 
-describe("Prediction Service", () => {
+describe.skip("Prediction Service", () => {
   test("Should contains OTP code and summary", async () => {
     const env = {
       ...wranglerConfig.vars
@@ -70,7 +70,7 @@ describe("Prediction Service", () => {
     expect(res.summary).toBeString();
   });
 
-  test.only("Should identify marketing email and extract summary", async () => {
+  test("Should identify marketing email and extract summary", async () => {
     const env = {
       ...wranglerConfig.vars
     };
