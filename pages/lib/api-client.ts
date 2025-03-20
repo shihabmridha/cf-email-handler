@@ -1,5 +1,5 @@
 import { LoginDto } from '@/shared/dtos/auth';
-import { EmailRouteDto } from '../../shared/dtos/email-route';
+import { EmailRouteDto } from '@/shared/dtos/email-route';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 

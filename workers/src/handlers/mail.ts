@@ -1,6 +1,6 @@
 ﻿import { Hono } from "hono";
 import { jwt } from 'hono/jwt';
-import { SendMailDto } from "@/shared/dtos/mail";
+import { SendMailDto } from "@/dtos/mail";
 import { AppContext } from '../interfaces/context';
 
 const app = new Hono<{ Bindings: AppContext }>();

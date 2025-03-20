@@ -2,7 +2,7 @@ import { Buffer } from "node:buffer";
 import { createHmac } from "node:crypto";
 import { HTTPException } from "hono/http-exception";
 import { hashText } from "../lib/utils";
-import { LoginDto } from "@/shared/dtos/auth";
+import { LoginDto } from "@/dtos/auth";
 import { Configuration } from "../config";
 import { UserEntity } from '../entities/user';
 import { IUserRepository } from '../interfaces/repositories/user';

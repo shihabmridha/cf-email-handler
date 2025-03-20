@@ -1,6 +1,6 @@
 import { ProviderFactory } from "./provider/factory";
 import { ProviderConfigService } from "./provider/config";
-import { SendMailDto } from "@/shared/dtos/mail";
+import { SendMailDto } from "@/dtos/mail";
 
 export class MailService {
   private readonly _providerConfigService: ProviderConfigService;

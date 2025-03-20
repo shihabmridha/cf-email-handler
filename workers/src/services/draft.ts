@@ -1,5 +1,5 @@
 ﻿import { DraftRepository } from "../repositories/draft";
-import { DraftDto } from "@/shared/dtos/draft";
+import { DraftDto } from "@/dtos/draft";
 import { DraftEntity } from "../entities/draft";
 import { Mapper } from "../lib/mapper";
 import { IDraftRepository } from '../interfaces/repositories/draft';

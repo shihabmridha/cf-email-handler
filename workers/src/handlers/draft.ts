@@ -1,5 +1,5 @@
 import { Hono } from "hono";
-import { DraftDto } from "@/shared/dtos/draft";
+import { DraftDto } from "@/dtos/draft";
 import { AppContext } from '../interfaces/context';
 import { jwt } from 'hono/jwt';
 

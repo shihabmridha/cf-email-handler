@@ -1,4 +1,4 @@
-import { LoginDto } from "@/shared/dtos/auth";
+import { LoginDto } from "@/dtos/auth";
 import { Hono } from "hono";
 import { AppContext } from '../interfaces/context';
 

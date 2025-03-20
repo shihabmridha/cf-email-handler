@@ -1,6 +1,6 @@
 ﻿import { Hono } from "hono";
 import { jwt } from 'hono/jwt';
-import { ProviderConfigDto } from "@/shared/dtos/provider";
+import { ProviderConfigDto } from "@/dtos/provider";
 import { AppContext } from '../interfaces/context';
 
 const app = new Hono<{ Bindings: AppContext }>();

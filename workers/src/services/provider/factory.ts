@@ -1,5 +1,5 @@
-import { ProviderType } from "@/shared/enums/provider";
-import { TransportApiConfig, TransportSmtpConfig } from "@/shared/dtos/transport";
+import { ProviderType } from "@/enums/provider";
+import { TransportApiConfig, TransportSmtpConfig } from "@/dtos/transport";
 import { Provider } from "../../interfaces/provider";
 import { ResendProviderService } from "./resend";
 import { MailTrapProviderService } from "./mailtrap";

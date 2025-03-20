@@ -1,6 +1,6 @@
 import { HTTPException } from 'hono/http-exception';
-import { EmailRouteDto } from '@/shared/dtos/email-route';
-import { EmailType } from '@/shared/enums/email-type';
+import { EmailRouteDto } from '@/dtos/email-route';
+import { EmailType } from '@/enums/email-type';
 import { Mapper } from '../lib/mapper';
 import { EmailRouteEntity } from '../entities/email-route';
 import { Configuration } from '../config';

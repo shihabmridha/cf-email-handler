@@ -1,4 +1,4 @@
-import { TransportApiConfig } from "@/shared/dtos/transport";
+import { TransportApiConfig } from "@/dtos/transport";
 import { Transport } from "../../interfaces/transport";
 
 export class ApiTransport implements Transport {

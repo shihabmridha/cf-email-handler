@@ -1,5 +1,5 @@
 import PostalMime from 'postal-mime';
-import { EmailType } from '@/shared/enums/email-type';
+import { EmailType } from '@/enums/email-type';
 import { Container } from '../container';
 import { cleanHtml } from '../lib/utils';
 

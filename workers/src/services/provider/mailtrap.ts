@@ -1,4 +1,4 @@
-﻿import { TransportApiConfig, TransportContent, TransportSmtpConfig } from "@/shared/dtos/transport";
+﻿import { TransportApiConfig, TransportContent, TransportSmtpConfig } from "@/dtos/transport";
 import { ApiTransportPayload, BaseProviderService } from "./base";
 
 export class MailTrapProviderService extends BaseProviderService {

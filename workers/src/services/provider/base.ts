@@ -1,4 +1,4 @@
-import { TransportApiConfig, TransportSmtpConfig, TransportContent } from "@/shared/dtos/transport";
+import { TransportApiConfig, TransportSmtpConfig, TransportContent } from "@/dtos/transport";
 import { Provider } from "../../interfaces/provider";
 import { SmtpTransport } from "../transport/smtp";
 import { ApiTransport } from "../transport/api";

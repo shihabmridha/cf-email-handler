@@ -6,7 +6,7 @@ const wranglerConfig = config as WranglerConfig;
 import { PredictionService, VerificationData } from "../src/services/prediction";
 import { GeminiService } from "../src/services/llm/gemini.js";
 import { Configuration } from "../src/config";
-import { EmailType } from "@/shared/enums/email-type";
+import { EmailType } from "@/enums/email-type";
 
 describe.skip("Prediction Service", () => {
   test("Should contains OTP code and summary", async () => {

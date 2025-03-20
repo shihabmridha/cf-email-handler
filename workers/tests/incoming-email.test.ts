@@ -3,7 +3,7 @@ import { parseEmail, processEmail } from '../src/handlers/incoming-email';
 import config from '../wrangler.toml';
 import { WranglerConfig } from "../src/interfaces/wrangler-config.js";
 import { Container } from '../src/container';
-import { EmailType } from '@/shared/enums/email-type';
+import { EmailType } from '@/enums/email-type';
 import { Configuration } from '../src/config';
 import { DiscordService } from '../src/services/discord';
 const wranglerConfig = config as WranglerConfig;

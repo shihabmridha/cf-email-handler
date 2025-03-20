@@ -1,10 +1,10 @@
-import { EmailType } from "@/shared/enums/email-type";
+import { EmailType } from "@/enums/email-type";
 import { EmailRouteEntity } from "../entities/email-route";
 import { IDatabase } from "../interfaces/database";
 import { BaseRepository } from "./base";
 import { IEmailRouteRepository } from '../interfaces/repositories/email-route';
 
-export class EmailRouteRepository extends BaseRepository<EmailRouteEntity> implements IEmailRouteRepository<EmailRouteEntity>{
+export class EmailRouteRepository extends BaseRepository<EmailRouteEntity> implements IEmailRouteRepository<EmailRouteEntity> {
   constructor(db: IDatabase) {
     super(db);
   }

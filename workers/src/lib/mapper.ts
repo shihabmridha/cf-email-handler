@@ -1,5 +1,5 @@
 ﻿import { BaseEntity } from "../entities/base";
-import { BaseDto } from "@/shared/dtos/base";
+import { BaseDto } from "@/dtos/base";
 import { ClassConstructor, plainToInstance } from "class-transformer";
 
 export class Mapper {

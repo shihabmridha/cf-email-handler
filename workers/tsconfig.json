@@ -16,8 +16,11 @@
       "esnext"
     ],
     "paths": {
-      "@/shared/*": [
-        "../shared/*"
+      "@/dtos/*": [
+        "./src/dtos/*"
+      ],
+      "@/enums/*": [
+        "./src/enums/*"
       ]
     },
   },
