@@ -6,7 +6,7 @@ export class Configuration {
   public readonly adminEmail: string;
   public readonly adminPassword: string;
 
-  constructor(env: CloudflareBindings) {
+  constructor(env: Env) {
     this.discordHookUrl = env.DISCORD_HOOK_URL;
     this.emailForwardTo = env.EMAIL_FORWARD_TO;
     this.geminiKey = env.GEMINI_KEY;

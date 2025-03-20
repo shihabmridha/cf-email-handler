@@ -6,5 +6,5 @@
       database_id: string;
     }
   >,
-  vars: CloudflareBindings
+  vars: Env
 }

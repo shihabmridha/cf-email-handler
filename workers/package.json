@@ -9,7 +9,7 @@
     "mg:new": "bun ./migration.ts --action create",
     "mg:ls": "bun ./migration.ts --action list",
     "mg:up": "bun ./migration.ts --action apply",
-    "cf-typegen": "wrangler types --env-interface CloudflareBindings"
+    "cf-typegen": "wrangler types"
   },
   "dependencies": {
     "class-transformer": "^0.5.1",

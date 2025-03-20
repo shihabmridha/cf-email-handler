@@ -19,14 +19,16 @@ cf-email-handler/
     ├── components/  # Reusable UI components
     ├── lib/         # Utility functions
 ├── workers/         # Rest API project
+    ├── handlers     # The rest api handlers
     ├── openapi.yaml # Contains the OpenAPI specification
 ├── shared/          # Contains shared types
 ```
+
 ## Must follow
+
 - All the UI related code must be in the pages directory
 - All the API related code must be in the workers directory
 - When integrating with API, must comply with relavent OpenApi spec located in workers/openapi.yaml
-
 
 ## Coding Standards
 

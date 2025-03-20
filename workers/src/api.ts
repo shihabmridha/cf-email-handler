@@ -6,10 +6,11 @@ import draftHandler from "./handlers/draft";
 import providerConfigHandler from "./handlers/provider-config";
 import emailHandler from "./handlers/mail";
 import emailRouteHandler from "./handlers/email-route";
+import configHandler from "./handlers/config";
 import { Container } from './container';
 import { AppContext } from './interfaces/context';
 
-const app = new Hono<{ Bindings: CloudflareBindings }>();
+const app = new Hono<{ Bindings: Env }>();
 app.notFound((c) => c.text('You are lost!', 404));
 
 app.onError((err, c) => {
@@ -36,6 +37,7 @@ api.route('/drafts', draftHandler);
 api.route('/provider-configs', providerConfigHandler);
 api.route('/email', emailHandler);
 api.route('/email-route', emailRouteHandler);
+api.route('/config', configHandler);
 
 app.route('/api', api);
 

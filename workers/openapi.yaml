@@ -416,3 +416,20 @@ paths:
       responses:
         '201':
           description: Email sent successfully
+
+  /config/forward-to:
+    get:
+      summary: Get the forward to email configuration
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Forward to email configuration
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  email:
+                    type: string
+                    format: email

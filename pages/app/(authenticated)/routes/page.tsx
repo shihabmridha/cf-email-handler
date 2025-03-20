@@ -84,20 +84,29 @@ export default function RoutesPage() {
     }
   };
 
-  const handleSaveRoute = async (route: EditableEmailRouteDto) => {
+  const handleSaveRoute = async (
+    route: EditableEmailRouteDto,
+    updates?: Partial<EmailRouteDto>,
+    shouldRefresh: boolean = true,
+  ) => {
     try {
       setLoading(true);
-      const { id, email, destination, type, enabled } = route;
+      const { id, email, destination, type, enabled, userId, createdAt } =
+        route;
       await apiClient.updateEmailRoute(id, {
-        email,
-        destination,
-        type,
-        enabled,
-        userId: route.userId,
-        createdAt: route.createdAt,
+        email: updates?.email ?? email,
+        destination: updates?.destination ?? destination,
+        type: updates?.type ?? type,
+        enabled: updates?.enabled ?? enabled,
+        userId,
+        createdAt,
         updatedAt: new Date(),
       });
-      await loadRoutes();
+      if (shouldRefresh) {
+        await loadRoutes();
+      } else {
+        setRoutes(routes.map((r) => (r.id === id ? { ...r, ...updates } : r)));
+      }
       toast({
         title: 'Success',
         description: 'Route updated successfully',
@@ -332,11 +341,15 @@ export default function RoutesPage() {
                 <td className="px-6 py-4 whitespace-nowrap">
                   <Switch
                     checked={route.enabled}
-                    onCheckedChange={(checked: boolean) => {
+                    onCheckedChange={async (checked: boolean) => {
                       if (route.isEditing) {
                         handleUpdateRoute(route, { enabled: checked });
                       } else {
-                        handleSaveRoute({ ...route, enabled: checked });
+                        await handleSaveRoute(
+                          route,
+                          { enabled: checked },
+                          false,
+                        );
                       }
                     }}
                     disabled={loading}

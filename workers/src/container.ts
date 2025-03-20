@@ -20,7 +20,7 @@ export class Container {
   private readonly _db: IDatabase;
   private readonly instances: Map<string, object>;
 
-  constructor(env: CloudflareBindings) {
+  constructor(env: Env) {
     this._config = new Configuration(env);
     this._db = new Database(env.DB);
     this.instances = new Map();

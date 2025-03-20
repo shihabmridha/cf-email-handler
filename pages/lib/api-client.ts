@@ -1,7 +1,8 @@
+import { LoginDto } from '@/shared/dtos/auth';
 import { EmailRouteDto } from '../../shared/dtos/email-route';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
-console.log(API_BASE_URL);
+
 export class ApiError extends Error {
   constructor(public status: number, message: string) {
     super(message);
@@ -14,21 +15,29 @@ async function handleResponse(response: Response) {
     const error = await response.json().catch(() => ({ error: 'An error occurred' }));
     throw new ApiError(response.status, error.error || 'An error occurred');
   }
-  return response.json();
+
+  const contentLength = response.headers.get('Content-Length');
+  if (contentLength === '0' || !response.body) {
+    return;
+  }
+
+  try {
+    return await response.json();
+  } catch {
+    return;
+  }
 }
 
 export interface LoginResponse {
   token: string;
 }
 
-export interface LoginRequest {
+export interface ForwardToEmailResponse {
   email: string;
-  password: string;
 }
 
-
 export const apiClient = {
-  async login(data: LoginRequest): Promise<LoginResponse> {
+  async login(data: LoginDto): Promise<LoginResponse> {
     const response = await fetch(`${API_BASE_URL}/login`, {
       method: 'POST',
       headers: {
@@ -92,6 +101,15 @@ export const apiClient = {
   async deleteEmailRoute(id: number): Promise<void> {
     const response = await fetch(`${API_BASE_URL}/email-route/${id}`, {
       method: 'DELETE',
+      headers: {
+        'Authorization': `Bearer ${this.getAuthToken()}`,
+      },
+    });
+    return handleResponse(response);
+  },
+
+  async getForwardToEmail(): Promise<ForwardToEmailResponse> {
+    const response = await fetch(`${API_BASE_URL}/config/forward-to`, {
       headers: {
         'Authorization': `Bearer ${this.getAuthToken()}`,
       },
