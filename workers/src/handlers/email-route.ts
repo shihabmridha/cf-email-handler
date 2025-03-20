@@ -31,11 +31,12 @@ app.post('/', async (c) => {
 });
 
 app.put('/:id', async (c) => {
+  const id = c.req.param('id');
   const body = await c.req.json<EmailRouteDto>();
-  body.id = c.get('jwtPayload')?.id as number;
+  body.userId = c.get('jwtPayload')?.id as number;
 
   const emailRouteService = c.env.container.getEmailRouteService();
-  await emailRouteService.update(body.id, body);
+  await emailRouteService.update(parseInt(id), body);
 
   return c.body(null, 204);
 });

@@ -1,41 +1,16 @@
-import PostalMime from 'postal-mime';
-import { cleanHtml } from './lib/utils';
-import httpHandler from './api';
-import { EmailType } from '@/shared/enums/email-type';
+import { parseEmail, processEmail } from './handlers/incoming-email';
 import { Container } from './container';
+import httpHandler from './api';
 
-// Email handler
-async function email(message: ForwardableEmailMessage, env: CloudflareBindings, _ctx: ExecutionContext) {
-  const rawMessage = await PostalMime.parse(message.raw);
-  const content = rawMessage.html
-    ? await cleanHtml(rawMessage.html)
-    : rawMessage.text ?? '';
-
-  if (!rawMessage.to) return;
+async function emailReceiver(message: ForwardableEmailMessage, env: CloudflareBindings, _ctx: ExecutionContext) {
+  const parsedEmail = await parseEmail(message);
 
   const container = new Container(env);
-  const predict = container.getPredictionService();
-  const emailData = await predict.extractEmailTypeAndData(content);
-  if (!emailData.class) {
-    return;
-  }
-
-  const config = container.getConfig();
-  const emailRouteService = container.getEmailRouteService();
-  const discordService = container.getDiscordService();
-
-  const emailType = EmailType[emailData.class as keyof typeof EmailType];
-  const to = rawMessage.to[0]?.address ?? config.emailForwardTo;
-  const destination = await emailRouteService.getDestination(to, emailType);
-
-  await Promise.allSettled([
-    discordService.sendMessage(message.from, message.headers.get('subject') ?? '', content),
-    message.forward(destination),
-  ]);
+  await processEmail(parsedEmail, container);
 }
 
 // Export the http and email handler for Cloudflare Workers
 export default {
   ...httpHandler,
-  email,
+  email: emailReceiver,
 };

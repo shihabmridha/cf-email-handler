@@ -1,0 +1,418 @@
+openapi: 3.0.0
+info:
+  title: Email Handler API
+  version: 1.0.0
+  description: API for managing email handling and routing
+
+servers:
+  - url: /api
+    description: API base URL
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer==
+      bearerFormat: JWT
+
+  schemas:
+    LoginDto:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          format: password
+
+    LoginResponse:
+      type: object
+      properties:
+        token:
+          type: string
+
+    BaseDto:
+      type: object
+      properties:
+        id:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    DraftDto:
+      allOf:
+        - $ref: '#/components/schemas/BaseDto'
+        - type: object
+          required:
+            - userId
+            - subject
+          properties:
+            userId:
+              type: integer
+            sender:
+              type: string
+            recipients:
+              type: array
+              items:
+                type: string
+            cc:
+              type: string
+            subject:
+              type: string
+            body:
+              type: string
+
+    ProviderConfigDto:
+      allOf:
+        - $ref: '#/components/schemas/BaseDto'
+        - type: object
+          required:
+            - name
+            - userId
+            - type
+            - domain
+          properties:
+            name:
+              type: string
+            userId:
+              type: integer
+            type:
+              type: string
+              enum: [UNKNOWN, SMTP, API]
+            domain:
+              type: string
+            smtp:
+              type: object
+              properties:
+                host:
+                  type: string
+                port:
+                  type: integer
+                secure:
+                  type: boolean
+                username:
+                  type: string
+                password:
+                  type: string
+            api:
+              type: object
+              properties:
+                token:
+                  type: string
+                host:
+                  type: string
+            enabled:
+              type: boolean
+
+    EmailRouteDto:
+      allOf:
+        - $ref: '#/components/schemas/BaseDto'
+        - type: object
+          required:
+            - userId
+            - email
+            - destination
+            - type
+          properties:
+            userId:
+              type: integer
+            email:
+              type: string
+              format: email
+            destination:
+              type: string
+            type:
+              type: string
+              enum: [UNKNOWN, SUPPORT, SALES, MARKETING, OTHER]
+            enabled:
+              type: boolean
+
+    SendMailDto:
+      type: object
+      required:
+        - providerConfigId
+        - content
+      properties:
+        providerConfigId:
+          type: integer
+        content:
+          type: object
+          required:
+            - from
+            - fromName
+            - to
+            - subject
+          properties:
+            from:
+              type: string
+            fromName:
+              type: string
+            to:
+              type: array
+              items:
+                type: string
+            cc:
+              type: array
+              items:
+                type: string
+            subject:
+              type: string
+            text:
+              type: string
+            html:
+              type: string
+
+paths:
+  /login:
+    post:
+      summary: Login to get JWT token
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginDto'
+      responses:
+        '200':
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+
+  /drafts:
+    get:
+      summary: Get all drafts
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: List of drafts
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  drafts:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/DraftDto'
+
+    post:
+      summary: Create a new draft
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DraftDto'
+      responses:
+        '201':
+          description: Draft created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DraftDto'
+
+    put:
+      summary: Update a draft
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DraftDto'
+      responses:
+        '201':
+          description: Draft updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DraftDto'
+
+    delete:
+      summary: Delete a draft
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: Draft deleted
+
+  /provider-configs:
+    get:
+      summary: Get all provider configurations
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: List of provider configurations
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  providers:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ProviderConfigDto'
+
+    post:
+      summary: Create a new provider configuration
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProviderConfigDto'
+      responses:
+        '201':
+          description: Provider configuration created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProviderConfigDto'
+
+    put:
+      summary: Update a provider configuration
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProviderConfigDto'
+      responses:
+        '201':
+          description: Provider configuration updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProviderConfigDto'
+
+    delete:
+      summary: Delete a provider configuration
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: Provider configuration deleted
+
+  /email-route:
+    get:
+      summary: Get all email routes
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: List of email routes
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  routes:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/EmailRouteDto'
+
+    post:
+      summary: Create a new email route
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EmailRouteDto'
+      responses:
+        '201':
+          description: Email route created
+
+    put:
+      summary: Update an email route
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EmailRouteDto'
+      responses:
+        '204':
+          description: Email route updated
+
+    delete:
+      summary: Delete an email route
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: Email route deleted
+
+  /email/send:
+    post:
+      summary: Send an email
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SendMailDto'
+      responses:
+        '201':
+          description: Email sent successfully

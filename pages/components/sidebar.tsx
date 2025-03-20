@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { Pencil, FileText, Settings, ChevronDown, ChevronRight } from 'lucide-react'
+import { Pencil, FileText, Settings, ChevronDown, ChevronRight, Route } from 'lucide-react'
 import { useState } from "react"
 import { cn } from "@/lib/utils"
 
@@ -21,6 +21,10 @@ export function Sidebar() {
           <FileText size={20} />
           <span>Draft</span>
         </Link>
+        <Link href="/routes" className={cn("flex items-center space-x-2 p-2 hover:bg-gray-200 rounded", pathname === "/routes" && "bg-gray-200")}>
+          <Route size={20} />
+          <span>Routes</span>
+        </Link>
         <div>
           <button
             onClick={() => setSettingsOpen(!settingsOpen)}
@@ -37,14 +41,11 @@ export function Sidebar() {
               <Link href="/settings/general" className={cn("block p-2 hover:bg-gray-200 rounded", pathname === "/settings/general" && "bg-gray-200")}>
                 General
               </Link>
-              <Link href="/settings/mailgun" className={cn("block p-2 hover:bg-gray-200 rounded", pathname === "/settings/mailgun" && "bg-gray-200")}>
-                MailGun
+              <Link href="/settings/mailtrap" className={cn("block p-2 hover:bg-gray-200 rounded", pathname === "/settings/mailtrap" && "bg-gray-200")}>
+                Mailtrap
               </Link>
-              <Link href="/settings/sendgrid" className={cn("block p-2 hover:bg-gray-200 rounded", pathname === "/settings/sendgrid" && "bg-gray-200")}>
-                SendGrid
-              </Link>
-              <Link href="/settings/aws-ses" className={cn("block p-2 hover:bg-gray-200 rounded", pathname === "/settings/aws-ses" && "bg-gray-200")}>
-                AWS SES
+              <Link href="/settings/resend" className={cn("block p-2 hover:bg-gray-200 rounded", pathname === "/settings/resend" && "bg-gray-200")}>
+                Resend
               </Link>
             </div>
           )}

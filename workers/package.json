@@ -2,32 +2,32 @@
   "name": "cf-email-handler",
   "type": "module",
   "scripts": {
-    "setup": "bun ./src/setup.ts",
+    "setup": "bun ./setup.ts",
     "dev": "wrangler dev",
     "login": "wrangler login",
     "deploy": "wrangler deploy --minify --env production",
-    "mg:new": "bun ./src/migration.ts --action create",
-    "mg:ls": "bun ./src/migration.ts --action list",
-    "mg:up": "bun ./src/migration.ts --action apply",
+    "mg:new": "bun ./migration.ts --action create",
+    "mg:ls": "bun ./migration.ts --action list",
+    "mg:up": "bun ./migration.ts --action apply",
     "cf-typegen": "wrangler types --env-interface CloudflareBindings"
   },
   "dependencies": {
     "class-transformer": "^0.5.1",
     "crypto-js": "^4.2.0",
-    "hono": "^4.7.4",
+    "hono": "^4.7.5",
     "nodemailer": "^6.10.0",
     "postal-mime": "^2.4.3"
   },
   "devDependencies": {
-    "@cloudflare/workers-types": "^4.20250303.0",
-    "@eslint/js": "^9.21.0",
-    "@types/bun": "^1.2.4",
+    "@eslint/js": "^9.22.0",
+    "@types/bun": "^1.2.5",
     "@types/crypto-js": "^4.2.2",
     "@types/nodemailer": "^6.4.17",
     "@types/react-dom": "^19.0.4",
-    "eslint": "^9.21.0",
+    "eslint": "^9.22.0",
     "globals": "^16.0.0",
-    "typescript-eslint": "^8.26.0",
-    "wrangler": "^3.114.0"
+    "typescript-eslint": "^8.27.0",
+    "wrangler": "^4.2.0",
+    "yocto-spinner": "^0.2.1"
   }
 }

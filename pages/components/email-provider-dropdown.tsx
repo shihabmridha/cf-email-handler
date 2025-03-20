@@ -15,9 +15,8 @@ export function EmailProviderDropdown() {
         <SelectValue placeholder="Select Provider" />
       </SelectTrigger>
       <SelectContent>
-        <SelectItem value="mailgun">MailGun</SelectItem>
-        <SelectItem value="sendgrid">SendGrid</SelectItem>
-        <SelectItem value="ses">AWS SES</SelectItem>
+        <SelectItem value="mailtrap">Mailtrap</SelectItem>
+        <SelectItem value="resend">Resend</SelectItem>
       </SelectContent>
     </Select>
   )

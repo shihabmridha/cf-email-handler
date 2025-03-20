@@ -44,6 +44,7 @@ export class Container {
   getDraftRepository(): DraftRepository {
     return this.get('draftRepository', () => new DraftRepository(this._db));
   }
+
   getEmailRouteRepository(): EmailRouteRepository {
     return this.get('emailRouteRepository', () => new EmailRouteRepository(this._db));
   }
@@ -69,7 +70,7 @@ export class Container {
   }
 
   getDiscordService(): DiscordService {
-    return this.get('discordService', () => new DiscordService(this._config, this.getPredictionService()));
+    return this.get('discordService', () => new DiscordService(this._config));
   }
 
   getDraftService(): DraftService {

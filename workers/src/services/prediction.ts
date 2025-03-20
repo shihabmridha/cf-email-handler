@@ -1,15 +1,19 @@
 import { LlmService } from "../interfaces/llm";
 
 export class VerificationData {
-  class?: string | null;
-  otp?: string | null;
-  summary?: string | null;
+  class: string = '';
+  otp: string = '';
+  summary: string = '';
 }
 
 export class PredictionService {
   private readonly llm: LlmService;
   constructor(llm: LlmService) {
     this.llm = llm;
+  }
+
+  private cleanupLLMResponse(response: string): string {
+    return response.replace(/^```json\n/, '').replace(/\n```$/, '');
   }
 
   async extractEmailTypeAndData(emailContent: string): Promise<VerificationData> {
@@ -28,14 +32,15 @@ export class PredictionService {
     `;
 
     const response = await this.llm.ask(prompt);
+    const cleanedResponse = this.cleanupLLMResponse(response);
     const result = new VerificationData();
     try {
-      const json = JSON.parse(response);
+      const json = JSON.parse(cleanedResponse);
       result.class = json.class || null;
       result.otp = json.otp || null;
       result.summary = json.summary || null;
     } catch (_err) {
-      console.error('Error parsing JSON. Data:', response);
+      console.error('Error parsing JSON. Data:', cleanedResponse);
     }
 
     return result;

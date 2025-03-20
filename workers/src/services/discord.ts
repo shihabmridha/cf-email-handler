@@ -1,25 +1,16 @@
 import { Configuration } from "../config";
-import { PredictionService } from "./prediction";
 
 export class DiscordService {
   private readonly _config: Configuration;
-  private readonly _predictionService: PredictionService;
 
-  constructor(config: Configuration, predictionService: PredictionService) {
+  constructor(config: Configuration) {
     this._config = config;
-    this._predictionService = predictionService;
   }
 
-  async sendMessage(from: string, subject: string, emailContent: string): Promise<void> {
-    if (!emailContent) {
-      return;
-    }
-
-    const summary = await this._predictionService.extractEmailTypeAndData(emailContent);;
-
-    const params = {
+  async sendMessage(from: string, subject: string, summary: string): Promise<void> {
+    const message = {
       username: "Robot",
-      content: summary ?? `Got an email from ${from}.\nSubject: ${subject}.`
+      content: `From: ${from}.\nSubject: ${subject}.\nSummary: ${summary ?? 'Could not generate summary.'}`,
     };
 
     await fetch(this._config.discordHookUrl, {
@@ -27,7 +18,7 @@ export class DiscordService {
       headers: {
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify(params)
+      body: JSON.stringify(message)
     });
   }
 }

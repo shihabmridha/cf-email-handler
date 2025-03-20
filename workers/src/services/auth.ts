@@ -1,7 +1,7 @@
 import { Buffer } from "node:buffer";
 import { createHmac } from "node:crypto";
 import { HTTPException } from "hono/http-exception";
-import { base64Url, hashText } from "../lib/utils";
+import { hashText } from "../lib/utils";
 import { LoginDto } from "@/shared/dtos/auth";
 import { Configuration } from "../config";
 import { UserEntity } from '../entities/user';
@@ -16,6 +16,11 @@ export class AuthService {
     this.jwtSecret = config.jwtSecret;
   }
 
+  // Replace characters according to base64url specifications
+  private base64Url(input: string) {
+    return input.replace(/=+$/, '').replace(/\+/g, '-').replace(/\//g, '_');
+  }
+
   private createJwtToken(payload: object) {
     if (!payload) {
       throw new Error('Empty payload');
@@ -24,14 +29,16 @@ export class AuthService {
     const exp = Math.floor(Date.now() / 1000) + (60 * 60);
     const jwtHeader = JSON.stringify({ alg: 'HS256', typ: 'JWT', exp });
     const jwtPayload = JSON.stringify(payload);
-    const encodedHeaders = base64Url(Buffer.from(jwtHeader, 'utf8'));
-    const encodedPayload = base64Url(Buffer.from(jwtPayload, 'utf8'));
+
+    const encodedHeaders = this.base64Url(Buffer.from(jwtHeader, 'utf8').toString('base64'));
+    const encodedPayload = this.base64Url(Buffer.from(jwtPayload, 'utf8').toString('base64'));
 
     const signature = createHmac('sha256', this.jwtSecret)
       .update(`${encodedHeaders}.${encodedPayload}`)
-      .digest();
+      .digest()
+      .toString('base64');
 
-    const encodedSignature = base64Url(signature);
+    const encodedSignature = this.base64Url(signature);
 
     return `${encodedHeaders}.${encodedPayload}.${encodedSignature}`;
   }
