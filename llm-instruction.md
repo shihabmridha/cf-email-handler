@@ -29,6 +29,8 @@ cf-email-handler/
 - All the UI related code must be in the pages directory
 - All the API related code must be in the workers directory
 - When integrating with API, must comply with relavent OpenApi spec located in workers/openapi.yaml
+- Never use console.log, instead try to fix the issue.
+- Always use bun instead of npm to install packages.
 
 ## Coding Standards
 

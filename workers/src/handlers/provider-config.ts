@@ -19,22 +19,32 @@ app.get('/', async (c) => {
   return c.json({ providers });
 });
 
+app.get('/type/:type', async (c) => {
+  const type = c.req.param('type');
+  const providerService = c.env.container.getProviderConfigService();
+  const providers = await providerService.getAll();
+  const provider = providers.find(p => p.type === parseInt(type));
+
+  return c.json({ provider });
+});
+
 app.post('/', async (c) => {
   const body = await c.req.json<ProviderConfigDto>();
+  body.userId = c.get('jwtPayload')?.id as number;
 
   const providerService = c.env.container.getProviderConfigService();
-  const dto = await providerService.create(body);
+  await providerService.create(body);
 
-  return c.json(dto, 201);
+  return c.body(null, 201);
 });
 
 app.put('/:id', async (c) => {
   const body = await c.req.json<ProviderConfigDto>();
 
   const providerService = c.env.container.getProviderConfigService();
-  const dto = await providerService.update(body.id, body);
+  await providerService.update(body.id, body);
 
-  return c.json(dto, 201);
+  return c.body(null, 204);
 });
 
 app.delete('/:id', async (c) => {

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -13,62 +13,35 @@ import {
 } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/components/ui/use-toast';
-import { apiClient } from '@/lib/api-client';
 import { EmailRouteDto } from '@/shared/dtos/email-route';
 import { EmailType } from '@/shared/enums/email-type';
-
-interface EditableEmailRouteDto extends EmailRouteDto {
-  isEditing: boolean;
-}
+import { useEmailRoutes } from '@/lib/hooks/useEmailRoutes';
 
 export default function RoutesPage() {
-  const [routes, setRoutes] = useState<EditableEmailRouteDto[]>([]);
-  const [loading, setLoading] = useState(false);
+  const {
+    routes,
+    loading,
+    createRoute,
+    updateRoute,
+    deleteRoute,
+    setRouteEditing,
+    updateRouteLocal,
+  } = useEmailRoutes();
   const [showAddPanel, setShowAddPanel] = useState(false);
   const [newRoute, setNewRoute] = useState<EmailRouteDto>(new EmailRouteDto());
   const { toast } = useToast();
 
-  const loadRoutes = useCallback(async () => {
-    try {
-      setLoading(true);
-      const response = await apiClient.getEmailRoutes();
-      setRoutes(
-        response.routes.map((route) => ({
-          ...route,
-          isEditing: false,
-        })),
-      );
-    } catch {
-      toast({
-        title: 'Error',
-        description: 'Failed to load routes',
-        variant: 'destructive',
-      });
-    } finally {
-      setLoading(false);
-    }
-  }, [toast]);
-
-  useEffect(() => {
-    loadRoutes();
-  }, [loadRoutes]);
-
   const handleAddRoute = async () => {
     try {
-      setLoading(true);
       const { email, destination, type, enabled } = newRoute;
-      await apiClient.createEmailRoute({
+      await createRoute({
         email,
         destination,
         type,
         enabled,
-        userId: 0,
-        createdAt: new Date(),
-        updatedAt: new Date(),
       });
       setNewRoute(new EmailRouteDto());
       setShowAddPanel(false);
-      await loadRoutes();
       toast({
         title: 'Success',
         description: 'Route added successfully',
@@ -79,34 +52,16 @@ export default function RoutesPage() {
         description: 'Failed to add route',
         variant: 'destructive',
       });
-    } finally {
-      setLoading(false);
     }
   };
 
   const handleSaveRoute = async (
-    route: EditableEmailRouteDto,
+    route: EmailRouteDto,
     updates?: Partial<EmailRouteDto>,
     shouldRefresh: boolean = true,
   ) => {
     try {
-      setLoading(true);
-      const { id, email, destination, type, enabled, userId, createdAt } =
-        route;
-      await apiClient.updateEmailRoute(id, {
-        email: updates?.email ?? email,
-        destination: updates?.destination ?? destination,
-        type: updates?.type ?? type,
-        enabled: updates?.enabled ?? enabled,
-        userId,
-        createdAt,
-        updatedAt: new Date(),
-      });
-      if (shouldRefresh) {
-        await loadRoutes();
-      } else {
-        setRoutes(routes.map((r) => (r.id === id ? { ...r, ...updates } : r)));
-      }
+      await updateRoute(route.id, updates ?? route, shouldRefresh);
       toast({
         title: 'Success',
         description: 'Route updated successfully',
@@ -117,16 +72,12 @@ export default function RoutesPage() {
         description: 'Failed to update route',
         variant: 'destructive',
       });
-    } finally {
-      setLoading(false);
     }
   };
 
   const handleDeleteRoute = async (id: number) => {
     try {
-      setLoading(true);
-      await apiClient.deleteEmailRoute(id);
-      await loadRoutes();
+      await deleteRoute(id);
       toast({
         title: 'Success',
         description: 'Route deleted successfully',
@@ -137,36 +88,7 @@ export default function RoutesPage() {
         description: 'Failed to delete route',
         variant: 'destructive',
       });
-    } finally {
-      setLoading(false);
     }
-  };
-
-  const handleEditRoute = (route: EditableEmailRouteDto) => {
-    setRoutes(
-      routes.map((r) => ({
-        ...r,
-        isEditing: r.id === route.id ? true : r.isEditing,
-      })),
-    );
-  };
-
-  const handleUpdateRoute = (
-    route: EditableEmailRouteDto,
-    updates: Partial<EmailRouteDto>,
-  ) => {
-    setRoutes(
-      routes.map((r) => (r.id === route.id ? { ...r, ...updates } : r)),
-    );
-  };
-
-  const handleCancelEdit = (route: EditableEmailRouteDto) => {
-    setRoutes(
-      routes.map((r) => ({
-        ...r,
-        isEditing: r.id === route.id ? false : r.isEditing,
-      })),
-    );
   };
 
   return (
@@ -285,7 +207,7 @@ export default function RoutesPage() {
                       type="email"
                       value={route.email}
                       onChange={(e) =>
-                        handleUpdateRoute(route, { email: e.target.value })
+                        updateRouteLocal(route.id, { email: e.target.value })
                       }
                       disabled={loading}
                     />
@@ -299,7 +221,7 @@ export default function RoutesPage() {
                       type="text"
                       value={route.destination}
                       onChange={(e) =>
-                        handleUpdateRoute(route, {
+                        updateRouteLocal(route.id, {
                           destination: e.target.value,
                         })
                       }
@@ -314,7 +236,7 @@ export default function RoutesPage() {
                     <Select
                       value={route.type}
                       onValueChange={(value: EmailType) =>
-                        handleUpdateRoute(route, { type: value })
+                        updateRouteLocal(route.id, { type: value })
                       }
                       disabled={loading}
                     >
@@ -343,7 +265,7 @@ export default function RoutesPage() {
                     checked={route.enabled}
                     onCheckedChange={async (checked: boolean) => {
                       if (route.isEditing) {
-                        handleUpdateRoute(route, { enabled: checked });
+                        updateRouteLocal(route.id, { enabled: checked });
                       } else {
                         await handleSaveRoute(
                           route,
@@ -366,7 +288,7 @@ export default function RoutesPage() {
                       </Button>
                       <Button
                         variant="outline"
-                        onClick={() => handleCancelEdit(route)}
+                        onClick={() => setRouteEditing(route.id, false)}
                         disabled={loading}
                       >
                         Cancel
@@ -376,7 +298,7 @@ export default function RoutesPage() {
                     <>
                       <Button
                         variant="outline"
-                        onClick={() => handleEditRoute(route)}
+                        onClick={() => setRouteEditing(route.id, true)}
                         disabled={loading}
                       >
                         Edit

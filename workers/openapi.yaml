@@ -85,8 +85,9 @@ components:
             userId:
               type: integer
             type:
-              type: string
-              enum: [UNKNOWN, SMTP, API]
+              type: integer
+              enum: [0, 1, 2]
+              description: '0: UNKNOWN, 1: RESEND, 2: MAILTRAP'
             domain:
               type: string
             smtp:
@@ -219,11 +220,9 @@ paths:
       responses:
         '201':
           description: Draft created
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/DraftDto'
+          content: {}
 
+  /drafts/{id}:
     put:
       summary: Update a draft
       security:
@@ -241,12 +240,9 @@ paths:
             schema:
               $ref: '#/components/schemas/DraftDto'
       responses:
-        '201':
+        '204':
           description: Draft updated
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/DraftDto'
+          content: {}
 
     delete:
       summary: Delete a draft
@@ -261,6 +257,7 @@ paths:
       responses:
         '204':
           description: Draft deleted
+          content: {}
 
   /provider-configs:
     get:
@@ -292,12 +289,10 @@ paths:
               $ref: '#/components/schemas/ProviderConfigDto'
       responses:
         '201':
-          description: Provider configuration created
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ProviderConfigDto'
+          description: Provider configuration created successfully
+          content: {}
 
+  /provider-configs/{id}:
     put:
       summary: Update a provider configuration
       security:
@@ -315,12 +310,9 @@ paths:
             schema:
               $ref: '#/components/schemas/ProviderConfigDto'
       responses:
-        '201':
-          description: Provider configuration updated
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ProviderConfigDto'
+        '204':
+          description: Provider configuration updated successfully
+          content: {}
 
     delete:
       summary: Delete a provider configuration
@@ -334,7 +326,30 @@ paths:
             type: integer
       responses:
         '204':
-          description: Provider configuration deleted
+          description: Provider configuration deleted successfully
+          content: {}
+
+  /provider-configs/type/{type}:
+    get:
+      summary: Get provider configuration by type
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: type
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Provider configuration for the specified type
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  provider:
+                    $ref: '#/components/schemas/ProviderConfigDto'
 
   /email-route:
     get:
@@ -433,3 +448,117 @@ paths:
                   email:
                     type: string
                     format: email
+
+  /providers:
+    get:
+      summary: Get all providers
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: List of providers
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  providers:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ProviderConfigDto'
+
+    post:
+      summary: Create a new provider
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProviderConfigDto'
+      responses:
+        '201':
+          description: Provider created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProviderConfigDto'
+
+  /providers/{id}:
+    put:
+      summary: Update a provider
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProviderConfigDto'
+      responses:
+        '200':
+          description: Provider updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProviderConfigDto'
+
+    delete:
+      summary: Delete a provider
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: Provider deleted
+
+  /providers/type/{type}:
+    get:
+      summary: Get provider by type
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: type
+          in: path
+          required: true
+          schema:
+            type: integer
+            enum: [0, 1, 2]
+            description: '0: UNKNOWN, 1: RESEND, 2: MAILTRAP'
+      responses:
+        '200':
+          description: Provider found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  provider:
+                    $ref: '#/components/schemas/ProviderConfigDto'
+
+  /providers/{id}/test:
+    post:
+      summary: Test a provider configuration
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Provider test successful

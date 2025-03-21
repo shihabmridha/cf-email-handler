@@ -1,9 +1,9 @@
-import {ProviderConfigEntity} from "../entities/provider-config";
+import { ProviderConfigEntity } from "../entities/provider-config";
 import { BaseRepository } from './base';
 import { IDatabase } from '../interfaces/database';
 import { IProviderConfigRepository } from '../interfaces/repositories/provider-config';
 
-export class ProviderConfigRepository extends BaseRepository<ProviderConfigEntity> implements IProviderConfigRepository<ProviderConfigEntity>{
+export class ProviderConfigRepository extends BaseRepository<ProviderConfigEntity> implements IProviderConfigRepository<ProviderConfigEntity> {
 
   constructor(db: IDatabase) {
     super(db);
@@ -23,10 +23,11 @@ export class ProviderConfigRepository extends BaseRepository<ProviderConfigEntit
       throw new Error('Failed to create new provider');
     }
 
-    return {...provider, id: response.meta.last_row_id};
+    return { ...provider, id: response.meta.last_row_id };
   }
 
   async update(id: number, provider: ProviderConfigEntity): Promise<ProviderConfigEntity> {
+    console.log(id, provider);
     const sql = `UPDATE provider_configs SET smtp = ?, api = ?, domain = ? WHERE id = ?`;
     const response = await this._db.prepare(sql)
       .bind(provider.smtp, provider.api, provider.domain, id)
@@ -36,7 +37,7 @@ export class ProviderConfigRepository extends BaseRepository<ProviderConfigEntit
       throw new Error('Failed to update provider');
     }
 
-    return {...provider, id};
+    return { ...provider, id };
   }
 
   async delete(id: number): Promise<boolean> {

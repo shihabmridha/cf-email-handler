@@ -22,12 +22,12 @@ app.get('/', async (c) => {
 
 app.post('/', async (c) => {
   const body = await c.req.json<DraftDto>();
-  body.id = c.get('jwtPayload')?.id as number;
+  body.userId = c.get('jwtPayload')?.id as number;
 
   const draftService = c.env.container.getDraftService();
-  const dto = await draftService.create(body);
+  await draftService.create(body);
 
-  return c.json(dto, 201);
+  return c.body(null, 201);
 });
 
 app.put('/:id', async (c) => {
@@ -35,9 +35,9 @@ app.put('/:id', async (c) => {
   const body = await c.req.json<DraftDto>();
 
   const draftService = c.env.container.getDraftService();
-  const dto = await draftService.update(id, body);
+  await draftService.update(id, body);
 
-  return c.json(dto, 201);
+  return c.body(null, 204);
 });
 
 app.delete('/:id', async (c) => {

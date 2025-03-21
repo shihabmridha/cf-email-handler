@@ -3,7 +3,7 @@ import { IDatabase } from '../interfaces/database';
 import { BaseRepository } from './base';
 import { IDraftRepository } from '../interfaces/repositories/draft';
 
-export class DraftRepository extends BaseRepository<DraftEntity> implements IDraftRepository<DraftEntity>{
+export class DraftRepository extends BaseRepository<DraftEntity> implements IDraftRepository<DraftEntity> {
   constructor(db: IDatabase) {
     super(db);
   }
@@ -13,11 +13,11 @@ export class DraftRepository extends BaseRepository<DraftEntity> implements IDra
   }
 
   async create(user: DraftEntity): Promise<DraftEntity> {
-    const sql = `INSERT INTO ${this.tableName} (userId, recipients, cc, subject, body)
-                 VALUES (?, ?, ?, ?, ?)`;
+    const sql = `INSERT INTO (userId, recipients, sender, cc, subject, body)
+                 VALUES (?, ?, ?, ?, ?, ?)`;
 
     const response = await this._db.prepare(sql)
-      .bind(user.userId, user.recipients, user.cc, user.subject, user.body)
+      .bind(user.userId, user.recipients, user.sender, user.cc, user.subject, user.body)
       .run();
 
     if (!response.success) {
@@ -28,14 +28,15 @@ export class DraftRepository extends BaseRepository<DraftEntity> implements IDra
   }
 
   async update(id: number, user: DraftEntity): Promise<DraftEntity> {
-    const sql = `UPDATE drafts
+    const sql = `UPDATE ${this.tableName}
                  SET recipients = ?,
                      cc         = ?,
                      subject    = ?,
-                     body       = ?
+                     body       = ?,
+                     sender     = ?
                  WHERE id = ?`;
     const response = await this._db.prepare(sql)
-      .bind(user.recipients, user.cc, user.subject, user.body, id)
+      .bind(user.recipients, user.cc, user.subject, user.body, user.sender, id)
       .run();
 
     if (!response.success) {

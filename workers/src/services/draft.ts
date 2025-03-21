@@ -1,5 +1,4 @@
-﻿import { DraftRepository } from "../repositories/draft";
-import { DraftDto } from "@/dtos/draft";
+﻿import { DraftDto } from "@/dtos/draft";
 import { DraftEntity } from "../entities/draft";
 import { Mapper } from "../lib/mapper";
 import { IDraftRepository } from '../interfaces/repositories/draft';
@@ -29,6 +28,7 @@ export class DraftService {
 
   async update(id: string, dto: DraftDto): Promise<DraftDto> {
     const entity = Mapper.dtoToEntity(DraftEntity, dto);
+    console.log(dto, entity);
     const updatedEntity = await this._draftRepository.update(parseInt(id), entity);
 
     return Mapper.entityToDto(DraftDto, updatedEntity);
