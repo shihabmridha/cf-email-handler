@@ -16,44 +16,58 @@ export default function MailtrapSettingsPage() {
     ProviderType.MAILTRAP,
   );
 
-  // SMTP settings
-  const [host, setHost] = useState('');
-  const [port, setPort] = useState('2525');
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
+  // Form state
+  const [formState, setFormState] = useState({
+    // SMTP settings
+    host: '',
+    port: '2525',
+    username: '',
+    password: '',
+    // API settings
+    apiKey: '',
+    domain: '',
+    apiHost: 'https://send.api.mailtrap.io',
+    // Active tab
+    activeTab: 'smtp',
+  });
 
-  // API settings
-  const [apiKey, setApiKey] = useState('');
-  const [domain, setDomain] = useState('');
-  const [apiHost, setApiHost] = useState('https://send.api.mailtrap.io');
+  // Destructure for convenience
+  const { host, port, username, password, apiKey, domain, apiHost, activeTab } =
+    formState;
 
-  // Active tab
-  const [activeTab, setActiveTab] = useState('smtp');
+  // Update form field
+  const updateField = (field: string, value: string) => {
+    setFormState((prev) => ({ ...prev, [field]: value }));
+  };
 
   useEffect(() => {
     if (!loading && provider) {
+      const newState = { ...formState };
+
       // Set SMTP settings if available
       if (provider.smtp) {
-        setHost(provider.smtp.host || '');
-        setPort(provider.smtp.port?.toString() || '2525');
-        setUsername(provider.smtp.username || '');
-        setPassword(provider.smtp.password || '');
+        newState.host = provider.smtp.host || '';
+        newState.port = provider.smtp.port?.toString() || '2525';
+        newState.username = provider.smtp.username || '';
+        newState.password = provider.smtp.password || '';
       }
 
       // Set API settings if available
       if (provider.api) {
-        setApiKey(provider.api.token || '');
-        setApiHost(provider.api.host || 'https://send.api.mailtrap.io');
+        newState.apiKey = provider.api.token || '';
+        newState.apiHost = provider.api.host || 'https://send.api.mailtrap.io';
       }
 
-      setDomain(provider.domain || '');
+      newState.domain = provider.domain || '';
 
       // Set active tab based on which configuration exists
       if (provider.api && !provider.smtp) {
-        setActiveTab('api');
+        newState.activeTab = 'api';
       } else if (provider.smtp && !provider.api) {
-        setActiveTab('smtp');
+        newState.activeTab = 'smtp';
       }
+
+      setFormState(newState);
     }
   }, [provider, loading]);
 
@@ -68,7 +82,7 @@ export default function MailtrapSettingsPage() {
       // Preserve existing provider data
       ...provider,
       domain: activeTab === 'smtp' ? host : domain,
-      // Update only the active configuration while preserving the other
+      // Update only the active configuration
       smtp:
         activeTab === 'smtp'
           ? {
@@ -78,14 +92,14 @@ export default function MailtrapSettingsPage() {
               username,
               password,
             }
-          : provider?.smtp, // Keep existing SMTP config if in API mode
+          : provider?.smtp,
       api:
         activeTab === 'api'
           ? {
               token: apiKey,
               host: apiHost,
             }
-          : provider?.api, // Keep existing API config if in SMTP mode
+          : provider?.api,
     };
 
     try {
@@ -95,14 +109,12 @@ export default function MailtrapSettingsPage() {
         description: 'Provider settings saved successfully',
       });
     } catch (error) {
-      const errorMessage =
-        error instanceof ApiError
-          ? error.message
-          : 'Failed to save provider settings';
-
       toast({
         title: 'Error',
-        description: errorMessage,
+        description:
+          error instanceof ApiError
+            ? error.message
+            : 'Failed to save provider settings',
         variant: 'destructive',
       });
     }
@@ -112,7 +124,10 @@ export default function MailtrapSettingsPage() {
     <div className="space-y-6">
       <h2 className="text-xl font-semibold">Mailtrap Settings</h2>
 
-      <Tabs value={activeTab} onValueChange={setActiveTab}>
+      <Tabs
+        value={activeTab}
+        onValueChange={(value) => updateField('activeTab', value)}
+      >
         <TabsList className="mb-4">
           <TabsTrigger value="smtp">SMTP</TabsTrigger>
           <TabsTrigger value="api">API</TabsTrigger>
@@ -126,7 +141,7 @@ export default function MailtrapSettingsPage() {
                 id="mailtrap-host"
                 placeholder="Enter SMTP Host"
                 value={host}
-                onChange={(e) => setHost(e.target.value)}
+                onChange={(e) => updateField('host', e.target.value)}
                 required={activeTab === 'smtp'}
               />
             </div>
@@ -137,7 +152,7 @@ export default function MailtrapSettingsPage() {
                 placeholder="Enter SMTP Port"
                 type="number"
                 value={port}
-                onChange={(e) => setPort(e.target.value)}
+                onChange={(e) => updateField('port', e.target.value)}
                 required={activeTab === 'smtp'}
               />
             </div>
@@ -147,7 +162,7 @@ export default function MailtrapSettingsPage() {
                 id="mailtrap-username"
                 placeholder="Enter SMTP Username"
                 value={username}
-                onChange={(e) => setUsername(e.target.value)}
+                onChange={(e) => updateField('username', e.target.value)}
                 required={activeTab === 'smtp'}
               />
             </div>
@@ -158,7 +173,7 @@ export default function MailtrapSettingsPage() {
                 type="password"
                 placeholder="Enter SMTP Password"
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                onChange={(e) => updateField('password', e.target.value)}
                 required={activeTab === 'smtp'}
               />
             </div>
@@ -175,7 +190,7 @@ export default function MailtrapSettingsPage() {
                 type="password"
                 placeholder="Enter Mailtrap API Key"
                 value={apiKey}
-                onChange={(e) => setApiKey(e.target.value)}
+                onChange={(e) => updateField('apiKey', e.target.value)}
                 required={activeTab === 'api'}
               />
             </div>
@@ -185,7 +200,7 @@ export default function MailtrapSettingsPage() {
                 id="mailtrap-domain"
                 placeholder="Enter Domain"
                 value={domain}
-                onChange={(e) => setDomain(e.target.value)}
+                onChange={(e) => updateField('domain', e.target.value)}
                 required={activeTab === 'api'}
               />
             </div>
@@ -195,7 +210,7 @@ export default function MailtrapSettingsPage() {
                 id="mailtrap-api-host"
                 placeholder="Enter API Host"
                 value={apiHost}
-                onChange={(e) => setApiHost(e.target.value)}
+                onChange={(e) => updateField('apiHost', e.target.value)}
                 required={activeTab === 'api'}
               />
             </div>

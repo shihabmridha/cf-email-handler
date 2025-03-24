@@ -6,6 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { useProviderSettings } from '@/lib/hooks/useProviderSettings';
 import { ProviderType } from '@/shared/enums/provider';
+import { toast } from '@/components/ui/use-toast';
 
 export default function ResendSettingsPage() {
   const { provider, loading, saveProvider } = useProviderSettings(
@@ -35,6 +36,11 @@ export default function ResendSettingsPage() {
         token: apiKey,
         host,
       },
+    });
+
+    toast({
+      title: 'Success',
+      description: 'Resend settings saved successfully',
     });
   };
 
