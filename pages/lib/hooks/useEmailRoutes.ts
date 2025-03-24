@@ -1,5 +1,5 @@
 import { EmailRouteDto } from "@/shared/dtos/email-route";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { apiClient } from '@/lib/api-client';
 
 interface EditableEmailRouteDto extends EmailRouteDto {
@@ -9,6 +9,7 @@ interface EditableEmailRouteDto extends EmailRouteDto {
 export function useEmailRoutes() {
   const [routes, setRoutes] = useState<EditableEmailRouteDto[]>([]);
   const [loading, setLoading] = useState(true);
+  const initialLoadDone = useRef(false);
 
   const loadRoutes = useCallback(async () => {
     try {
@@ -24,7 +25,10 @@ export function useEmailRoutes() {
   }, []);
 
   useEffect(() => {
-    loadRoutes();
+    if (!initialLoadDone.current) {
+      loadRoutes();
+      initialLoadDone.current = true;
+    }
   }, [loadRoutes]);
 
   const createRoute = async (data: Pick<EmailRouteDto, 'email' | 'destination' | 'type' | 'enabled'>) => {

@@ -1,5 +1,5 @@
 import { DraftDto } from "@/shared/dtos/draft";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import { apiClient } from "../api-client";
 
 type DraftDataForApi = Omit<DraftDto, 'id' | 'createdAt' | 'updatedAt'>;
@@ -8,8 +8,9 @@ export function useDrafts() {
   const [drafts, setDrafts] = useState<DraftDto[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const initialLoadDone = useRef(false);
 
-  const fetchDrafts = async () => {
+  const fetchDrafts = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
@@ -20,7 +21,7 @@ export function useDrafts() {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   const saveDraft = async (draft: DraftDto) => {
     try {
@@ -67,8 +68,11 @@ export function useDrafts() {
   };
 
   useEffect(() => {
-    fetchDrafts();
-  }, []);
+    if (!initialLoadDone.current) {
+      fetchDrafts();
+      initialLoadDone.current = true;
+    }
+  }, [fetchDrafts]);
 
   return { drafts, loading, error, saveDraft, deleteDraft, fetchDrafts };
 }
