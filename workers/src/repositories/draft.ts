@@ -13,7 +13,7 @@ export class DraftRepository extends BaseRepository<DraftEntity> implements IDra
   }
 
   async create(user: DraftEntity): Promise<DraftEntity> {
-    const sql = `INSERT INTO (userId, recipients, sender, cc, subject, body)
+    const sql = `INSERT INTO ${this.tableName} (userId, recipients, sender, cc, subject, body)
                  VALUES (?, ?, ?, ?, ?, ?)`;
 
     const response = await this._db.prepare(sql)
@@ -47,7 +47,7 @@ export class DraftRepository extends BaseRepository<DraftEntity> implements IDra
   }
 
   async delete(id: number): Promise<boolean> {
-    const response = await this._db.prepare('DELETE FROM drafts WHERE id = ?')
+    const response = await this._db.prepare(`DELETE FROM ${this.tableName} WHERE id = ?`)
       .bind(id)
       .run();
 

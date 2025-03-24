@@ -1,25 +1,42 @@
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { RichTextEditor } from "@/components/rich-text-editor"
-import { EmailProviderDropdown } from "@/components/email-provider-dropdown"
+'use client';
+
+import { EmailForm } from '@/components/email-form';
+import { useToast } from '@/components/ui/use-toast';
+import { useDrafts } from '@/lib/hooks/useDrafts';
+import { DraftDto } from '@/shared/dtos/draft';
 
 export default function ComposePage() {
+  const { saveDraft } = useDrafts();
+  const { toast } = useToast();
+
+  const handleSave = async (data: Partial<DraftDto>) => {
+    try {
+      await saveDraft(data as DraftDto);
+      toast({
+        title: 'Success',
+        description: 'Draft saved successfully',
+      });
+    } catch {
+      toast({
+        title: 'Error',
+        description: 'Failed to save draft',
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const handleSend = async (data: Partial<DraftDto>) => {
+    // Implement send functionality
+    toast({
+      title: 'Info',
+      description: 'Send functionality will be implemented in a future update',
+    });
+  };
+
   return (
     <div className="p-6 space-y-4 max-w-3xl mx-auto">
       <h1 className="text-2xl font-bold">Compose Email</h1>
-      <Input placeholder="From" />
-      <Input placeholder="To" />
-      <Input placeholder="CC" />
-      <Input placeholder="Subject" />
-      <RichTextEditor />
-      <div className="flex justify-between items-center">
-        <div className="space-x-2">
-          <Button>Send</Button>
-          <Button variant="outline">Save as Draft</Button>
-        </div>
-        <EmailProviderDropdown />
-      </div>
+      <EmailForm onSave={handleSave} onSend={handleSend} />
     </div>
-  )
+  );
 }
-

@@ -1,4 +1,4 @@
-"use client"
+'use client';
 
 import {
   Select,
@@ -6,11 +6,19 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
+} from '@/components/ui/select';
 
-export function EmailProviderDropdown() {
+interface EmailProviderDropdownProps {
+  value?: string;
+  onChange?: (value: string) => void;
+}
+
+export function EmailProviderDropdown({
+  value,
+  onChange,
+}: EmailProviderDropdownProps) {
   return (
-    <Select>
+    <Select value={value} onValueChange={onChange}>
       <SelectTrigger className="w-[180px]">
         <SelectValue placeholder="Select Provider" />
       </SelectTrigger>
@@ -19,6 +27,5 @@ export function EmailProviderDropdown() {
         <SelectItem value="resend">Resend</SelectItem>
       </SelectContent>
     </Select>
-  )
+  );
 }
-

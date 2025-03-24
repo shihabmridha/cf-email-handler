@@ -1,6 +1,6 @@
 ﻿import { ProviderType } from "../enums/provider";
-import {BaseDto} from "./base";
-import {TransportSmtpConfig, TransportApiConfig} from "./transport";
+import { BaseDto } from "./base";
+import { TransportSmtpConfig, TransportApiConfig } from "./transport";
 
 export class ProviderConfigDto extends BaseDto {
   name: string = '';

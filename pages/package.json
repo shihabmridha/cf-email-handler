@@ -1,8 +1,9 @@
 {
   "name": "pages",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "private": true,
   "scripts": {
+    "predev": "bun exec \"rm -rf ./shared/* && cp -R ../workers/src/dtos ../workers/src/enums ./shared/\"",
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
