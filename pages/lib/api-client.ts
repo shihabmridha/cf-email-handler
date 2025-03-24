@@ -40,6 +40,19 @@ export interface ForwardToEmailResponse {
   email: string;
 }
 
+function isLocalStorageAvailable(): boolean {
+  if (typeof window === 'undefined') {
+    return false;
+  }
+  try {
+    localStorage.setItem('test', 'test');
+    localStorage.removeItem('test');
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 export const apiClient = {
   async login(data: LoginDto): Promise<LoginResponse> {
     const response = await fetch(`${API_BASE_URL}/login`, {
@@ -53,15 +66,22 @@ export const apiClient = {
   },
 
   setAuthToken(token: string) {
-    localStorage.setItem('auth_token', token);
+    if (isLocalStorageAvailable()) {
+      localStorage.setItem('auth_token', token);
+    }
   },
 
   getAuthToken(): string | null {
+    if (!isLocalStorageAvailable()) {
+      return null;
+    }
     return localStorage.getItem('auth_token');
   },
 
   removeAuthToken() {
-    localStorage.removeItem('auth_token');
+    if (isLocalStorageAvailable()) {
+      localStorage.removeItem('auth_token');
+    }
   },
 
   isAuthenticated(): boolean {

@@ -45,6 +45,7 @@ export function useProviders() {
   return {
     providers,
     loading,
-    error
+    error,
+    refresh: fetchProviders
   };
 }

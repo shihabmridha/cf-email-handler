@@ -5,30 +5,38 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { useProviderSettings } from '@/lib/hooks/useProviderSettings';
-import { ProviderType } from '@/shared/enums/provider';
 import { ProviderConfigDto } from '@/shared/dtos/provider';
-import { toast } from '@/components/ui/use-toast';
 import { ApiError } from '@/lib/api-client';
+import { toast } from '@/components/ui/use-toast';
 
-export default function MailtrapSettingsPage() {
-  const { provider, loading, saveProvider } = useProviderSettings(
-    ProviderType.MAILTRAP,
-  );
+interface ProviderSettingsFormProps {
+  provider: ProviderConfigDto | null;
+  loading: boolean;
+  onSave: (config: Partial<ProviderConfigDto>) => Promise<void>;
+  providerName: string;
+  defaultApiHost?: string;
+}
 
+export function ProviderSettingsForm({
+  provider,
+  loading,
+  onSave,
+  providerName,
+  defaultApiHost = 'https://api.resend.com',
+}: ProviderSettingsFormProps) {
   // Form state
   const [formState, setFormState] = useState({
     // SMTP settings
     host: '',
-    port: '2525',
+    port: '587',
     username: '',
     password: '',
     // API settings
     apiKey: '',
     domain: '',
-    apiHost: 'https://send.api.mailtrap.io',
+    apiHost: defaultApiHost,
     // Active tab
-    activeTab: 'smtp',
+    activeTab: 'api',
   });
 
   // Destructure for convenience
@@ -47,7 +55,7 @@ export default function MailtrapSettingsPage() {
       // Set SMTP settings if available
       if (provider.smtp) {
         newState.host = provider.smtp.host || '';
-        newState.port = provider.smtp.port?.toString() || '2525';
+        newState.port = provider.smtp.port?.toString() || '587';
         newState.username = provider.smtp.username || '';
         newState.password = provider.smtp.password || '';
       }
@@ -55,7 +63,7 @@ export default function MailtrapSettingsPage() {
       // Set API settings if available
       if (provider.api) {
         newState.apiKey = provider.api.token || '';
-        newState.apiHost = provider.api.host || 'https://send.api.mailtrap.io';
+        newState.apiHost = provider.api.host || defaultApiHost;
       }
 
       newState.domain = provider.domain || '';
@@ -69,7 +77,7 @@ export default function MailtrapSettingsPage() {
 
       setFormState(newState);
     }
-  }, [provider, loading]);
+  }, [provider, loading, defaultApiHost]);
 
   if (loading) {
     return <div>Loading...</div>;
@@ -103,7 +111,7 @@ export default function MailtrapSettingsPage() {
     };
 
     try {
-      await saveProvider(config);
+      await onSave(config);
       toast({
         title: 'Success',
         description: 'Provider settings saved successfully',
@@ -122,7 +130,7 @@ export default function MailtrapSettingsPage() {
 
   return (
     <div className="space-y-6">
-      <h2 className="text-xl font-semibold">Mailtrap Settings</h2>
+      <h2 className="text-xl font-semibold">{providerName} Settings</h2>
 
       <Tabs
         value={activeTab}
@@ -136,9 +144,9 @@ export default function MailtrapSettingsPage() {
         <TabsContent value="smtp">
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="space-y-2">
-              <Label htmlFor="mailtrap-host">SMTP Host</Label>
+              <Label htmlFor="smtp-host">SMTP Host</Label>
               <Input
-                id="mailtrap-host"
+                id="smtp-host"
                 placeholder="Enter SMTP Host"
                 value={host}
                 onChange={(e) => updateField('host', e.target.value)}
@@ -146,9 +154,9 @@ export default function MailtrapSettingsPage() {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="mailtrap-port">SMTP Port</Label>
+              <Label htmlFor="smtp-port">SMTP Port</Label>
               <Input
-                id="mailtrap-port"
+                id="smtp-port"
                 placeholder="Enter SMTP Port"
                 type="number"
                 value={port}
@@ -157,9 +165,9 @@ export default function MailtrapSettingsPage() {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="mailtrap-username">SMTP Username</Label>
+              <Label htmlFor="smtp-username">SMTP Username</Label>
               <Input
-                id="mailtrap-username"
+                id="smtp-username"
                 placeholder="Enter SMTP Username"
                 value={username}
                 onChange={(e) => updateField('username', e.target.value)}
@@ -167,9 +175,9 @@ export default function MailtrapSettingsPage() {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="mailtrap-password">SMTP Password</Label>
+              <Label htmlFor="smtp-password">SMTP Password</Label>
               <Input
-                id="mailtrap-password"
+                id="smtp-password"
                 type="password"
                 placeholder="Enter SMTP Password"
                 value={password}
@@ -184,20 +192,20 @@ export default function MailtrapSettingsPage() {
         <TabsContent value="api">
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="space-y-2">
-              <Label htmlFor="mailtrap-api-key">API Key</Label>
+              <Label htmlFor="api-key">API Key</Label>
               <Input
-                id="mailtrap-api-key"
+                id="api-key"
                 type="password"
-                placeholder="Enter Mailtrap API Key"
+                placeholder={`Enter ${providerName} API Key`}
                 value={apiKey}
                 onChange={(e) => updateField('apiKey', e.target.value)}
                 required={activeTab === 'api'}
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="mailtrap-domain">Domain</Label>
+              <Label htmlFor="domain">Domain</Label>
               <Input
-                id="mailtrap-domain"
+                id="domain"
                 placeholder="Enter Domain"
                 value={domain}
                 onChange={(e) => updateField('domain', e.target.value)}
@@ -205,9 +213,9 @@ export default function MailtrapSettingsPage() {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="mailtrap-api-host">API Host</Label>
+              <Label htmlFor="api-host">API Host</Label>
               <Input
-                id="mailtrap-api-host"
+                id="api-host"
                 placeholder="Enter API Host"
                 value={apiHost}
                 onChange={(e) => updateField('apiHost', e.target.value)}
