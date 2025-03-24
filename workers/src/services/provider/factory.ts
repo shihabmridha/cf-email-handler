@@ -5,7 +5,7 @@ import { ResendProviderService } from "./resend";
 import { MailTrapProviderService } from "./mailtrap";
 
 export class ProviderFactory {
-  static getProvider(provider: ProviderType, smtpConfig?: TransportSmtpConfig, apiConfig?: TransportApiConfig): Provider {
+  static getProvider(provider: ProviderType, smtpConfig?: TransportSmtpConfig, apiConfig?: TransportApiConfig): Provider<unknown> {
     switch (provider) {
       case ProviderType.RESEND:
         return new ResendProviderService(smtpConfig, apiConfig);
