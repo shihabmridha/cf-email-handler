@@ -8,6 +8,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ProviderConfigDto } from '@/shared/dtos/provider';
 import { ApiError } from '@/lib/api-client';
 import { toast } from '@/components/ui/use-toast';
+import { ProviderType } from '@/shared/enums/provider';
+import { Eye, EyeOff } from 'lucide-react';
 
 interface ProviderSettingsFormProps {
   provider: ProviderConfigDto | null;
@@ -25,89 +27,91 @@ export function ProviderSettingsForm({
   defaultApiHost = 'https://api.resend.com',
 }: ProviderSettingsFormProps) {
   // Form state
-  const [formState, setFormState] = useState({
-    // SMTP settings
-    host: '',
-    port: '587',
-    username: '',
-    password: '',
-    // API settings
+  const [formData, setFormData] = useState({
+    name: providerName || '',
+    type: provider?.type,
+    domain: provider?.domain || '',
     apiKey: '',
-    domain: '',
     apiHost: defaultApiHost,
-    // Active tab
-    activeTab: 'api',
+    smtpHost: '',
+    smtpPort: '',
+    smtpUser: '',
+    smtpPass: '',
   });
 
-  // Destructure for convenience
-  const { host, port, username, password, apiKey, domain, apiHost, activeTab } =
-    formState;
+  const [showApiKey, setShowApiKey] = useState(false);
 
-  // Update form field
-  const updateField = (field: string, value: string) => {
-    setFormState((prev) => ({ ...prev, [field]: value }));
-  };
-
+  // Update form when provider changes
   useEffect(() => {
-    if (!loading && provider) {
-      const newState = { ...formState };
-
-      // Set SMTP settings if available
-      if (provider.smtp) {
-        newState.host = provider.smtp.host || '';
-        newState.port = provider.smtp.port?.toString() || '587';
-        newState.username = provider.smtp.username || '';
-        newState.password = provider.smtp.password || '';
-      }
-
-      // Set API settings if available
-      if (provider.api) {
-        newState.apiKey = provider.api.token || '';
-        newState.apiHost = provider.api.host || defaultApiHost;
-      }
-
-      newState.domain = provider.domain || '';
-
-      // Set active tab based on which configuration exists
-      if (provider.api && !provider.smtp) {
-        newState.activeTab = 'api';
-      } else if (provider.smtp && !provider.api) {
-        newState.activeTab = 'smtp';
-      }
-
-      setFormState(newState);
+    if (provider) {
+      setFormData({
+        name: provider.name || '',
+        type: provider.type,
+        domain: provider.domain || '',
+        apiKey: provider.api?.token || '',
+        apiHost: provider.api?.host || defaultApiHost,
+        smtpHost: provider.smtp?.host || '',
+        smtpPort: provider.smtp?.port?.toString() || '',
+        smtpUser: provider.smtp?.username || '',
+        smtpPass: provider.smtp?.password || '',
+      });
     }
-  }, [provider, loading, defaultApiHost]);
+  }, [provider, defaultApiHost]);
 
-  if (loading) {
-    return <div>Loading...</div>;
-  }
+  // Handle input changes
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
+  ) => {
+    const { id, value } = e.target;
+
+    if (id === 'type') {
+      const newType = parseInt(value) as ProviderType;
+      const newApiHost = getDefaultApiHost(newType);
+
+      setFormData((prev) => ({
+        ...prev,
+        type: newType,
+        apiHost: newApiHost,
+      }));
+    } else {
+      setFormData((prev) => ({
+        ...prev,
+        [id]: value,
+      }));
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    const {
+      name,
+      type,
+      domain,
+      apiKey,
+      apiHost,
+      smtpHost,
+      smtpPort,
+      smtpUser,
+      smtpPass,
+    } = formData;
 
     const config: Partial<ProviderConfigDto> = {
-      // Preserve existing provider data
-      ...provider,
-      domain: activeTab === 'smtp' ? host : domain,
-      // Update only the active configuration
-      smtp:
-        activeTab === 'smtp'
-          ? {
-              host,
-              port: parseInt(port),
-              secure: parseInt(port) === 465,
-              username,
-              password,
-            }
-          : provider?.smtp,
-      api:
-        activeTab === 'api'
-          ? {
-              token: apiKey,
-              host: apiHost,
-            }
-          : provider?.api,
+      name,
+      type,
+      domain,
+      api: {
+        token: apiKey,
+        host: apiHost,
+      },
+      smtp: smtpHost
+        ? {
+            host: smtpHost,
+            port: smtpPort ? parseInt(smtpPort, 10) : 587,
+            username: smtpUser,
+            password: smtpPass,
+            secure: smtpPort === '465',
+          }
+        : undefined,
     };
 
     try {
@@ -128,104 +132,156 @@ export function ProviderSettingsForm({
     }
   };
 
+  // Get the default API host based on provider type
+  const getDefaultApiHost = (providerType: ProviderType) => {
+    switch (providerType) {
+      case ProviderType.RESEND:
+        return 'https://api.resend.com/emails';
+      case ProviderType.MAILTRAP:
+        return 'https://send.api.mailtrap.io';
+      default:
+        return '';
+    }
+  };
+
   return (
     <div className="space-y-6">
       <h2 className="text-xl font-semibold">{providerName} Settings</h2>
 
-      <Tabs
-        value={activeTab}
-        onValueChange={(value) => updateField('activeTab', value)}
-      >
-        <TabsList className="mb-4">
-          <TabsTrigger value="smtp">SMTP</TabsTrigger>
-          <TabsTrigger value="api">API</TabsTrigger>
-        </TabsList>
+      <form onSubmit={handleSubmit} className="space-y-6">
+        <div className="space-y-4">
+          <div>
+            <Label htmlFor="name">Provider Name</Label>
+            <Input
+              id="name"
+              value={formData.name}
+              onChange={handleChange}
+              placeholder="Enter provider name"
+              disabled={loading}
+            />
+          </div>
+          <div>
+            <Label htmlFor="type">Provider Type</Label>
+            <select
+              id="type"
+              value={formData.type}
+              onChange={handleChange}
+              className="w-full px-3 py-2 border rounded-md"
+              disabled={loading}
+            >
+              <option value={ProviderType.MAILTRAP}>Mailtrap</option>
+              <option value={ProviderType.RESEND}>Resend</option>
+            </select>
+          </div>
+          <div>
+            <Label htmlFor="domain">Domain</Label>
+            <Input
+              id="domain"
+              value={formData.domain}
+              onChange={handleChange}
+              placeholder="Enter domain"
+              disabled={loading}
+            />
+          </div>
+        </div>
 
-        <TabsContent value="smtp">
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="space-y-2">
-              <Label htmlFor="smtp-host">SMTP Host</Label>
+        <Tabs defaultValue="api" className="w-full">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="api">API Configuration</TabsTrigger>
+            <TabsTrigger value="smtp">SMTP Configuration</TabsTrigger>
+          </TabsList>
+          <TabsContent value="api" className="space-y-4">
+            <div>
+              <Label htmlFor="apiKey">API Key</Label>
+              <div className="relative">
+                <Input
+                  id="apiKey"
+                  value={formData.apiKey}
+                  onChange={handleChange}
+                  type={showApiKey ? 'text' : 'password'}
+                  placeholder="Enter API key"
+                  disabled={loading}
+                />
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  className="absolute right-0 top-0 h-full px-3"
+                  onClick={() => setShowApiKey(!showApiKey)}
+                  disabled={loading}
+                >
+                  {showApiKey ? (
+                    <EyeOff className="h-4 w-4" />
+                  ) : (
+                    <Eye className="h-4 w-4" />
+                  )}
+                  <span className="sr-only">
+                    {showApiKey ? 'Hide API key' : 'Show API key'}
+                  </span>
+                </Button>
+              </div>
+            </div>
+            <div>
+              <Label htmlFor="apiHost">Send Endpoint</Label>
               <Input
-                id="smtp-host"
-                placeholder="Enter SMTP Host"
-                value={host}
-                onChange={(e) => updateField('host', e.target.value)}
-                required={activeTab === 'smtp'}
+                id="apiHost"
+                value={formData.apiHost}
+                onChange={handleChange}
+                placeholder="Enter send endpoint"
+                disabled={loading}
               />
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="smtp-port">SMTP Port</Label>
+          </TabsContent>
+          <TabsContent value="smtp" className="space-y-4">
+            <div>
+              <Label htmlFor="smtpHost">SMTP Host</Label>
               <Input
-                id="smtp-port"
-                placeholder="Enter SMTP Port"
+                id="smtpHost"
+                value={formData.smtpHost}
+                onChange={handleChange}
+                placeholder="Enter SMTP host"
+                disabled={loading}
+              />
+            </div>
+            <div>
+              <Label htmlFor="smtpPort">SMTP Port</Label>
+              <Input
+                id="smtpPort"
+                value={formData.smtpPort}
+                onChange={handleChange}
                 type="number"
-                value={port}
-                onChange={(e) => updateField('port', e.target.value)}
-                required={activeTab === 'smtp'}
+                placeholder="Enter SMTP port"
+                disabled={loading}
               />
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="smtp-username">SMTP Username</Label>
+            <div>
+              <Label htmlFor="smtpUser">SMTP Username</Label>
               <Input
-                id="smtp-username"
-                placeholder="Enter SMTP Username"
-                value={username}
-                onChange={(e) => updateField('username', e.target.value)}
-                required={activeTab === 'smtp'}
+                id="smtpUser"
+                value={formData.smtpUser}
+                onChange={handleChange}
+                placeholder="Enter SMTP username"
+                disabled={loading}
               />
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="smtp-password">SMTP Password</Label>
+            <div>
+              <Label htmlFor="smtpPass">SMTP Password</Label>
               <Input
-                id="smtp-password"
+                id="smtpPass"
+                value={formData.smtpPass}
+                onChange={handleChange}
                 type="password"
-                placeholder="Enter SMTP Password"
-                value={password}
-                onChange={(e) => updateField('password', e.target.value)}
-                required={activeTab === 'smtp'}
+                placeholder="Enter SMTP password"
+                disabled={loading}
               />
             </div>
-            <Button type="submit">Save SMTP Settings</Button>
-          </form>
-        </TabsContent>
+          </TabsContent>
+        </Tabs>
 
-        <TabsContent value="api">
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="space-y-2">
-              <Label htmlFor="api-key">API Key</Label>
-              <Input
-                id="api-key"
-                type="password"
-                placeholder={`Enter ${providerName} API Key`}
-                value={apiKey}
-                onChange={(e) => updateField('apiKey', e.target.value)}
-                required={activeTab === 'api'}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="domain">Domain</Label>
-              <Input
-                id="domain"
-                placeholder="Enter Domain"
-                value={domain}
-                onChange={(e) => updateField('domain', e.target.value)}
-                required={activeTab === 'api'}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="api-host">API Host</Label>
-              <Input
-                id="api-host"
-                placeholder="Enter API Host"
-                value={apiHost}
-                onChange={(e) => updateField('apiHost', e.target.value)}
-                required={activeTab === 'api'}
-              />
-            </div>
-            <Button type="submit">Save API Settings</Button>
-          </form>
-        </TabsContent>
-      </Tabs>
+        <Button type="submit" disabled={loading}>
+          Save Changes
+        </Button>
+      </form>
     </div>
   );
 }

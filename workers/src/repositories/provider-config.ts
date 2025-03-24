@@ -27,9 +27,9 @@ export class ProviderConfigRepository extends BaseRepository<ProviderConfigEntit
   }
 
   async update(id: number, provider: ProviderConfigEntity): Promise<ProviderConfigEntity> {
-    const sql = `UPDATE ${this.tableName} SET smtp = ?, api = ?, domain = ? WHERE id = ?`;
+    const sql = `UPDATE ${this.tableName} SET name = ?, smtp = ?, api = ?, domain = ? WHERE id = ?`;
     const response = await this._db.prepare(sql)
-      .bind(provider.smtp, provider.api, provider.domain, id)
+      .bind(provider.name, provider.smtp, provider.api, provider.domain, id)
       .run();
 
     if (!response.success) {

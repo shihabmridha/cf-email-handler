@@ -59,7 +59,9 @@ export default function ProvidersPage() {
     try {
       if (isCreateMode) {
         await apiClient.createProvider({
-          name: `${ProviderType[config.type || ProviderType.UNKNOWN]} Provider`,
+          name:
+            config.name ||
+            `${ProviderType[config.type || ProviderType.UNKNOWN]} Provider`,
           type: config.type || ProviderType.UNKNOWN,
           domain: config.domain || '',
           userId: 0, // Will be set by backend
@@ -71,7 +73,10 @@ export default function ProvidersPage() {
           description: 'Provider created successfully',
         });
       } else if (selectedProvider) {
-        await apiClient.updateProvider(selectedProvider.id, config);
+        await apiClient.updateProvider(selectedProvider.id, {
+          ...config,
+          name: config.name || selectedProvider.name,
+        });
         toast({
           title: 'Success',
           description: 'Provider updated successfully',
@@ -195,11 +200,7 @@ export default function ProvidersPage() {
             provider={selectedProvider}
             loading={loading}
             onSave={handleSave}
-            providerName={
-              selectedProvider
-                ? getProviderConfig(selectedProvider.type).name
-                : 'New Provider'
-            }
+            providerName={selectedProvider?.name || ''}
             defaultApiHost={
               selectedProvider
                 ? getProviderConfig(selectedProvider.type).defaultApiHost
