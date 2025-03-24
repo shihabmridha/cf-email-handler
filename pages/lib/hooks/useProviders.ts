@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { apiClient } from '@/lib/api-client';
 import { ProviderConfigDto } from '@/shared/dtos/provider';
 
@@ -8,35 +8,39 @@ export function useProviders() {
   const [providers, setProviders] = useState<ProviderConfigDto[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const initialLoadDone = useRef(false);
 
-  useEffect(() => {
+  const fetchProviders = useCallback(async () => {
     let mounted = true;
     setLoading(true);
 
-    const fetchProviders = async () => {
-      try {
-        const providers = await apiClient.getProviders();
-        if (mounted) {
-          setProviders(providers);
-          setError(null);
-        }
-      } catch {
-        if (mounted) {
-          setError('Failed to load providers');
-        }
-      } finally {
-        if (mounted) {
-          setLoading(false);
-        }
+    try {
+      const providers = await apiClient.getProviders();
+      if (mounted) {
+        setProviders(providers);
+        setError(null);
       }
-    };
-
-    fetchProviders();
+    } catch {
+      if (mounted) {
+        setError('Failed to load providers');
+      }
+    } finally {
+      if (mounted) {
+        setLoading(false);
+      }
+    }
 
     return () => {
       mounted = false;
     };
   }, []);
+
+  useEffect(() => {
+    if (!initialLoadDone.current) {
+      fetchProviders();
+      initialLoadDone.current = true;
+    }
+  }, [fetchProviders]);
 
   return {
     providers,

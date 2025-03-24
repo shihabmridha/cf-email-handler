@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { ProviderConfigDto } from '@/shared/dtos/provider';
 import { ProviderType } from '@/shared/enums/provider';
 import { apiClient } from '@/lib/api-client';
@@ -8,31 +8,36 @@ import { apiClient } from '@/lib/api-client';
 export function useProviderSettings(type: ProviderType) {
   const [provider, setProvider] = useState<ProviderConfigDto | null>(null);
   const [loading, setLoading] = useState(true);
+  const initialLoadDone = useRef(false);
 
-  useEffect(() => {
+  const fetchData = useCallback(async () => {
     let mounted = true;
     setLoading(true);
 
-    const fetchData = async () => {
+    try {
       const provider = await apiClient.getProviderByType(type);
       if (mounted) {
         setProvider(provider);
       }
+    } catch {
+      // Handle error silently
+    } finally {
       if (mounted) {
         setLoading(false);
       }
-    };
-
-    fetchData().catch(() => {
-      if (mounted) {
-        setLoading(false);
-      }
-    });
+    }
 
     return () => {
       mounted = false;
     };
   }, [type]);
+
+  useEffect(() => {
+    if (!initialLoadDone.current) {
+      fetchData();
+      initialLoadDone.current = true;
+    }
+  }, [fetchData]);
 
   async function saveProvider(data: Partial<ProviderConfigDto>) {
     // Save the provider
