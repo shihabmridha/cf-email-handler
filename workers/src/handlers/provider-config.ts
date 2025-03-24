@@ -39,10 +39,12 @@ app.post('/', async (c) => {
 });
 
 app.put('/:id', async (c) => {
+  const id = c.req.param('id');
   const body = await c.req.json<ProviderConfigDto>();
+  body.userId = c.get('jwtPayload')?.id as number;
 
   const providerService = c.env.container.getProviderConfigService();
-  await providerService.update(body.id, body);
+  await providerService.update(parseInt(id), body);
 
   return c.body(null, 204);
 });

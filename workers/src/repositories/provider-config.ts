@@ -14,7 +14,7 @@ export class ProviderConfigRepository extends BaseRepository<ProviderConfigEntit
   }
 
   async create(provider: ProviderConfigEntity): Promise<ProviderConfigEntity> {
-    const sql = `INSERT INTO provider_configs (name, userId, type, enabled, domain, smtp, api) VALUES (?, ?, ?, ?, ?, ?, ?)`;
+    const sql = `INSERT INTO ${this.tableName} (name, userId, type, enabled, domain, smtp, api) VALUES (?, ?, ?, ?, ?, ?, ?)`;
     const response = await this._db.prepare(sql)
       .bind(provider.name, provider.userId, provider.type, provider.enabled, provider.domain, provider.smtp, provider.api)
       .run();
@@ -27,8 +27,7 @@ export class ProviderConfigRepository extends BaseRepository<ProviderConfigEntit
   }
 
   async update(id: number, provider: ProviderConfigEntity): Promise<ProviderConfigEntity> {
-    console.log(id, provider);
-    const sql = `UPDATE provider_configs SET smtp = ?, api = ?, domain = ? WHERE id = ?`;
+    const sql = `UPDATE ${this.tableName} SET smtp = ?, api = ?, domain = ? WHERE id = ?`;
     const response = await this._db.prepare(sql)
       .bind(provider.smtp, provider.api, provider.domain, id)
       .run();
@@ -41,7 +40,7 @@ export class ProviderConfigRepository extends BaseRepository<ProviderConfigEntit
   }
 
   async delete(id: number): Promise<boolean> {
-    const response = await this._db.prepare('DELETE FROM provider_configs WHERE id = ?')
+    const response = await this._db.prepare(`DELETE FROM ${this.tableName} WHERE id = ?`)
       .bind(id)
       .run();
 

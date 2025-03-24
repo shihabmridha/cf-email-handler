@@ -42,6 +42,10 @@ export async function processEmail(
   const emailType = EmailType[emailData.class as keyof typeof EmailType];
   const destination = await emailRouteService.getDestination(to, emailType);
 
+  if (emailData.otp) {
+    emailData.summary = `OTP: ${emailData.otp}. ${emailData.summary}`;
+  }
+
   await Promise.allSettled([
     discordService.sendMessage(from, subject, emailData.summary),
     forward(destination),

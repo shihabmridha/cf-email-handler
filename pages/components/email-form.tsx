@@ -4,7 +4,6 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { RichTextEditor } from '@/components/rich-text-editor';
-import { EmailProviderDropdown } from '@/components/email-provider-dropdown';
 import { DraftDto } from '@/shared/dtos/draft';
 
 interface EmailFormProps {
@@ -28,8 +27,6 @@ export function EmailForm({
     cc: '',
     ...initialData,
   });
-
-  const [selectedProvider, setSelectedProvider] = useState<string>('');
 
   const handleChange = (
     field: keyof DraftDto,
@@ -109,10 +106,6 @@ export function EmailForm({
             </Button>
           )}
         </div>
-        <EmailProviderDropdown
-          value={selectedProvider}
-          onChange={setSelectedProvider}
-        />
       </div>
     </div>
   );

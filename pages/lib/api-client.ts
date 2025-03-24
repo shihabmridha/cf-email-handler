@@ -2,6 +2,7 @@ import { LoginDto } from '@/shared/dtos/auth';
 import { DraftDto } from '@/shared/dtos/draft';
 import { EmailRouteDto } from '@/shared/dtos/email-route';
 import { ProviderConfigDto } from '@/shared/dtos/provider';
+import { SendMailDto } from '@/shared/dtos/mail';
 import { ProviderType } from '@/shared/enums/provider';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
@@ -230,5 +231,20 @@ export const apiClient = {
       },
     });
     return handleResponse(response);
+  },
+
+  async sendEmail(data: SendMailDto): Promise<void> {
+    const response = await fetch(`${API_BASE_URL}/email/send`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${this.getAuthToken()}`,
+      },
+      body: JSON.stringify(data),
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to send email');
+    }
   },
 };

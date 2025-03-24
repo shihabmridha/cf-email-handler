@@ -1,8 +1,7 @@
 ﻿import { TransportContent } from "@/dtos/transport";
-import { ApiTransportPayload } from "../services/provider/base";
 
-export interface Provider {
-  createApiPayload(content: TransportContent): ApiTransportPayload;
+export interface Provider<TPayload> {
+  createApiPayload(content: TransportContent): TPayload;
   sendByApi(payload: TransportContent): Promise<boolean>;
   sendBySmtp(payload: TransportContent): Promise<boolean>;
 }

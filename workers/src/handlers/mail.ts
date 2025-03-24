@@ -17,9 +17,13 @@ app.post('/send', async (c) => {
   const mailService = c.env.container.getMailService();
   const body = await c.req.json<SendMailDto>();
 
-  const dto = await mailService.send(body);
+  const sent = await mailService.send(body);
 
-  return c.json(dto, 201);
+  if (!sent) {
+    return c.json({ error: 'Failed to send email' }, 500);
+  }
+
+  return c.json({ message: 'Email sent successfully' }, 200);
 });
 
 export default app;

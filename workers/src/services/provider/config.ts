@@ -61,6 +61,7 @@ export class ProviderConfigService {
 
   async update(id: number, provider: ProviderConfigDto) {
     const entity = Mapper.dtoToEntity(ProviderConfigEntity, provider);
+    console.log(provider, entity);
     const updatedEntity = await this._providerRepository.update(id, entity);
 
     return Mapper.entityToDto(ProviderConfigDto, updatedEntity);
