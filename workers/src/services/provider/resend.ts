@@ -1,19 +1,29 @@
-﻿import {TransportApiConfig, TransportContent, TransportSmtpConfig} from "@/shared/dtos/transport";
-import {ApiTransportPayload, BaseProviderService} from "./base";
+﻿import { TransportApiConfig, TransportContent, TransportSmtpConfig } from "@/dtos/transport";
+import { BaseProviderService } from "./base";
 
-export class ResendProviderService extends BaseProviderService {
+interface ResendApiPayload {
+  from: string;
+  to: string[];
+  cc: string[];
+  subject: string;
+  text: string;
+  html?: string;
+  category?: string;
+}
+
+export class ResendProviderService extends BaseProviderService<ResendApiPayload> {
   constructor(smtpConfig?: TransportSmtpConfig, apiConfig?: TransportApiConfig) {
     super(smtpConfig, apiConfig);
   }
 
-  createApiPayload(content: TransportContent): ApiTransportPayload {
+  createApiPayload(content: TransportContent): ResendApiPayload {
     return {
-      from: {email: content.from, name: content.fromName},
-      to: content.to.map(e => ({email: e})),
-      cc: content.cc.map(e => ({email: e})),
+      from: `${content.from} <${content.from}>`,
+      to: content.to,
+      cc: content.cc,
       subject: content.subject,
       text: content.text,
-      html: content.html,
+      html: content?.html,
     };
   }
 }

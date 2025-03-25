@@ -1,15 +1,15 @@
-﻿import {ProviderConfigRepository} from "../../repositories/provider-config";
-import {ProviderConfigDto} from "@/shared/dtos/provider";
-import {Mapper} from "../../lib/mapper";
-import {ProviderConfigEntity} from "../../entities/provider-config";
-import {ProviderType} from "@/shared/enums/provider";
-import {HTTPException} from "hono/http-exception";
+﻿import { HTTPException } from "hono/http-exception";
+import { ProviderConfigDto } from "@/dtos/provider";
+import { ProviderType } from "@/enums/provider";
+import { Mapper } from "../../lib/mapper";
+import { ProviderConfigEntity } from "../../entities/provider-config";
+import { IProviderConfigRepository } from '../../interfaces/repositories/provider-config';
 
 export class ProviderConfigService {
-  private readonly _providerRepository: ProviderConfigRepository;
+  private readonly _providerRepository: IProviderConfigRepository<ProviderConfigEntity>;
 
-  constructor(db: D1Database) {
-    this._providerRepository = new ProviderConfigRepository(db);
+  constructor(providerConfigRepository: IProviderConfigRepository<ProviderConfigEntity>) {
+    this._providerRepository = providerConfigRepository;
   }
 
   async getAll(): Promise<ProviderConfigDto[]> {
@@ -29,7 +29,7 @@ export class ProviderConfigService {
       return null;
     }
 
-    const dto =Mapper.entityToDto(ProviderConfigDto, provider);
+    const dto = Mapper.entityToDto(ProviderConfigDto, provider);
     dto.api = provider.api ? JSON.parse(provider.api) : null;
     dto.smtp = provider.smtp ? JSON.parse(provider.smtp) : null;
 
@@ -38,19 +38,19 @@ export class ProviderConfigService {
 
   async create(provider: ProviderConfigDto) {
     if (provider.userId === 0) {
-      throw new HTTPException(400, {message: 'User ID is required'});
+      throw new HTTPException(400, { message: 'User ID is required' });
     }
 
     if (!provider.name) {
-      throw new HTTPException(400, {message: 'Provider name is required'});
+      throw new HTTPException(400, { message: 'Provider name is required' });
     }
 
     if (provider.type === ProviderType.UNKNOWN) {
-      throw new HTTPException(400, {message: 'Provider type is required'});
+      throw new HTTPException(400, { message: 'Provider type is required' });
     }
 
     if (!provider.api && !provider.smtp) {
-      throw new HTTPException(400, {message: 'Either API or SMTP configuration is required'});
+      throw new HTTPException(400, { message: 'Either API or SMTP configuration is required' });
     }
 
     const entity = Mapper.dtoToEntity(ProviderConfigEntity, provider);

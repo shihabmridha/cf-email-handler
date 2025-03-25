@@ -1,6 +1,6 @@
 import * as nodemailer from 'nodemailer';
 import { Transport } from '../../interfaces/transport';
-import { TransportSmtpConfig, TransportContent } from '@/shared/dtos/transport';
+import { TransportSmtpConfig, TransportContent } from '@/dtos/transport';
 
 export class SmtpTransport implements Transport {
   private readonly transporter: nodemailer.Transporter;
@@ -20,7 +20,7 @@ export class SmtpTransport implements Transport {
   async send<T extends TransportContent>(mailContent: T): Promise<boolean> {
     const to = mailContent.to.join(',');
 
-    try{
+    try {
       await this.transporter.sendMail({
         from: `"${mailContent.fromName}" <${mailContent.from}>`,
         to,

@@ -1,19 +1,9 @@
-import { TransportApiConfig, TransportSmtpConfig, TransportContent } from "@/shared/dtos/transport";
+import { TransportApiConfig, TransportSmtpConfig, TransportContent } from "@/dtos/transport";
 import { Provider } from "../../interfaces/provider";
 import { SmtpTransport } from "../transport/smtp";
 import { ApiTransport } from "../transport/api";
 
-export class ApiTransportPayload {
-  from: { email: string; name: string } = {email: "", name: ""};
-  to: { email: string }[] = [{email: ""}];
-  cc: { email: string }[] = [{email: ""}];
-  subject: string = '';
-  text: string = '';
-  html?: string = '';
-  category?: string = '';
-}
-
-export abstract class BaseProviderService implements Provider {
+export abstract class BaseProviderService<TPayload> implements Provider<TPayload> {
   private readonly _smtpTransport?: SmtpTransport;
   private readonly _apiTransport?: ApiTransport;
 
@@ -28,7 +18,7 @@ export abstract class BaseProviderService implements Provider {
       this._apiTransport = new ApiTransport(apiConfig);
   }
 
-  abstract createApiPayload(content: TransportContent): ApiTransportPayload;
+  abstract createApiPayload(content: TransportContent): TPayload;
 
   async sendByApi(content: TransportContent): Promise<boolean> {
     if (!this._apiTransport)

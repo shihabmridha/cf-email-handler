@@ -1,26 +1,56 @@
-import {Header} from "@/components/header"
-import {Sidebar} from "@/components/sidebar"
-import {redirect} from 'next/navigation';
-import React from "react";
+'use client';
 
-function checkAuth() {
-    const isAuthenticated = true;
-    if (!isAuthenticated) {
-        redirect('/home');
+import { useEffect } from 'react';
+import { useRouter, usePathname } from 'next/navigation';
+import { Suspense } from 'react';
+import { Header } from '@/components/header';
+import { Sidebar } from '@/components/sidebar';
+import { apiClient } from '@/lib/api-client';
+import ComposeLoading from './compose/loading';
+import DraftLoading from './draft/loading';
+import RoutesLoading from './routes/loading';
+import ProvidersLoading from './providers/loading';
+
+function getLoadingComponent(pathname: string) {
+  switch (pathname) {
+    case '/compose':
+      return <ComposeLoading />;
+    case '/draft':
+      return <DraftLoading />;
+    case '/routes':
+      return <RoutesLoading />;
+    case '/providers':
+      return <ProvidersLoading />;
+    default:
+      return <ComposeLoading />;
+  }
+}
+
+export default function AuthenticatedLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  const router = useRouter();
+  const pathname = usePathname();
+
+  useEffect(() => {
+    if (!apiClient.getAuthToken()) {
+      router.push('/home');
     }
+  }, [router]);
+
+  return (
+    <div className="min-h-screen">
+      <Header />
+      <div className="flex h-[calc(100vh-3.5rem)]">
+        <Sidebar />
+        <main className="flex-1 overflow-y-auto bg-muted/10">
+          <Suspense fallback={getLoadingComponent(pathname)}>
+            {children}
+          </Suspense>
+        </main>
+      </div>
+    </div>
+  );
 }
-
-export default function AuthenticatedLayout({children}: { children: React.ReactNode }) {
-    checkAuth();
-
-    return (
-        <div className="flex flex-col h-screen">
-            <Header/>
-            <div className="flex flex-1 overflow-hidden">
-                <Sidebar/>
-                <main className="flex-1 p-6 overflow-auto">{children}</main>
-            </div>
-        </div>
-    )
-}
-

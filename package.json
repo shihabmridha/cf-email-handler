@@ -1,9 +1,11 @@
-﻿{
+{
   "name": "cf-email-handler",
   "version": "1.0.0",
   "scripts": {
-    "build:pages": "cd pages && bun run build && bun exec \"cp -r out ../workers/dist\"",
+    "prebuild:pages": "bun exec \"rm -rf pages/shared/* && cp -R workers/src/dtos workers/src/enums ./pages/shared/\"",
+    "build:pages": "cd pages && bun run build && bun exec \"cp -R out ../workers/dist\"",
     "deploy:worker": "cd workers && bun run deploy",
+    "predeploy": "bun exec \"rm -rf workers/dist\"",
     "deploy": "bun run build:pages && bun run deploy:worker"
   }
 }

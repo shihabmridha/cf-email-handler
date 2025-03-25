@@ -1,12 +1,12 @@
 import { ProviderFactory } from "./provider/factory";
 import { ProviderConfigService } from "./provider/config";
+import { SendMailDto } from "@/dtos/mail";
 
-import { SendMailDto } from "@/shared/dtos/mail";
 export class MailService {
   private readonly _providerConfigService: ProviderConfigService;
 
-  constructor(db: D1Database) {
-    this._providerConfigService = new ProviderConfigService(db);
+  constructor(providerConfigService: ProviderConfigService) {
+    this._providerConfigService = providerConfigService;
   }
 
   async send(payload: SendMailDto): Promise<boolean> {
@@ -16,14 +16,16 @@ export class MailService {
     }
 
     const provider = ProviderFactory.getProvider(providerConfig.type, providerConfig.smtp, providerConfig.api);
+
+    let sent = false;
     if (providerConfig.smtp) {
-      return provider.sendBySmtp(payload.content);
+      sent = await provider.sendBySmtp(payload.content);
     }
 
     if (providerConfig.api) {
-      return provider.sendByApi(payload.content);
+      sent = await provider.sendByApi(payload.content);
     }
 
-    return false;
+    return sent;
   }
 }

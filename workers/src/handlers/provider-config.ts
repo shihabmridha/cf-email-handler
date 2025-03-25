@@ -1,38 +1,58 @@
-﻿import {Hono} from "hono";
-import {ProviderConfigService} from "../services/provider/config";
-import {ProviderConfigDto} from "@/shared/dtos/provider";
+﻿import { Hono } from "hono";
+import { jwt } from 'hono/jwt';
+import { ProviderConfigDto } from "@/dtos/provider";
+import { AppContext } from '../interfaces/context';
 
-const app = new Hono<{ Bindings: CloudflareBindings }>();
+const app = new Hono<{ Bindings: AppContext }>();
+app.use('*', async (c, next) => {
+  const auth = jwt({
+    secret: c.env.JWT_SECRET,
+  });
+
+  return auth(c, next);
+});
 
 app.get('/', async (c) => {
-  const providerService = new ProviderConfigService(c.env.DB);
+  const providerService = c.env.container.getProviderConfigService();
   const providers = await providerService.getAll();
 
-  return c.json({providers});
+  return c.json({ providers });
+});
+
+app.get('/type/:type', async (c) => {
+  const type = c.req.param('type');
+  const providerService = c.env.container.getProviderConfigService();
+  const providers = await providerService.getAll();
+  const provider = providers.find(p => p.type === parseInt(type));
+
+  return c.json({ provider });
 });
 
 app.post('/', async (c) => {
-  const providerService = new ProviderConfigService(c.env.DB);
   const body = await c.req.json<ProviderConfigDto>();
+  body.userId = c.get('jwtPayload')?.id as number;
 
-  const dto = await providerService.create(body);
+  const providerService = c.env.container.getProviderConfigService();
+  await providerService.create(body);
 
-  return c.json(dto, 201);
+  return c.body(null, 201);
 });
 
 app.put('/:id', async (c) => {
-  const providerService = new ProviderConfigService(c.env.DB);
+  const id = c.req.param('id');
   const body = await c.req.json<ProviderConfigDto>();
+  body.userId = c.get('jwtPayload')?.id as number;
 
-  const dto = await providerService.update(body.id, body);
+  const providerService = c.env.container.getProviderConfigService();
+  await providerService.update(parseInt(id), body);
 
-  return c.json(dto, 201);
+  return c.body(null, 204);
 });
 
 app.delete('/:id', async (c) => {
-  const providerService = new ProviderConfigService(c.env.DB);
   const id = c.req.param('id');
 
+  const providerService = c.env.container.getProviderConfigService();
   await providerService.delete(parseInt(id));
 
   return c.body(null, 204);

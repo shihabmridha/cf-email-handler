@@ -1,77 +1,99 @@
-'use client'
+'use client';
 
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { apiClient } from '@/lib/api-client';
+import { Skeleton } from '@/components/ui/skeleton';
 
 enum LoginState {
   LOGIN,
   FORGOT_PASSWORD,
-  RESET_PASSWORD
+  RESET_PASSWORD,
 }
 
 export default function HomePage() {
-  const [loginState, setLoginState] = useState<LoginState>(LoginState.LOGIN)
-  const [username, setUsername] = useState('')
-  const [password, setPassword] = useState('')
-  const [passphrase, setPassphrase] = useState('')
-  const [newPassword, setNewPassword] = useState('')
-  const [confirmPassword, setConfirmPassword] = useState('')
-  const [error, setError] = useState('')
-  const router = useRouter()
+  const [loginState, setLoginState] = useState<LoginState>(LoginState.LOGIN);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [passphrase, setPassphrase] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(true);
+  const router = useRouter();
+
+  useEffect(() => {
+    // Check if user is already authenticated
+    if (apiClient.isAuthenticated()) {
+      router.push('/compose');
+    } else {
+      setIsLoading(false);
+    }
+  }, [router]);
 
   const handleLogin = async () => {
-    const res = await fetch(process.env.NEXT_PUBLIC_API_HOST + '/api/auth', {
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json'
-      },
-      method: 'POST',
-      body: JSON.stringify({
-        email: username,
-        password: password
-      })
-    })
-    if (res.ok) {
-      router.push('/draft')
-    } else {
-      setError('Invalid username or password')
+    try {
+      const response = await apiClient.login({ email, password });
+      apiClient.setAuthToken(response.token);
+      router.push('/compose');
+    } catch (err) {
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError('An error occurred during login');
+      }
     }
-  }
+  };
 
   const handleForgotPassword = () => {
     // Placeholder forgot password logic
-    console.log('Forgot password for passphrase:', passphrase)
-    setLoginState(LoginState.RESET_PASSWORD)
-  }
+    console.log('Forgot password for passphrase:', passphrase);
+    setLoginState(LoginState.RESET_PASSWORD);
+  };
 
   const handleResetPassword = () => {
     // Placeholder reset password logic
     if (newPassword === confirmPassword) {
-      console.log('Password reset successfully')
-      setLoginState(LoginState.LOGIN)
+      console.log('Password reset successfully');
+      setLoginState(LoginState.LOGIN);
     } else {
-      setError('Passwords do not match')
+      setError('Passwords do not match');
     }
+  };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-100">
+        <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
+          <Skeleton className="h-8 w-48 mx-auto mb-6" />
+          <div className="space-y-4">
+            <Skeleton className="h-10 w-full" />
+            <Skeleton className="h-10 w-full" />
+            <Skeleton className="h-10 w-full" />
+          </div>
+        </div>
+      </div>
+    );
   }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
       <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
         <h1 className="text-2xl font-bold mb-6 text-center">Email Platform</h1>
-        
+
         {loginState === LoginState.LOGIN && (
           <>
             <div className="space-y-4">
               <div>
-                <Label htmlFor="username">Username/Email</Label>
+                <Label htmlFor="email">Email</Label>
                 <Input
-                  id="username"
-                  type="text"
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
+                  id="email"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                 />
               </div>
               <div>
@@ -84,7 +106,9 @@ export default function HomePage() {
                 />
               </div>
             </div>
-            <Button className="w-full mt-4" onClick={handleLogin}>Login</Button>
+            <Button className="w-full mt-4" onClick={handleLogin}>
+              Login
+            </Button>
             <div className="text-center mt-4">
               <button
                 className="text-blue-500 hover:underline"
@@ -109,7 +133,9 @@ export default function HomePage() {
                 />
               </div>
             </div>
-            <Button className="w-full mt-4" onClick={handleForgotPassword}>Submit</Button>
+            <Button className="w-full mt-4" onClick={handleForgotPassword}>
+              Submit
+            </Button>
           </>
         )}
 
@@ -135,15 +161,14 @@ export default function HomePage() {
                 />
               </div>
             </div>
-            <Button className="w-full mt-4" onClick={handleResetPassword}>Reset Password</Button>
+            <Button className="w-full mt-4" onClick={handleResetPassword}>
+              Reset Password
+            </Button>
           </>
         )}
 
-        {error && (
-          <div className="mt-4 text-red-500 text-center">{error}</div>
-        )}
+        {error && <div className="mt-4 text-red-500 text-center">{error}</div>}
       </div>
     </div>
-  )
+  );
 }
-

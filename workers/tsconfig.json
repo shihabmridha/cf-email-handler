@@ -1,22 +1,38 @@
 {
   "compilerOptions": {
-    "target": "ESNext",
-    "module": "ESNext",
-    "moduleResolution": "Bundler",
-    "strict": true,
+    "target": "esnext",
+    "module": "esnext",
+    "moduleResolution": "node",
     "skipLibCheck": true,
-    "lib": [
-      "ESNext"
-    ],
-    "types": [
-        "@cloudflare/workers-types/2023-07-01"
-    ],
-    "jsx": "react",
     "experimentalDecorators": true,
+    "forceConsistentCasingInFileNames": true,
+    "noFallthroughCasesInSwitch": true,
+    "strict": true,
+    "noEmit": true,
+    "pretty": true,
+    "sourceMap": true,
+    "esModuleInterop": true,
+    "lib": [
+      "esnext"
+    ],
     "paths": {
-      "@/shared/*": [
-        "../shared/*"
+      "@/dtos/*": [
+        "./src/dtos/*"
+      ],
+      "@/enums/*": [
+        "./src/enums/*"
       ]
-    }
+    },
   },
+  "exclude": [
+    "node_modules",
+    "dist",
+  ],
+  "include": [
+    "src",
+    "tests",
+    "setup.ts",
+    "migration.ts",
+    "*.d.ts"
+  ]
 }

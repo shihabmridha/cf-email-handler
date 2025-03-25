@@ -1,13 +1,13 @@
-import { AuthService } from "../services/auth";
-import {LoginDto} from "@/shared/dtos/auth";
-import {Hono} from "hono";
+import { LoginDto } from "@/dtos/auth";
+import { Hono } from "hono";
+import { AppContext } from '../interfaces/context';
 
-const app = new Hono<{ Bindings: CloudflareBindings }>();
+const app = new Hono<{ Bindings: AppContext }>();
 
 app.post('/', async (c) => {
   const body = await c.req.json<LoginDto>();
 
-  const authService = new AuthService(c.env.DB, c.env.JWT_SECRET);
+  const authService = c.env.container.getAuthService();
   const token = await authService.login(body);
 
   return c.json({

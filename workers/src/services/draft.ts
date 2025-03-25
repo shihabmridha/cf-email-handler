@@ -1,13 +1,13 @@
-﻿import {DraftRepository} from "../repositories/draft";
-import {DraftDto} from "@/shared/dtos/draft";
-import {DraftEntity} from "../entities/draft";
-import {Mapper} from "../lib/mapper";
+﻿import { DraftDto } from "@/dtos/draft";
+import { DraftEntity } from "../entities/draft";
+import { Mapper } from "../lib/mapper";
+import { IDraftRepository } from '../interfaces/repositories/draft';
 
 export class DraftService {
-  private readonly _draftRepository: DraftRepository;
+  private readonly _draftRepository: IDraftRepository<DraftEntity>;
 
-  constructor(db: D1Database) {
-    this._draftRepository = new DraftRepository(db);
+  constructor(draftRepository: IDraftRepository<DraftEntity>) {
+    this._draftRepository = draftRepository;
   }
 
   async getAll(): Promise<DraftDto[]> {
@@ -28,6 +28,7 @@ export class DraftService {
 
   async update(id: string, dto: DraftDto): Promise<DraftDto> {
     const entity = Mapper.dtoToEntity(DraftEntity, dto);
+    console.log(dto, entity);
     const updatedEntity = await this._draftRepository.update(parseInt(id), entity);
 
     return Mapper.entityToDto(DraftDto, updatedEntity);
