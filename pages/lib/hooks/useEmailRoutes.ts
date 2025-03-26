@@ -37,8 +37,7 @@ export function useEmailRoutes() {
       await apiClient.createEmailRoute({
         ...data,
         userId: 0,
-        createdAt: new Date(),
-        updatedAt: new Date(),
+        drop: false,
       });
       await loadRoutes();
     } finally {
@@ -55,7 +54,6 @@ export function useEmailRoutes() {
       await apiClient.updateEmailRoute(id, {
         ...route,
         ...data,
-        updatedAt: new Date(),
       });
 
       if (shouldRefresh) {

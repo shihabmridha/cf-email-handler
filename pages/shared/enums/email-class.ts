@@ -1,4 +1,4 @@
-export enum EmailType {
+export enum EmailClass {
   UNKNOWN = 'UNKNOWN',
   OTP = 'OTP',
   INVOICE = 'INVOICE',

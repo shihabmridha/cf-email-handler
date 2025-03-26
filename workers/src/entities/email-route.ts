@@ -1,6 +1,6 @@
 import { Expose, Transform } from "class-transformer";
 import { BaseEntity } from "./base";
-import { EmailType } from "@/enums/email-class";
+import { EmailClass } from "@/enums/email-class";
 
 export class EmailRouteEntity extends BaseEntity {
   @Expose()
@@ -13,9 +13,15 @@ export class EmailRouteEntity extends BaseEntity {
   destination: string = "";
 
   @Expose()
-  @Transform(({ value }) => EmailType[value as keyof typeof EmailType])
-  type: EmailType = EmailType.UNKNOWN;
+  @Transform(({ value }) => EmailClass[value as keyof typeof EmailClass])
+  type: EmailClass = EmailClass.UNKNOWN;
 
   @Expose()
   enabled: boolean = true;
+
+  @Expose()
+  drop: boolean = false;
+
+  received: number = 0;
+  sent: number = 0;
 }

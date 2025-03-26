@@ -18,6 +18,7 @@ export async function parseEmail(message: ForwardableEmailMessage) {
     forward: message.forward.bind(message),
     drop: () => {
       console.log('Dropping email from', message.from, 'to', message.to);
+      return Promise.resolve();
     },
   };
 }
@@ -26,7 +27,7 @@ export async function processEmail(
   parsedEmail: ReturnType<typeof parseEmail> extends Promise<infer T> ? T : never,
   container: Container
 ) {
-  const { content, from, subject, forward } = parsedEmail;
+  const { content, from, subject, forward, drop } = parsedEmail;
   let { to } = parsedEmail;
 
   const config = container.getConfig();
@@ -45,6 +46,10 @@ export async function processEmail(
 
   const emailRouteService = container.getEmailRouteService();
   const discordService = container.getDiscordService();
+  const actions = [
+    discordService.sendMessage(from, subject, emailData.summary),
+    emailRouteService.incrementReceived(to),
+  ];
 
   const emailType = EmailClass[emailData.class as keyof typeof EmailClass];
   console.log('Email type:', emailType);
@@ -52,8 +57,11 @@ export async function processEmail(
   const destination = await emailRouteService.getDestination(to, emailType);
   console.log('Destination:', destination);
 
-  await Promise.allSettled([
-    discordService.sendMessage(from, subject, emailData.summary),
-    forward(destination),
-  ]);
+  if (destination) {
+    actions.push(forward(destination));
+  } else {
+    actions.push(drop());
+  }
+
+  await Promise.allSettled(actions);
 }

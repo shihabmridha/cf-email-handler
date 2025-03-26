@@ -14,7 +14,7 @@ import {
 import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/components/ui/use-toast';
 import { EmailRouteDto } from '@/shared/dtos/email-route';
-import { EmailType } from '@/shared/enums/email-type';
+import { EmailClass } from '@/shared/enums/email-class';
 import { useEmailRoutes } from '@/lib/hooks/useEmailRoutes';
 import {
   Table,
@@ -155,7 +155,7 @@ export default function RoutesPage() {
               <Label htmlFor="new-type">Type</Label>
               <Select
                 value={newRoute.type}
-                onValueChange={(value: EmailType) =>
+                onValueChange={(value: EmailClass) =>
                   setNewRoute({ ...newRoute, type: value })
                 }
                 disabled={loading}
@@ -164,10 +164,10 @@ export default function RoutesPage() {
                   <SelectValue placeholder="Select type" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value={EmailType.UNKNOWN}>Unknown</SelectItem>
-                  <SelectItem value={EmailType.OTP}>OTP</SelectItem>
-                  <SelectItem value={EmailType.INVOICE}>Invoice</SelectItem>
-                  <SelectItem value={EmailType.PROMOTIONAL}>
+                  <SelectItem value={EmailClass.UNKNOWN}>Unknown</SelectItem>
+                  <SelectItem value={EmailClass.OTP}>OTP</SelectItem>
+                  <SelectItem value={EmailClass.INVOICE}>Invoice</SelectItem>
+                  <SelectItem value={EmailClass.PROMOTIONAL}>
                     Promotional
                   </SelectItem>
                 </SelectContent>
@@ -204,6 +204,9 @@ export default function RoutesPage() {
               <TableHead>Destination</TableHead>
               <TableHead>Type</TableHead>
               <TableHead>Enabled</TableHead>
+              <TableHead>Drop</TableHead>
+              <TableHead>Received</TableHead>
+              <TableHead>Sent</TableHead>
               <TableHead>Actions</TableHead>
             </TableRow>
           </TableHeader>
@@ -244,7 +247,7 @@ export default function RoutesPage() {
                   {route.isEditing ? (
                     <Select
                       value={route.type}
-                      onValueChange={(value: EmailType) =>
+                      onValueChange={(value: EmailClass) =>
                         updateRouteLocal(route.id, { type: value })
                       }
                       disabled={loading}
@@ -253,14 +256,14 @@ export default function RoutesPage() {
                         <SelectValue placeholder="Select type" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value={EmailType.UNKNOWN}>
+                        <SelectItem value={EmailClass.UNKNOWN}>
                           Unknown
                         </SelectItem>
-                        <SelectItem value={EmailType.OTP}>OTP</SelectItem>
-                        <SelectItem value={EmailType.INVOICE}>
+                        <SelectItem value={EmailClass.OTP}>OTP</SelectItem>
+                        <SelectItem value={EmailClass.INVOICE}>
                           Invoice
                         </SelectItem>
-                        <SelectItem value={EmailType.PROMOTIONAL}>
+                        <SelectItem value={EmailClass.PROMOTIONAL}>
                           Promotional
                         </SelectItem>
                       </SelectContent>
@@ -286,6 +289,21 @@ export default function RoutesPage() {
                     disabled={loading}
                   />
                 </TableCell>
+                <TableCell>
+                  <Switch
+                    checked={route.drop}
+                    onCheckedChange={async (checked: boolean) => {
+                      if (route.isEditing) {
+                        updateRouteLocal(route.id, { drop: checked });
+                      } else {
+                        await handleSaveRoute(route, { drop: checked }, false);
+                      }
+                    }}
+                    disabled={loading}
+                  />
+                </TableCell>
+                <TableCell>{route.received}</TableCell>
+                <TableCell>{route.sent}</TableCell>
                 <TableCell className="space-x-2">
                   {route.isEditing ? (
                     <>

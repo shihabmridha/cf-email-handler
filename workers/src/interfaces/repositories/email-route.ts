@@ -1,10 +1,12 @@
 ﻿import { IBaseRepository } from './base';
-import { EmailType } from '@/enums/email-class';
+import { EmailClass } from '@/enums/email-class';
 import { EmailRouteEntity } from '../../entities/email-route';
 
 export interface IEmailRouteRepository<T> extends IBaseRepository<T> {
-  getByEmailAndType(email: string, type: EmailType): Promise<EmailRouteEntity | null>;
   create(route: EmailRouteEntity): Promise<void>;
   update(id: number, route: EmailRouteEntity): Promise<void>;
   delete(id: number): Promise<boolean>;
+  getByEmailAndType(email: string, type: EmailClass): Promise<T | null>;
+  incrementReceived(email: string): Promise<void>;
+  incrementSent(email: string): Promise<void>;
 }

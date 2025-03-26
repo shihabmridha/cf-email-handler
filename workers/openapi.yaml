@@ -123,18 +123,37 @@ components:
             - destination
             - type
           properties:
+            id:
+              type: integer
+              format: int64
             userId:
               type: integer
+              format: int64
             email:
               type: string
-              format: email
             destination:
               type: string
             type:
               type: string
-              enum: [UNKNOWN, SUPPORT, SALES, MARKETING, OTHER]
+              enum: [UNKNOWN, OTP, INVOICE, PROMOTIONAL]
             enabled:
               type: boolean
+            drop:
+              type: boolean
+            received:
+              type: integer
+              format: int64
+              readOnly: true
+            sent:
+              type: integer
+              format: int64
+              readOnly: true
+            createdAt:
+              type: string
+              format: date-time
+            updatedAt:
+              type: string
+              format: date-time
 
     SendMailDto:
       type: object

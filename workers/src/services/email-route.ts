@@ -53,6 +53,7 @@ export class EmailRouteService {
     }
 
     const entity = Mapper.dtoToEntity(EmailRouteEntity, dto);
+
     await this._emailRouteRepository.update(id, entity);
   }
 
@@ -68,5 +69,13 @@ export class EmailRouteService {
     }
 
     return routeEntity.destination;
+  }
+
+  async incrementReceived(email: string): Promise<void> {
+    await this._emailRouteRepository.incrementReceived(email);
+  }
+
+  async incrementSent(email: string): Promise<void> {
+    await this._emailRouteRepository.incrementSent(email);
   }
 }

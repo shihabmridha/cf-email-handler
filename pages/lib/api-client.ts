@@ -98,7 +98,7 @@ export const apiClient = {
     return handleResponse(response);
   },
 
-  async createEmailRoute(data: Omit<EmailRouteDto, 'id'>): Promise<void> {
+  async createEmailRoute(data: Omit<EmailRouteDto, 'id' | 'received' | 'sent' | 'createdAt' | 'updatedAt'>): Promise<void> {
     const response = await fetch(`${API_BASE_URL}/email-route`, {
       method: 'POST',
       headers: {
@@ -110,7 +110,7 @@ export const apiClient = {
     return handleResponse(response);
   },
 
-  async updateEmailRoute(id: number, data: Omit<EmailRouteDto, 'id'>): Promise<void> {
+  async updateEmailRoute(id: number, data: Omit<EmailRouteDto, 'id' | 'received' | 'sent' | 'createdAt' | 'updatedAt'>): Promise<void> {
     const response = await fetch(`${API_BASE_URL}/email-route/${id}`, {
       method: 'PUT',
       headers: {

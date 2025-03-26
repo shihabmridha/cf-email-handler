@@ -72,7 +72,7 @@ export default function ProvidersPage() {
             `${ProviderType[config.type || ProviderType.UNKNOWN]} Provider`,
           type: config.type || ProviderType.UNKNOWN,
           domain: config.domain || '',
-          userId: 0, // Will be set by backend
+          userId: 0,
           enabled: true,
           ...config,
         });
