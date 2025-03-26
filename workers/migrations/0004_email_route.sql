@@ -5,8 +5,11 @@ CREATE TABLE email_routes
     userId      INTEGER  NOT NULL,
     email       TEXT     NOT NULL,
     destination TEXT     NOT NULL,
-    type        TEXT     NOT NULL CHECK (type IN ('OTP', 'INVOICE', 'PROMOTIONAL')),
+    type        TEXT     NOT NULL CHECK (type IN ('OTP', 'INVOICE', 'PROMOTIONAL', 'UNKNOWN')),
     enabled     INTEGER  NOT NULL DEFAULT 1 CHECK (enabled IN (0, 1)),
+    `drop`      INTEGER  NOT NULL DEFAULT 0 CHECK (`drop` IN (0, 1)),
+    received    INTEGER  NOT NULL DEFAULT 0,
+    sent        INTEGER  NOT NULL DEFAULT 0,
     createdAt   DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updatedAt   DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
 

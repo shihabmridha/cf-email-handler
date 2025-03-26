@@ -29,7 +29,7 @@ export class EmailRouteService {
       throw new HTTPException(400, { message: 'Email and Destination is required' });
     }
 
-    if (!dto.type || dto.type === EmailClass.UNKNOWN) {
+    if (!dto.type) {
       throw new HTTPException(400, { message: 'Type is required' });
     }
 
@@ -48,7 +48,7 @@ export class EmailRouteService {
       throw new HTTPException(400, { message: 'Email and Destination is required' });
     }
 
-    if (dto.type === EmailClass.UNKNOWN) {
+    if (!dto.type) {
       throw new HTTPException(400, { message: 'Type is required' });
     }
 
@@ -61,11 +61,15 @@ export class EmailRouteService {
     await this._emailRouteRepository.delete(id);
   }
 
-  async getDestination(email: string, type: EmailClass): Promise<string> {
+  async getDestination(email: string, type: EmailClass): Promise<string | null> {
     const routeEntity = await this._emailRouteRepository.getByEmailAndType(email, type);
     if (!routeEntity) {
       console.log('No route entity found, using default email :', this._config.emailForwardTo);
       return this._config.emailForwardTo;
+    }
+
+    if (routeEntity.drop) {
+      return null;
     }
 
     return routeEntity.destination;

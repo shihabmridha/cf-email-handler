@@ -24,6 +24,12 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 
 export default function RoutesPage() {
   const {
@@ -35,7 +41,7 @@ export default function RoutesPage() {
     setRouteEditing,
     updateRouteLocal,
   } = useEmailRoutes();
-  const [showAddPanel, setShowAddPanel] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
   const [newRoute, setNewRoute] = useState<EmailRouteDto>(new EmailRouteDto());
   const { toast } = useToast();
 
@@ -49,7 +55,7 @@ export default function RoutesPage() {
         enabled,
       });
       setNewRoute(new EmailRouteDto());
-      setShowAddPanel(false);
+      setIsOpen(false);
       toast({
         title: 'Success',
         description: 'Route added successfully',
@@ -105,7 +111,7 @@ export default function RoutesPage() {
         <h1 className="text-2xl font-bold">Email Routes</h1>
         <Button
           variant="default"
-          onClick={() => setShowAddPanel(true)}
+          onClick={() => setIsOpen(true)}
           disabled={loading}
           className="cursor-pointer"
         >
@@ -113,20 +119,12 @@ export default function RoutesPage() {
         </Button>
       </div>
 
-      {showAddPanel && (
-        <div className="bg-card p-6 rounded-lg border mb-8">
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-lg font-semibold">Add New Route</h2>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setShowAddPanel(false)}
-              className="cursor-pointer"
-            >
-              ✕
-            </Button>
-          </div>
-          <div className="grid gap-4">
+      <Dialog open={isOpen} onOpenChange={setIsOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Add New Route</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
             <div>
               <Label htmlFor="new-email">Email</Label>
               <Input
@@ -184,17 +182,27 @@ export default function RoutesPage() {
               />
               <Label htmlFor="new-enabled">Enabled</Label>
             </div>
-            <Button
-              variant="default"
-              onClick={handleAddRoute}
-              disabled={loading}
-              className="cursor-pointer"
-            >
-              Add Route
-            </Button>
+            <div className="flex justify-end space-x-2">
+              <Button
+                variant="outline"
+                onClick={() => setIsOpen(false)}
+                disabled={loading}
+                className="cursor-pointer"
+              >
+                Cancel
+              </Button>
+              <Button
+                variant="default"
+                onClick={handleAddRoute}
+                disabled={loading}
+                className="cursor-pointer"
+              >
+                Add Route
+              </Button>
+            </div>
           </div>
-        </div>
-      )}
+        </DialogContent>
+      </Dialog>
 
       <div className="rounded-lg border bg-card">
         <Table>
