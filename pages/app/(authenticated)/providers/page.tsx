@@ -12,9 +12,17 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { Plus, Pencil, Trash2 } from 'lucide-react';
+import { Pencil, Trash2 } from 'lucide-react';
 import { apiClient } from '@/lib/api-client';
 import { toast } from '@/components/ui/use-toast';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 
 export default function ProvidersPage() {
   const { providers, loading, error, refresh } = useProviders();
@@ -122,54 +130,45 @@ export default function ProvidersPage() {
     <div className="container mx-auto py-10">
       <div className="flex justify-between items-center mb-8">
         <h1 className="text-2xl font-bold">Email Providers</h1>
-        <Button onClick={handleCreate} disabled={loading}>
-          <Plus className="mr-2 h-4 w-4" />
+        <Button
+          variant="default"
+          onClick={handleCreate}
+          disabled={loading}
+          className="cursor-pointer"
+        >
           Create Provider
         </Button>
       </div>
 
-      <div className="bg-white rounded-lg shadow overflow-hidden">
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
-            <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Name
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Type
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Domain
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Status
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Actions
-              </th>
-            </tr>
-          </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
+      <div className="rounded-lg border bg-card">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Name</TableHead>
+              <TableHead>Type</TableHead>
+              <TableHead>Domain</TableHead>
+              <TableHead>Status</TableHead>
+              <TableHead>Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
             {providers.map((provider) => {
               const config = getProviderConfig(provider.type);
               return (
-                <tr key={provider.id}>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    {provider.name}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">{config.name}</td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    {provider.domain}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
+                <TableRow key={provider.id}>
+                  <TableCell>{provider.name}</TableCell>
+                  <TableCell>{config.name}</TableCell>
+                  <TableCell>{provider.domain}</TableCell>
+                  <TableCell>
                     {provider.enabled ? 'Active' : 'Inactive'}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap space-x-2">
+                  </TableCell>
+                  <TableCell className="space-x-2">
                     <Button
                       variant="outline"
                       size="sm"
                       onClick={() => handleEdit(provider)}
                       disabled={loading}
+                      className="cursor-pointer"
                     >
                       <Pencil className="h-4 w-4" />
                     </Button>
@@ -178,15 +177,16 @@ export default function ProvidersPage() {
                       size="sm"
                       onClick={() => handleDelete(provider)}
                       disabled={loading}
+                      className="cursor-pointer"
                     >
                       <Trash2 className="h-4 w-4" />
                     </Button>
-                  </td>
-                </tr>
+                  </TableCell>
+                </TableRow>
               );
             })}
-          </tbody>
-        </table>
+          </TableBody>
+        </Table>
       </div>
 
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>

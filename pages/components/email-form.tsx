@@ -6,6 +6,11 @@ import { Input } from '@/components/ui/input';
 import { RichTextEditor } from '@/components/rich-text-editor';
 import { DraftDto } from '@/shared/dtos/draft';
 
+interface Attachment {
+  id: string;
+  name: string;
+}
+
 interface EmailFormProps {
   initialData?: Partial<DraftDto>;
   onSave?: (data: Partial<DraftDto>) => Promise<void>;
@@ -27,6 +32,7 @@ export function EmailForm({
     cc: '',
     ...initialData,
   });
+  const [attachments, setAttachments] = useState<Attachment[]>([]);
 
   const handleChange = (
     field: keyof DraftDto,
@@ -62,6 +68,21 @@ export function EmailForm({
     }
   };
 
+  const handleAttachmentUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (files) {
+      const newAttachments = Array.from(files).map((file) => ({
+        id: Math.random().toString(36).substr(2, 9),
+        name: file.name,
+      }));
+      setAttachments([...attachments, ...newAttachments]);
+    }
+  };
+
+  const handleRemoveAttachment = (id: string) => {
+    setAttachments(attachments.filter((attachment) => attachment.id !== id));
+  };
+
   return (
     <div className="space-y-4">
       <Input
@@ -91,17 +112,47 @@ export function EmailForm({
       <RichTextEditor
         initialContent={formData.body || ''}
         onChange={handleBodyChange}
+        attachments={attachments}
+        onRemoveAttachment={handleRemoveAttachment}
       />
       <div className="flex justify-between items-center">
-        <div className="space-x-2">
-          {onSend && <Button onClick={handleSend}>Send</Button>}
+        <div>
           {onSave && (
-            <Button variant="outline" onClick={handleSave}>
+            <Button
+              variant="outline"
+              onClick={handleSave}
+              className="cursor-pointer"
+            >
               Save as Draft
             </Button>
           )}
+        </div>
+        <div className="space-x-2">
+          <input
+            type="file"
+            multiple
+            onChange={handleAttachmentUpload}
+            className="hidden"
+            id="file-upload"
+          />
+          <Button
+            variant="default"
+            onClick={() => document.getElementById('file-upload')?.click()}
+            className="cursor-pointer"
+          >
+            Attach Files
+          </Button>
+          {onSend && (
+            <Button onClick={handleSend} className="cursor-pointer">
+              Send
+            </Button>
+          )}
           {onCancel && (
-            <Button variant="ghost" onClick={onCancel}>
+            <Button
+              variant="ghost"
+              onClick={onCancel}
+              className="cursor-pointer"
+            >
               Cancel
             </Button>
           )}

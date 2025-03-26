@@ -13,6 +13,14 @@ import {
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 
 export default function DraftPage() {
   const { drafts, loading, error, saveDraft, deleteDraft } = useDrafts();
@@ -113,53 +121,77 @@ export default function DraftPage() {
 
   return (
     <>
-      <div className="p-6 space-y-4 max-w-5xl mx-auto">
-        <div className="flex justify-between items-center">
+      <div className="container mx-auto py-10">
+        <div className="flex justify-between items-center mb-8">
           <h1 className="text-2xl font-bold">Drafts</h1>
-          <Button onClick={handleNew}>New Draft</Button>
+          <Button
+            variant="default"
+            onClick={handleNew}
+            className="cursor-pointer"
+          >
+            New Draft
+          </Button>
         </div>
-        <div className="space-y-2">
-          {drafts.map((draft) => (
-            <div
-              key={draft.id}
-              className="flex items-center justify-between p-4 bg-white rounded-lg shadow"
-            >
-              <div className="space-y-1">
-                <h3 className="font-semibold">{draft.subject}</h3>
-                {draft.sender && (
-                  <p className="text-sm text-gray-500">From: {draft.sender}</p>
-                )}
-                {Array.isArray(draft.recipients) &&
-                  draft.recipients.length > 0 && (
-                    <p className="text-sm text-gray-500">
-                      To: {draft.recipients.join(', ')}
-                    </p>
-                  )}
-                {draft.cc && (
-                  <p className="text-sm text-gray-500">CC: {draft.cc}</p>
-                )}
-                <p className="text-sm text-gray-500">
-                  Last edited: {new Date(draft.updatedAt).toLocaleDateString()}
-                </p>
-              </div>
-              <div className="space-x-2">
-                <Button variant="outline" onClick={() => handleEdit(draft)}>
-                  Edit
-                </Button>
-                <Button
-                  variant="destructive"
-                  onClick={() => deleteDraft(draft.id)}
-                >
-                  Delete
-                </Button>
-              </div>
-            </div>
-          ))}
-          {drafts.length === 0 && (
-            <div className="text-center text-gray-500 py-8">
-              <p>No drafts found. Create a new draft to get started.</p>
-            </div>
-          )}
+
+        <div className="rounded-lg border bg-card">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Subject</TableHead>
+                <TableHead>From</TableHead>
+                <TableHead>To</TableHead>
+                <TableHead>CC</TableHead>
+                <TableHead>Last Edited</TableHead>
+                <TableHead>Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {drafts.map((draft) => (
+                <TableRow key={draft.id}>
+                  <TableCell className="font-semibold">
+                    {draft.subject}
+                  </TableCell>
+                  <TableCell>{draft.sender || '-'}</TableCell>
+                  <TableCell>
+                    {Array.isArray(draft.recipients) &&
+                    draft.recipients.length > 0
+                      ? draft.recipients.join(', ')
+                      : '-'}
+                  </TableCell>
+                  <TableCell>{draft.cc || '-'}</TableCell>
+                  <TableCell>
+                    {new Date(draft.updatedAt).toLocaleDateString()}
+                  </TableCell>
+                  <TableCell className="space-x-2">
+                    <Button
+                      variant="outline"
+                      onClick={() => handleEdit(draft)}
+                      className="cursor-pointer"
+                    >
+                      Edit
+                    </Button>
+                    <Button
+                      variant="destructive"
+                      onClick={() => deleteDraft(draft.id)}
+                      className="cursor-pointer"
+                    >
+                      Delete
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))}
+              {drafts.length === 0 && (
+                <TableRow>
+                  <TableCell
+                    colSpan={6}
+                    className="text-center text-muted-foreground"
+                  >
+                    No drafts found. Create a new draft to get started.
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
         </div>
       </div>
 
@@ -242,10 +274,18 @@ export default function DraftPage() {
               />
             </div>
             <div className="flex justify-end space-x-2">
-              <Button variant="outline" onClick={() => setIsOpen(false)}>
+              <Button
+                variant="outline"
+                onClick={() => setIsOpen(false)}
+                className="cursor-pointer"
+              >
                 Cancel
               </Button>
-              <Button onClick={handleSave}>
+              <Button
+                variant="default"
+                onClick={handleSave}
+                className="cursor-pointer"
+              >
                 {selectedDraft ? 'Update' : 'Create'}
               </Button>
             </div>

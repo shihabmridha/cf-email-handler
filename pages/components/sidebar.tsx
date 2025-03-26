@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
-import { Mail, FileText, Route, Users, LogOut } from 'lucide-react';
+import { Mail, FileText, Route, Users, LogOut, Settings } from 'lucide-react';
 import { apiClient } from '@/lib/api-client';
 import { useEffect } from 'react';
 
@@ -64,6 +64,9 @@ export function Sidebar() {
           </NavLink>
           <NavLink href="/providers" icon={<Users className="h-4 w-4" />}>
             Providers
+          </NavLink>
+          <NavLink href="/general" icon={<Settings className="h-4 w-4" />}>
+            General
           </NavLink>
         </div>
       </div>

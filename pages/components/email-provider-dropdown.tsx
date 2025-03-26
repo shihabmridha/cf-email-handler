@@ -41,7 +41,7 @@ export function EmailProviderDropdown({
   if (loading) {
     return (
       <Select disabled>
-        <SelectTrigger className="w-[180px]">
+        <SelectTrigger className="w-[180px] cursor-pointer">
           <SelectValue placeholder="Loading..." />
         </SelectTrigger>
         <SelectContent>
@@ -53,7 +53,7 @@ export function EmailProviderDropdown({
 
   return (
     <Select value={value} onValueChange={onChange}>
-      <SelectTrigger className="w-[180px]">
+      <SelectTrigger className="w-[180px] cursor-pointer">
         <SelectValue placeholder="Select Provider" />
       </SelectTrigger>
       <SelectContent>
