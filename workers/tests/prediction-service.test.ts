@@ -6,9 +6,10 @@ const wranglerConfig = config as WranglerConfig;
 import { PredictionService, VerificationData } from "../src/services/prediction";
 import { GeminiService } from "../src/services/llm/gemini.js";
 import { Configuration } from "../src/config";
-import { EmailType } from "@/enums/email-type";
+import { EmailClass } from "@/enums/email-class";
+import { cleanHtml } from "../src/lib/utils";
 
-describe.skip("Prediction Service", () => {
+describe("Prediction Service", () => {
   test("Should contains OTP code and summary", async () => {
     const env = {
       ...wranglerConfig.vars
@@ -16,7 +17,8 @@ describe.skip("Prediction Service", () => {
     const config = new Configuration(env);
     const llm = new GeminiService(config);
     const service = new PredictionService(llm);
-    const res = await service.extractEmailTypeAndData(`
+
+    const cleanedHtml = await cleanHtml(`
       <html>
         <body style="font-family: Arial, sans-serif;">
           <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
@@ -30,11 +32,13 @@ describe.skip("Prediction Service", () => {
         </body>
       </html>
     `);
+    const res = await service.extractEmailClassAndData(cleanedHtml);
     expect(res).toBeDefined();
     expect(res).toBeInstanceOf(VerificationData);
-    expect(res.class).toContain(EmailType.OTP);
+    expect(res.class).toContain(EmailClass.OTP);
     expect(res.otp).toContain("123456");
     expect(res.summary).toBeString();
+    expect(res.summary).toContain("123456");
   });
 
   test("Should extract verification link and summary", async () => {
@@ -44,7 +48,8 @@ describe.skip("Prediction Service", () => {
     const config = new Configuration(env);
     const llm = new GeminiService(config);
     const service = new PredictionService(llm);
-    const res = await service.extractEmailTypeAndData(`
+
+    const cleanedHtml = await cleanHtml(`
       <html>
         <body style="font-family: Arial, sans-serif;">
           <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
@@ -63,9 +68,10 @@ describe.skip("Prediction Service", () => {
         </body>
       </html>
     `);
+    const res = await service.extractEmailClassAndData(cleanedHtml);
     expect(res).toBeDefined();
     expect(res).toBeInstanceOf(VerificationData);
-    expect(res.class).toContain(EmailType.OTP);
+    expect(res.class).toContain(EmailClass.OTP);
     expect(res.otp).toContain("https://example.com/verify?token=abc123");
     expect(res.summary).toBeString();
   });
@@ -77,7 +83,8 @@ describe.skip("Prediction Service", () => {
     const config = new Configuration(env);
     const llm = new GeminiService(config);
     const service = new PredictionService(llm);
-    const res = await service.extractEmailTypeAndData(`
+
+    const cleanedHtml = await cleanHtml(`
       <html>
         <body style="font-family: Arial, sans-serif;">
           <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
@@ -102,9 +109,10 @@ describe.skip("Prediction Service", () => {
         </body>
       </html>
     `);
+    const res = await service.extractEmailClassAndData(cleanedHtml);
     expect(res).toBeDefined();
     expect(res).toBeInstanceOf(VerificationData);
-    expect(res.class).toContain(EmailType.PROMOTIONAL);
+    expect(res.class).toContain(EmailClass.PROMOTIONAL);
     expect(res.summary).toBeString();
   });
 
@@ -115,7 +123,8 @@ describe.skip("Prediction Service", () => {
     const config = new Configuration(env);
     const llm = new GeminiService(config);
     const service = new PredictionService(llm);
-    const res = await service.extractEmailTypeAndData(`
+
+    const cleanedHtml = await cleanHtml(`
       <html>
         <body style="font-family: Arial, sans-serif;">
           <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
@@ -160,9 +169,38 @@ describe.skip("Prediction Service", () => {
         </body>
       </html>
     `);
+    const res = await service.extractEmailClassAndData(cleanedHtml);
     expect(res).toBeDefined();
     expect(res).toBeInstanceOf(VerificationData);
-    expect(res.class).toContain(EmailType.INVOICE);
+    expect(res.class).toContain(EmailClass.INVOICE);
+    expect(res.otp).toBeOneOf(["", "EMPTY"]);
+    expect(res.summary).toBeString();
+    expect(res.summary).toContain("$229.97");
+  });
+
+  test("Should identify unknown email type", async () => {
+    const env = {
+      ...wranglerConfig.vars
+    };
+    const config = new Configuration(env);
+    const llm = new GeminiService(config);
+    const service = new PredictionService(llm);
+
+    const cleanedHtml = await cleanHtml(`
+      <html>
+        <body style="font-family: Arial, sans-serif;">
+          <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
+            <h1 style="color: #333;">Welcome to Our Service</h1>
+            <p>Thank you for signing up with us. We're excited to have you on board!</p>
+          </div>
+        </body>
+      </html>
+    `);
+    const res = await service.extractEmailClassAndData(cleanedHtml);
+    expect(res).toBeDefined();
+    expect(res).toBeInstanceOf(VerificationData);
+    expect(res.class).toContain(EmailClass.UNKNOWN);
+    expect(res.otp).toBeOneOf(["", "EMPTY"]);
     expect(res.summary).toBeString();
   });
 });

@@ -1,4 +1,4 @@
-import { EmailType } from "@/enums/email-type";
+import { EmailType } from "@/enums/email-class";
 import { EmailRouteEntity } from "../entities/email-route";
 import { IDatabase } from "../interfaces/database";
 import { BaseRepository } from "./base";

@@ -2,7 +2,7 @@ import { expect, test, describe } from "bun:test";
 import { cleanHtml } from "../src/lib/utils";
 
 describe("Utils", () => {
-  test.only("clean html", async () => {
+  test("clean html", async () => {
     const html = `
       <html>
         <head>

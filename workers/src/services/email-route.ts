@@ -1,6 +1,6 @@
 import { HTTPException } from 'hono/http-exception';
 import { EmailRouteDto } from '@/dtos/email-route';
-import { EmailType } from '@/enums/email-type';
+import { EmailClass } from '@/enums/email-class';
 import { Mapper } from '../lib/mapper';
 import { EmailRouteEntity } from '../entities/email-route';
 import { Configuration } from '../config';
@@ -29,7 +29,7 @@ export class EmailRouteService {
       throw new HTTPException(400, { message: 'Email and Destination is required' });
     }
 
-    if (!dto.type || dto.type === EmailType.UNKNOWN) {
+    if (!dto.type || dto.type === EmailClass.UNKNOWN) {
       throw new HTTPException(400, { message: 'Type is required' });
     }
 
@@ -48,7 +48,7 @@ export class EmailRouteService {
       throw new HTTPException(400, { message: 'Email and Destination is required' });
     }
 
-    if (dto.type === EmailType.UNKNOWN) {
+    if (dto.type === EmailClass.UNKNOWN) {
       throw new HTTPException(400, { message: 'Type is required' });
     }
 
@@ -60,9 +60,10 @@ export class EmailRouteService {
     await this._emailRouteRepository.delete(id);
   }
 
-  async getDestination(email: string, type: EmailType): Promise<string> {
+  async getDestination(email: string, type: EmailClass): Promise<string> {
     const routeEntity = await this._emailRouteRepository.getByEmailAndType(email, type);
     if (!routeEntity) {
+      console.log('No route entity found, using default email :', this._config.emailForwardTo);
       return this._config.emailForwardTo;
     }
 

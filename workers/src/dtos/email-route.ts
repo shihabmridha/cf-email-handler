@@ -1,4 +1,4 @@
-import { EmailType } from "../enums/email-type";
+import { EmailType } from "../enums/email-class";
 import { BaseDto } from "./base";
 
 export class EmailRouteDto extends BaseDto {

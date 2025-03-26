@@ -1,5 +1,5 @@
 ﻿import { IBaseRepository } from './base';
-import { EmailType } from '@/enums/email-type';
+import { EmailType } from '@/enums/email-class';
 import { EmailRouteEntity } from '../../entities/email-route';
 
 export interface IEmailRouteRepository<T> extends IBaseRepository<T> {

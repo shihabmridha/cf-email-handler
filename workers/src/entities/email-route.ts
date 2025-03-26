@@ -1,6 +1,6 @@
 import { Expose, Transform } from "class-transformer";
 import { BaseEntity } from "./base";
-import { EmailType } from "@/enums/email-type";
+import { EmailType } from "@/enums/email-class";
 
 export class EmailRouteEntity extends BaseEntity {
   @Expose()

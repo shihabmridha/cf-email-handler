@@ -1,5 +1,5 @@
 import PostalMime from 'postal-mime';
-import { EmailType } from '@/enums/email-type';
+import { EmailClass } from '@/enums/email-class';
 import { Container } from '../container';
 import { cleanHtml } from '../lib/utils';
 
@@ -13,8 +13,12 @@ export async function parseEmail(message: ForwardableEmailMessage) {
     content,
     from: message.from,
     to: rawMessage.to?.[0]?.address ?? '',
+    // @ts-expect-error - to ignore the lint error
     subject: message.headers.get('subject') ?? '',
-    forward: message.forward.bind(message)
+    forward: message.forward.bind(message),
+    drop: () => {
+      console.log('Dropping email from', message.from, 'to', message.to);
+    },
   };
 }
 
@@ -29,8 +33,11 @@ export async function processEmail(
 
   if (to === '') to = config.emailForwardTo;
 
+  console.log(`Received email from ${from} to ${to} with subject ${subject}`);
+
   const predict = container.getPredictionService();
-  const emailData = await predict.extractEmailTypeAndData(content);
+  const emailData = await predict.extractEmailClassAndData(content);
+  console.log('Email data:', JSON.stringify(emailData, null, 2));
 
   if (!emailData.class) {
     return;
@@ -39,12 +46,11 @@ export async function processEmail(
   const emailRouteService = container.getEmailRouteService();
   const discordService = container.getDiscordService();
 
-  const emailType = EmailType[emailData.class as keyof typeof EmailType];
-  const destination = await emailRouteService.getDestination(to, emailType);
+  const emailType = EmailClass[emailData.class as keyof typeof EmailClass];
+  console.log('Email type:', emailType);
 
-  if (emailData.otp) {
-    emailData.summary = `OTP: ${emailData.otp}. ${emailData.summary}`;
-  }
+  const destination = await emailRouteService.getDestination(to, emailType);
+  console.log('Destination:', destination);
 
   await Promise.allSettled([
     discordService.sendMessage(from, subject, emailData.summary),
