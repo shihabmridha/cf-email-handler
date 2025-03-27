@@ -7,10 +7,10 @@ import { Configuration } from '../config';
 import { IEmailRouteRepository } from '../interfaces/repositories/email-route';
 
 export class EmailRouteService {
-  private readonly _emailRouteRepository: IEmailRouteRepository<EmailRouteEntity>;
+  private readonly _emailRouteRepository: IEmailRouteRepository;
   private readonly _config: Configuration;
 
-  constructor(config: Configuration, emailRouteRepository: IEmailRouteRepository<EmailRouteEntity>) {
+  constructor(config: Configuration, emailRouteRepository: IEmailRouteRepository) {
     this._config = config;
     this._emailRouteRepository = emailRouteRepository;
   }
@@ -62,17 +62,17 @@ export class EmailRouteService {
   }
 
   async getDestination(email: string, type: EmailClass): Promise<string | null> {
-    const routeEntity = await this._emailRouteRepository.getByEmailAndType(email, type);
-    if (!routeEntity) {
-      console.log('No route entity found, using default email :', this._config.emailForwardTo);
+    const routes = await this._emailRouteRepository.getByEmail(email);
+    if (!routes?.length) {
+      console.log('No route entity found, using default email:', this._config.emailForwardTo);
       return this._config.emailForwardTo;
     }
 
-    if (routeEntity.drop) {
-      return null;
-    }
+    const matchingRoute = routes.find(r => r.type === type && !r.drop);
+    if (matchingRoute) return matchingRoute.destination;
 
-    return routeEntity.destination;
+    const unknownRoute = routes.find(r => r.type === EmailClass.UNKNOWN && !r.drop);
+    return unknownRoute?.destination || null;
   }
 
   async incrementReceived(email: string): Promise<void> {

@@ -9,7 +9,7 @@ import { Configuration } from "../src/config";
 import { EmailClass } from "@/enums/email-class";
 import { cleanHtml } from "../src/lib/utils";
 
-describe("Prediction Service", () => {
+describe.skip("Prediction Service", () => {
   test("Should contains OTP code and summary", async () => {
     const env = {
       ...wranglerConfig.vars

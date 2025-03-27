@@ -1,10 +1,9 @@
-import { EmailClass } from "@/enums/email-class";
 import { EmailRouteEntity } from "../entities/email-route";
 import { IDatabase } from "../interfaces/database";
 import { BaseRepository } from "./base";
 import { IEmailRouteRepository } from '../interfaces/repositories/email-route';
 
-export class EmailRouteRepository extends BaseRepository<EmailRouteEntity> implements IEmailRouteRepository<EmailRouteEntity> {
+export class EmailRouteRepository extends BaseRepository<EmailRouteEntity> implements IEmailRouteRepository {
   constructor(db: IDatabase) {
     super(db);
   }
@@ -43,17 +42,17 @@ export class EmailRouteRepository extends BaseRepository<EmailRouteEntity> imple
     return response.success;
   }
 
-  async getByEmailAndType(email: string, type: EmailClass): Promise<EmailRouteEntity | null> {
+  async getByEmail(email: string): Promise<EmailRouteEntity[] | null> {
     const result = await this._db
-      .prepare(`SELECT * FROM ${this.tableName} WHERE email = ? AND type = ? AND enabled = 1`)
-      .bind(email, type)
-      .first<EmailRouteEntity>();
+      .prepare(`SELECT * FROM ${this.tableName} WHERE email = ?`)
+      .bind(email)
+      .all<EmailRouteEntity>();
 
     if (!result) {
       return null;
     }
 
-    return result;
+    return result.results;
   }
 
   async incrementReceived(email: string): Promise<void> {

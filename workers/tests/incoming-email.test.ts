@@ -3,7 +3,7 @@ import { parseEmail, processEmail } from '../src/handlers/incoming-email';
 import config from '../wrangler.toml';
 import { WranglerConfig } from "../src/interfaces/wrangler-config.js";
 import { Container } from '../src/container';
-import { EmailType } from '@/enums/email-class';
+import { EmailClass } from '@/enums/email-class';
 import { Configuration } from '../src/config';
 import { DiscordService } from '../src/services/discord';
 const wranglerConfig = config as WranglerConfig;
@@ -56,7 +56,7 @@ describe.skip('Incoming Email', () => {
 
     const mockGetDestination = mock(() => Promise.resolve("forwarded@example.com"));
     const extractEmailTypeAndData = mock(() => Promise.resolve({
-      class: EmailType.INVOICE,
+      class: EmailClass.INVOICE,
       summary: "Email summary"
     }));
 
