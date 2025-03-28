@@ -75,11 +75,11 @@ export class EmailRouteService {
     return unknownRoute?.destination || null;
   }
 
-  async incrementReceived(email: string): Promise<void> {
-    await this._emailRouteRepository.incrementReceived(email);
+  async incrementReceived(email: string, emailClass: EmailClass): Promise<void> {
+    await this._emailRouteRepository.incrementReceived(email, emailClass);
   }
 
-  async incrementSent(email: string): Promise<void> {
-    await this._emailRouteRepository.incrementSent(email);
+  async incrementSent(email: string, emailClass: EmailClass): Promise<void> {
+    await this._emailRouteRepository.incrementSent(email, emailClass);
   }
 }

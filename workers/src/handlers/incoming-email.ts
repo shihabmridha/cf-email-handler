@@ -44,17 +44,17 @@ export async function processEmail(
     return;
   }
 
+  const emailType = EmailClass[emailData.class as keyof typeof EmailClass];
+  console.log('Email type:', emailType);
+
   const emailRouteService = container.getEmailRouteService();
   const discordService = container.getDiscordService();
   const incomingHistoryService = container.getIncomingHistoryService();
 
   const actions = [
     discordService.sendMessage(from, subject, emailData.summary),
-    emailRouteService.incrementReceived(to),
+    emailRouteService.incrementReceived(to, emailType),
   ];
-
-  const emailType = EmailClass[emailData.class as keyof typeof EmailClass];
-  console.log('Email type:', emailType);
 
   const destination = await emailRouteService.getDestination(to, emailType);
   console.log('Destination:', destination);

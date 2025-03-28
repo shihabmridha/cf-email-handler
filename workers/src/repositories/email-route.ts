@@ -2,6 +2,7 @@ import { EmailRouteEntity } from "../entities/email-route";
 import { IDatabase } from "../interfaces/database";
 import { BaseRepository } from "./base";
 import { IEmailRouteRepository } from '../interfaces/repositories/email-route';
+import { EmailClass } from "@/enums/email-class";
 
 export class EmailRouteRepository extends BaseRepository<EmailRouteEntity> implements IEmailRouteRepository {
   constructor(db: IDatabase) {
@@ -55,10 +56,10 @@ export class EmailRouteRepository extends BaseRepository<EmailRouteEntity> imple
     return result.results;
   }
 
-  async incrementReceived(email: string): Promise<void> {
-    const sql = `UPDATE ${this.tableName} SET received = received + 1 WHERE email = ?`;
+  async incrementReceived(email: string, emailClass: EmailClass): Promise<void> {
+    const sql = `UPDATE ${this.tableName} SET received = received + 1 WHERE email = ? AND type = ?`;
     const response = await this._db.prepare(sql)
-      .bind(email)
+      .bind(email, emailClass)
       .run();
 
     if (!response.success) {
@@ -66,10 +67,10 @@ export class EmailRouteRepository extends BaseRepository<EmailRouteEntity> imple
     }
   }
 
-  async incrementSent(email: string): Promise<void> {
-    const sql = `UPDATE ${this.tableName} SET sent = sent + 1 WHERE email = ?`;
+  async incrementSent(email: string, emailClass: EmailClass): Promise<void> {
+    const sql = `UPDATE ${this.tableName} SET sent = sent + 1 WHERE email = ? AND type = ?`;
     const response = await this._db.prepare(sql)
-      .bind(email)
+      .bind(email, emailClass)
       .run();
 
     if (!response.success) {
