@@ -46,6 +46,8 @@ export async function processEmail(
 
   const emailRouteService = container.getEmailRouteService();
   const discordService = container.getDiscordService();
+  const incomingHistoryService = container.getIncomingHistoryService();
+
   const actions = [
     discordService.sendMessage(from, subject, emailData.summary),
     emailRouteService.incrementReceived(to),
@@ -62,6 +64,18 @@ export async function processEmail(
   } else {
     actions.push(drop());
   }
+
+  actions.push(incomingHistoryService.create({
+    id: 0,
+    fromEmail: from,
+    toEmail: to,
+    subject,
+    destination: destination || undefined,
+    emailClass: emailType,
+    summary: emailData.summary,
+    createdAt: new Date(),
+    updatedAt: new Date()
+  }));
 
   await Promise.allSettled(actions);
 }

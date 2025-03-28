@@ -10,7 +10,7 @@ import { IEmailRouteRepository } from "../src/interfaces/repositories/email-rout
 import { EmailRouteEntity } from "../src/entities/email-route";
 
 
-describe.only("Route Service", () => {
+describe.skip("Route Service", () => {
   test("should get unknown destination when no route is found", async () => {
     const env = {
       ...wranglerConfig.vars

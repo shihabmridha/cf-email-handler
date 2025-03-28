@@ -7,6 +7,7 @@ import providerConfigHandler from "./handlers/provider-config";
 import emailHandler from "./handlers/mail";
 import emailRouteHandler from "./handlers/email-route";
 import configHandler from "./handlers/config";
+import incomingHistoryHandler from "./handlers/incoming-history";
 import { Container } from './container';
 import { AppContext } from './interfaces/context';
 
@@ -38,6 +39,7 @@ api.route('/provider-configs', providerConfigHandler);
 api.route('/email', emailHandler);
 api.route('/email-route', emailRouteHandler);
 api.route('/config', configHandler);
+api.route('/incoming-history', incomingHistoryHandler);
 
 app.route('/api', api);
 

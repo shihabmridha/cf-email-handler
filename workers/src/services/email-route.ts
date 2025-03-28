@@ -1,10 +1,10 @@
 import { HTTPException } from 'hono/http-exception';
 import { EmailRouteDto } from '@/dtos/email-route';
 import { EmailClass } from '@/enums/email-class';
-import { Mapper } from '../lib/mapper';
-import { EmailRouteEntity } from '../entities/email-route';
+import { Mapper } from '@/lib/mapper';
+import { EmailRouteEntity } from '@/entities/email-route';
 import { Configuration } from '../config';
-import { IEmailRouteRepository } from '../interfaces/repositories/email-route';
+import { IEmailRouteRepository } from '@/interfaces/repositories/email-route';
 
 export class EmailRouteService {
   private readonly _emailRouteRepository: IEmailRouteRepository;

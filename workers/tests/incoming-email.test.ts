@@ -8,7 +8,7 @@ import { Configuration } from '../src/config';
 import { DiscordService } from '../src/services/discord';
 const wranglerConfig = config as WranglerConfig;
 
-describe.skip('Incoming Email', () => {
+describe('Incoming Email', () => {
   test('should forward email and send discord message', async () => {
     const rawEmailString = [
       "MIME-Version: 1.0",
@@ -55,26 +55,29 @@ describe.skip('Incoming Email', () => {
     };
 
     const mockGetDestination = mock(() => Promise.resolve("forwarded@example.com"));
-    const extractEmailTypeAndData = mock(() => Promise.resolve({
+    const extractEmailClassAndData = mock(() => Promise.resolve({
       class: EmailClass.INVOICE,
       summary: "Email summary"
     }));
 
     const mockContainer = {
       getPredictionService: mock(() => ({
-        extractEmailTypeAndData: extractEmailTypeAndData
+        extractEmailClassAndData: extractEmailClassAndData
       })),
-      getConfig: mock(() => Promise.resolve()),
+      getConfig: mock(() => config),
       getEmailRouteService: mock(() => ({
         getDestination: mockGetDestination
       })),
-      getDiscordService: () => discordService
+      getDiscordService: () => discordService,
+      getIncomingHistoryService: mock(() => ({
+        create: mock(() => Promise.resolve())
+      }))
     } as unknown as Container;
 
     const parsedEmail = await parseEmail(mockMessage);
     await processEmail(parsedEmail, mockContainer);
 
-    expect(extractEmailTypeAndData).toHaveBeenCalled();
+    expect(extractEmailClassAndData).toHaveBeenCalled();
     expect(mockGetDestination).toHaveBeenCalled();
     expect(mockMessage.forward).toHaveBeenCalled();
   });

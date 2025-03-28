@@ -21,6 +21,21 @@
       ],
       "@/enums/*": [
         "./src/enums/*"
+      ],
+      "@/entities/*": [
+        "./src/entities/*"
+      ],
+      "@/interfaces/*": [
+        "./src/interfaces/*"
+      ],
+      "@/repositories/*": [
+        "./src/repositories/*"
+      ],
+      "@/services/*": [
+        "./src/services/*"
+      ],
+      "@/lib/*": [
+        "./src/lib/*"
       ]
     },
   },
