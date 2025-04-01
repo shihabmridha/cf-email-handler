@@ -6,6 +6,8 @@
     "build:pages": "cd pages && bun run build && bun exec \"cp -R out ../workers/dist\"",
     "deploy:worker": "cd workers && bun run deploy",
     "predeploy": "bun exec \"rm -rf workers/dist\"",
-    "deploy": "bun run build:pages && bun run deploy:worker"
+    "deploy": "bun run build:pages && bun run deploy:worker",
+    "lint:be": "cd workers && bun run tsc --noEmit",
+    "lint:fe": "cd pages && bun run tsc --noEmit"
   }
 }

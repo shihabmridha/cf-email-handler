@@ -3,7 +3,7 @@ import { BaseRepository } from './base';
 import { IDatabase } from '../interfaces/database';
 import { IProviderConfigRepository } from '../interfaces/repositories/provider-config';
 
-export class ProviderConfigRepository extends BaseRepository<ProviderConfigEntity> implements IProviderConfigRepository<ProviderConfigEntity> {
+export class ProviderConfigRepository extends BaseRepository<ProviderConfigEntity> implements IProviderConfigRepository {
 
   constructor(db: IDatabase) {
     super(db);

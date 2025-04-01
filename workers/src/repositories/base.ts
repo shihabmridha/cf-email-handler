@@ -1,7 +1,8 @@
+import { BaseEntity } from "@/entities/base";
 import { IDatabase } from "../interfaces/database";
 import { IBaseRepository } from '../interfaces/repositories/base';
 
-export abstract class BaseRepository<T> implements IBaseRepository<T> {
+export abstract class BaseRepository<T extends BaseEntity> implements IBaseRepository<T> {
   protected readonly _db: D1Database;
   protected constructor(db: IDatabase) {
     this._db = db.instance();

@@ -3,7 +3,7 @@ import { BaseRepository } from './base';
 import { IDatabase } from '../interfaces/database';
 import { IUserRepository } from '../interfaces/repositories/user';
 
-export class UserRepository extends BaseRepository<UserEntity> implements IUserRepository<UserEntity> {
+export class UserRepository extends BaseRepository<UserEntity> implements IUserRepository {
   constructor(db: IDatabase) {
     super(db);
   }

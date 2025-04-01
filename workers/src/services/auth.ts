@@ -4,14 +4,13 @@ import { HTTPException } from "hono/http-exception";
 import { hashText } from "../lib/utils";
 import { LoginDto } from "@/dtos/auth";
 import { Configuration } from "../config";
-import { UserEntity } from '../entities/user';
 import { IUserRepository } from '../interfaces/repositories/user';
 
 export class AuthService {
-  private readonly _userRepository: IUserRepository<UserEntity>;
+  private readonly _userRepository: IUserRepository;
   private readonly jwtSecret: string;
 
-  constructor(userRepository: IUserRepository<UserEntity>, config: Configuration) {
+  constructor(userRepository: IUserRepository, config: Configuration) {
     this._userRepository = userRepository;
     this.jwtSecret = config.jwtSecret;
   }

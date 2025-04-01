@@ -4,9 +4,9 @@ import { Mapper } from "../lib/mapper";
 import { IDraftRepository } from '../interfaces/repositories/draft';
 
 export class DraftService {
-  private readonly _draftRepository: IDraftRepository<DraftEntity>;
+  private readonly _draftRepository: IDraftRepository;
 
-  constructor(draftRepository: IDraftRepository<DraftEntity>) {
+  constructor(draftRepository: IDraftRepository) {
     this._draftRepository = draftRepository;
   }
 

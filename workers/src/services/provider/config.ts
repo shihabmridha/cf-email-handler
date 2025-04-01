@@ -6,9 +6,9 @@ import { ProviderConfigEntity } from "../../entities/provider-config";
 import { IProviderConfigRepository } from '../../interfaces/repositories/provider-config';
 
 export class ProviderConfigService {
-  private readonly _providerRepository: IProviderConfigRepository<ProviderConfigEntity>;
+  private readonly _providerRepository: IProviderConfigRepository;
 
-  constructor(providerConfigRepository: IProviderConfigRepository<ProviderConfigEntity>) {
+  constructor(providerConfigRepository: IProviderConfigRepository) {
     this._providerRepository = providerConfigRepository;
   }
 

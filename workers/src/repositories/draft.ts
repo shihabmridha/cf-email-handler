@@ -3,7 +3,7 @@ import { IDatabase } from '../interfaces/database';
 import { BaseRepository } from './base';
 import { IDraftRepository } from '../interfaces/repositories/draft';
 
-export class DraftRepository extends BaseRepository<DraftEntity> implements IDraftRepository<DraftEntity> {
+export class DraftRepository extends BaseRepository<DraftEntity> implements IDraftRepository {
   constructor(db: IDatabase) {
     super(db);
   }

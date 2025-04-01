@@ -3,6 +3,7 @@
   "type": "module",
   "scripts": {
     "setup": "bun ./setup.ts",
+    "predev": "tsc --noEmit",
     "dev": "wrangler dev",
     "login": "wrangler login",
     "deploy": "wrangler deploy --minify --env production",
