@@ -4,6 +4,7 @@ import { EmailRouteDto } from '@/shared/dtos/email-route';
 import { ProviderConfigDto } from '@/shared/dtos/provider';
 import { SendMailDto } from '@/shared/dtos/mail';
 import { ProviderType } from '@/shared/enums/provider';
+import { IncomingHistoryDto } from '@/shared/dtos/incoming-history.dto';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -283,5 +284,14 @@ export const apiClient = {
     if (!response.ok) {
       throw new Error('Failed to send email');
     }
+  },
+
+  async getIncomingHistory(): Promise<{ histories: IncomingHistoryDto[] }> {
+    const response = await fetch(`${API_BASE_URL}/incoming-history`, {
+      headers: {
+        'Authorization': `Bearer ${this.getAuthToken()}`,
+      },
+    });
+    return handleResponse(response);
   },
 };

@@ -46,7 +46,7 @@ export class IncomingHistoryRepository extends BaseRepository<IncomingHistoryEnt
     const limit = 10;
     const offset = (page - 1) * limit;
 
-    const response = await this._db.prepare(`SELECT * FROM ${this.tableName} LIMIT ? OFFSET ? ORDER BY createdAt DESC`)
+    const response = await this._db.prepare(`SELECT * FROM ${this.tableName} ORDER BY createdAt DESC LIMIT ? OFFSET ?`)
       .bind(limit, offset)
       .all<IncomingHistoryEntity>();
 
