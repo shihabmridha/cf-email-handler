@@ -1,10 +1,15 @@
-import { Buffer } from "node:buffer";
-import { createHmac } from "node:crypto";
 import { HTTPException } from "hono/http-exception";
+import { sign } from "hono/jwt";
 import { hashText } from "../lib/utils";
 import { LoginDto } from "@/dtos/auth";
 import { Configuration } from "../config";
 import { IUserRepository } from '../interfaces/repositories/user';
+
+export type JwtPayload = {
+  id: number;
+  email: string;
+  exp: number;
+};
 
 export class AuthService {
   private readonly _userRepository: IUserRepository;
@@ -15,31 +20,14 @@ export class AuthService {
     this.jwtSecret = config.jwtSecret;
   }
 
-  // Replace characters according to base64url specifications
-  private base64Url(input: string) {
-    return input.replace(/=+$/, '').replace(/\+/g, '-').replace(/\//g, '_');
-  }
-
-  private createJwtToken(payload: object) {
+  private async createJwtToken(payload: JwtPayload) {
     if (!payload) {
       throw new Error('Empty payload');
     }
 
-    const exp = Math.floor(Date.now() / 1000) + (60 * 60);
-    const jwtHeader = JSON.stringify({ alg: 'HS256', typ: 'JWT', exp });
-    const jwtPayload = JSON.stringify(payload);
+    const token = await sign(payload, this.jwtSecret);
 
-    const encodedHeaders = this.base64Url(Buffer.from(jwtHeader, 'utf8').toString('base64'));
-    const encodedPayload = this.base64Url(Buffer.from(jwtPayload, 'utf8').toString('base64'));
-
-    const signature = createHmac('sha256', this.jwtSecret)
-      .update(`${encodedHeaders}.${encodedPayload}`)
-      .digest()
-      .toString('base64');
-
-    const encodedSignature = this.base64Url(signature);
-
-    return `${encodedHeaders}.${encodedPayload}.${encodedSignature}`;
+    return token;
   }
 
   async login(dto: LoginDto) {
@@ -54,6 +42,12 @@ export class AuthService {
       throw new HTTPException(401, { message: 'Invalid credential' });
     }
 
-    return this.createJwtToken({ id: user.id, email: user.email });
+    const payload = {
+      id: user.id,
+      email: user.email,
+      exp: Math.floor(Date.now() / 1000) + (60 * 60),
+    };
+
+    return this.createJwtToken(payload);
   }
 }

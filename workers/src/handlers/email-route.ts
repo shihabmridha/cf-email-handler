@@ -22,7 +22,7 @@ app.get('/', async (c) => {
 
 app.post('/', async (c) => {
   const body = await c.req.json<EmailRouteDto>();
-  body.userId = c.get('jwtPayload')?.id as number;
+  body.userId = c.get('jwtPayload')?.id;
 
   const emailRouteService = c.env.container.getEmailRouteService();
   await emailRouteService.create(body);
@@ -33,7 +33,7 @@ app.post('/', async (c) => {
 app.put('/:id', async (c) => {
   const id = c.req.param('id');
   const body = await c.req.json<EmailRouteDto>();
-  body.userId = c.get('jwtPayload')?.id as number;
+  body.userId = c.get('jwtPayload')?.id;
 
   const emailRouteService = c.env.container.getEmailRouteService();
   await emailRouteService.update(parseInt(id), body);

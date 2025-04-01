@@ -1,9 +1,10 @@
 import { Hono } from "hono";
 import { DraftDto } from "@/dtos/draft";
 import { AppContext } from '../interfaces/context';
-import { jwt } from 'hono/jwt';
+import { jwt, JwtVariables } from 'hono/jwt';
+import type { JwtPayload } from '../services/auth';
 
-const app = new Hono<{ Bindings: AppContext }>();
+const app = new Hono<{ Bindings: AppContext, Variables: JwtVariables<JwtPayload> }>();
 
 app.use('*', async (c, next) => {
   const auth = jwt({
@@ -17,12 +18,14 @@ app.get('/', async (c) => {
   const draftService = c.env.container.getDraftService();
   const drafts = await draftService.getAll();
 
-  return c.json({ drafts });
+  const payload = c.get('jwtPayload');
+
+  return c.json({ drafts, payload });
 });
 
 app.post('/', async (c) => {
   const body = await c.req.json<DraftDto>();
-  body.userId = c.get('jwtPayload')?.id as number;
+  body.userId = c.get('jwtPayload')?.id;
 
   const draftService = c.env.container.getDraftService();
   await draftService.create(body);
