@@ -55,7 +55,7 @@ function isLocalStorageAvailable(): boolean {
 
 export const apiClient = {
   async login(data: LoginDto): Promise<LoginResponse> {
-    const response = await fetch(`${API_BASE_URL}/login`, {
+    const response = await fetch(`${API_BASE_URL}/auth/login`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -84,8 +84,25 @@ export const apiClient = {
     }
   },
 
-  isAuthenticated(): boolean {
-    return !!this.getAuthToken();
+  async verifyToken(): Promise<boolean> {
+    try {
+      const response = await fetch(`${API_BASE_URL}/auth/verify`, {
+        headers: {
+          'Authorization': `Bearer ${this.getAuthToken()}`,
+        },
+      });
+      return response.ok;
+    } catch {
+      return false;
+    }
+  },
+
+  async isAuthenticated(): Promise<boolean> {
+    const token = this.getAuthToken();
+    if (!token) {
+      return false;
+    }
+    return this.verifyToken();
   },
 
   // Email Route API calls

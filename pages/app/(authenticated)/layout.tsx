@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { Suspense } from 'react';
 import { Header } from '@/components/header';
@@ -33,12 +33,23 @@ export default function AuthenticatedLayout({
 }) {
   const router = useRouter();
   const pathname = usePathname();
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    if (!apiClient.getAuthToken()) {
-      router.push('/home');
-    }
+    const checkAuth = async () => {
+      const isAuthenticated = await apiClient.isAuthenticated();
+      if (!isAuthenticated) {
+        router.push('/home');
+      }
+      setIsLoading(false);
+    };
+
+    checkAuth();
   }, [router]);
+
+  if (isLoading) {
+    return <ComposeLoading />;
+  }
 
   return (
     <div className="min-h-screen">

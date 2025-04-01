@@ -26,12 +26,15 @@ export default function HomePage() {
   const router = useRouter();
 
   useEffect(() => {
-    // Check if user is already authenticated
-    if (apiClient.isAuthenticated()) {
-      router.push('/compose');
-    } else {
-      setIsLoading(false);
-    }
+    const checkAuth = async () => {
+      const isAuthenticated = await apiClient.isAuthenticated();
+      if (isAuthenticated) {
+        router.push('/compose');
+        setIsLoading(false);
+      }
+    };
+
+    checkAuth();
   }, [router]);
 
   const handleLogin = async () => {

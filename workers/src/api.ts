@@ -33,7 +33,7 @@ api.use('*', async (c, next) => {
   await next();
 });
 
-api.route('/login', authHandler);
+api.route('/auth', authHandler);
 api.route('/drafts', draftHandler);
 api.route('/provider-configs', providerConfigHandler);
 api.route('/email', emailHandler);
