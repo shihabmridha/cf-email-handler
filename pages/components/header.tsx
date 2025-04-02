@@ -12,6 +12,7 @@ import { useEffect, useState } from 'react';
 import { IncomingHistoryDto } from '@/shared/dtos/incoming-history.dto';
 import { apiClient } from '@/lib/api-client';
 import { NotificationDetailModal } from './notification-detail-modal';
+import { formatDateTime } from '../lib/utils/date';
 
 export function Header() {
   const { theme, setTheme } = useTheme();
@@ -82,14 +83,21 @@ export function Header() {
                         className="p-2 hover:bg-accent cursor-pointer border-b last:border-b-0"
                         onClick={() => handleNotificationClick(notification)}
                       >
-                        <div className="text-sm font-medium break-words line-clamp-1">
-                          {notification.subject}
-                        </div>
-                        <div className="text-xs text-muted-foreground break-words line-clamp-1">
-                          From: {notification.fromEmail}
-                        </div>
-                        <div className="text-xs text-muted-foreground break-words line-clamp-1">
-                          To: {notification.toEmail}
+                        <div className="flex justify-between items-start gap-2">
+                          <div className="flex-1 min-w-0">
+                            <div className="text-sm font-medium break-words line-clamp-1">
+                              {notification.subject}
+                            </div>
+                            <div className="text-xs text-muted-foreground break-words line-clamp-1">
+                              From: {notification.fromEmail}
+                            </div>
+                            <div className="text-xs text-muted-foreground break-words line-clamp-1">
+                              To: {notification.toEmail}
+                            </div>
+                          </div>
+                          <div className="text-xs text-muted-foreground whitespace-nowrap">
+                            {formatDateTime(notification.createdAt)}
+                          </div>
                         </div>
                       </div>
                     ))

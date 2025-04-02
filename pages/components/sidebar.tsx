@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { cn } from '@/lib/utils';
+import { cn } from '@/lib/utils/class';
 import { Button } from '@/components/ui/button';
 import { Mail, FileText, Route, Users, LogOut, Settings } from 'lucide-react';
 import { apiClient } from '@/lib/api-client';

@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { LucideIcon } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { cn } from '@/lib/utils/class';
 
 interface NavLinkProps {
   href: string;

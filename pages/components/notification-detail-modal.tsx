@@ -7,7 +7,8 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { IncomingHistoryDto } from '@/shared/dtos/incoming-history.dto';
-import { Mail, User, Send, ArrowRight } from 'lucide-react';
+import { Mail, User, Send, ArrowRight, Clock } from 'lucide-react';
+import { formatDateTime } from '@/lib/utils/date';
 
 interface NotificationDetailModalProps {
   notification: IncomingHistoryDto | null;
@@ -26,9 +27,15 @@ export function NotificationDetailModal({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[600px]">
         <DialogHeader className="pb-4 border-b">
-          <DialogTitle className="text-xl font-semibold break-words">
-            {notification.subject}
-          </DialogTitle>
+          <div className="flex justify-between items-start gap-4">
+            <DialogTitle className="text-xl font-semibold break-words flex-1">
+              {notification.subject}
+            </DialogTitle>
+            <div className="flex items-center gap-2 text-sm text-muted-foreground whitespace-nowrap">
+              <Clock className="h-4 w-4" />
+              {formatDateTime(notification.createdAt)}
+            </div>
+          </div>
         </DialogHeader>
         <div className="space-y-6 py-4">
           <div className="space-y-3">

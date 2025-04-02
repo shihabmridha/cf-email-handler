@@ -30,8 +30,8 @@ export default function HomePage() {
       const isAuthenticated = await apiClient.isAuthenticated();
       if (isAuthenticated) {
         router.push('/compose');
-        setIsLoading(false);
       }
+      setIsLoading(false);
     };
 
     checkAuth();
@@ -69,8 +69,8 @@ export default function HomePage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-100">
-        <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="bg-card p-8 rounded-lg shadow-md w-full max-w-md">
           <Skeleton className="h-8 w-48 mx-auto mb-6" />
           <div className="space-y-4">
             <Skeleton className="h-10 w-full" />
@@ -83,8 +83,8 @@ export default function HomePage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
+    <div className="min-h-screen flex items-center justify-center bg-background">
+      <div className="bg-card p-8 rounded-lg shadow-md w-full max-w-md">
         <h1 className="text-2xl font-bold mb-6 text-center">Email Platform</h1>
 
         {loginState === LoginState.LOGIN && (
@@ -114,7 +114,7 @@ export default function HomePage() {
             </Button>
             <div className="text-center mt-4">
               <button
-                className="text-blue-500 hover:underline"
+                className="text-primary hover:underline"
                 onClick={() => setLoginState(LoginState.FORGOT_PASSWORD)}
               >
                 Forgot Password?
@@ -170,7 +170,9 @@ export default function HomePage() {
           </>
         )}
 
-        {error && <div className="mt-4 text-red-500 text-center">{error}</div>}
+        {error && (
+          <div className="mt-4 text-destructive text-center">{error}</div>
+        )}
       </div>
     </div>
   );
