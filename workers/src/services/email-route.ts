@@ -68,11 +68,17 @@ export class EmailRouteService {
       return this._config.emailForwardTo;
     }
 
-    const matchingRoute = routes.find(r => r.type === type && !r.drop);
-    if (matchingRoute) return matchingRoute.destination;
+    const routeToUse = routes.find(r => r.type === type) || routes.find(r => r.type === EmailClass.UNKNOWN);
+    if (routeToUse?.drop) {
+      return null;
+    }
 
-    const unknownRoute = routes.find(r => r.type === EmailClass.UNKNOWN && !r.drop);
-    return unknownRoute?.destination || null;
+    if (routeToUse?.destination) {
+      return routeToUse.destination;
+    }
+
+    console.log('No matching route found, using default email:', this._config.emailForwardTo);
+    return this._config.emailForwardTo;
   }
 
   async incrementReceived(email: string, emailClass: EmailClass): Promise<void> {
