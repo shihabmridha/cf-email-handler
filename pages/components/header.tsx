@@ -88,10 +88,10 @@ export function Header() {
                             <div className="text-sm font-medium break-words line-clamp-1">
                               {notification.subject}
                             </div>
-                            <div className="text-xs text-muted-foreground break-words line-clamp-1">
+                            <div className="text-xs text-muted-foreground truncate">
                               From: {notification.fromEmail}
                             </div>
-                            <div className="text-xs text-muted-foreground break-words line-clamp-1">
+                            <div className="text-xs text-muted-foreground truncate">
                               To: {notification.toEmail}
                             </div>
                           </div>
