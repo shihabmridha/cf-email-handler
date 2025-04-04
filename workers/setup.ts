@@ -4,7 +4,7 @@ import yocto from "yocto-spinner";
 import { generateSalt, hashText } from './src/lib/utils';
 import { WranglerConfig } from './src/interfaces/wrangler-config';
 import config from './wrangler.toml';
-import { Settings } from './src/enums/settings';
+import { SettingKeys } from './src/enums/settings-key';
 
 const wranglerConfig = config as WranglerConfig;
 const { values: { remote = false } } = parseArgs({
@@ -55,13 +55,13 @@ if (existingUser?.length) {
 }
 
 spinner.start(' Creating default settings');
-const settingQuery = await $`wrangler d1 execute ${dbName} --command "SELECT * FROM settings WHERE key = '${Settings.EMAIL_FORWARD_TO}'" --json ${remoteFlag}`.text();
+const settingQuery = await $`wrangler d1 execute ${dbName} --command "SELECT * FROM settings WHERE key = '${SettingKeys.EMAIL_FORWARD_TO}'" --json ${remoteFlag}`.text();
 const existingSetting = JSON.parse(settingQuery)[0]?.results;
 
 if (existingSetting?.length) {
   spinner.start().info(' Default settings already exists.');
 } else {
-  await $`wrangler d1 execute ${dbName} --command "INSERT INTO settings (key, value, description) VALUES ('${Settings.EMAIL_FORWARD_TO}', '${EMAIL_FORWARD_TO}', 'Default email address to forward emails to')" ${remoteFlag}`.text();
+  await $`wrangler d1 execute ${dbName} --command "INSERT INTO settings (key, value, description) VALUES ('${SettingKeys.EMAIL_FORWARD_TO}', '${EMAIL_FORWARD_TO}', 'Default email address to forward emails to')" ${remoteFlag}`.text();
   spinner.success(' Default settings created.');
 }
 

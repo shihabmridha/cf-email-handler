@@ -43,17 +43,13 @@ export class EmailRouteRepository extends BaseRepository<EmailRouteEntity> imple
     return response.success;
   }
 
-  async getByEmail(email: string): Promise<EmailRouteEntity[] | null> {
+  async getByEmail(email: string): Promise<EmailRouteEntity[]> {
     const result = await this._db
       .prepare(`SELECT * FROM ${this.tableName} WHERE email = ?`)
       .bind(email)
       .all<EmailRouteEntity>();
 
-    if (!result) {
-      return null;
-    }
-
-    return result.results;
+    return result?.results ?? [];
   }
 
   async incrementReceived(email: string, emailClass: EmailClass): Promise<void> {

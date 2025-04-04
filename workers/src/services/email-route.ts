@@ -3,16 +3,16 @@ import { EmailRouteDto } from '@/dtos/email-route';
 import { EmailClass } from '@/enums/email-class';
 import { Mapper } from '@/lib/mapper';
 import { EmailRouteEntity } from '@/entities/email-route';
-import { Configuration } from '../config';
 import { IEmailRouteRepository } from '@/interfaces/repositories/email-route';
-
+import { SettingKeys } from '@/enums/settings-key';
+import { ISettingsRepository } from '@/interfaces/repositories/settings';
 export class EmailRouteService {
   private readonly _emailRouteRepository: IEmailRouteRepository;
-  private readonly _config: Configuration;
+  private readonly _settingsRepository: ISettingsRepository;
 
-  constructor(config: Configuration, emailRouteRepository: IEmailRouteRepository) {
-    this._config = config;
+  constructor(emailRouteRepository: IEmailRouteRepository, settingsRepository: ISettingsRepository) {
     this._emailRouteRepository = emailRouteRepository;
+    this._settingsRepository = settingsRepository;
   }
 
   async getAll(): Promise<EmailRouteDto[]> {
@@ -63,10 +63,6 @@ export class EmailRouteService {
 
   async getDestination(email: string, type: EmailClass): Promise<string | null> {
     const routes = await this._emailRouteRepository.getByEmail(email);
-    if (!routes?.length) {
-      console.log('No route entity found, using default email:', this._config.emailForwardTo);
-      return this._config.emailForwardTo;
-    }
 
     const routeToUse = routes.find(r => r.type === type) || routes.find(r => r.type === EmailClass.UNKNOWN);
     if (routeToUse?.drop) {
@@ -77,8 +73,10 @@ export class EmailRouteService {
       return routeToUse.destination;
     }
 
-    console.log('No matching route found, using default email:', this._config.emailForwardTo);
-    return this._config.emailForwardTo;
+    const forwardTo = await this._settingsRepository.getByKey(SettingKeys.EMAIL_FORWARD_TO);
+
+    console.log('No matching route found, using default email:', forwardTo?.value);
+    return forwardTo?.value ?? null;
   }
 
   async incrementReceived(email: string, emailClass: EmailClass): Promise<void> {

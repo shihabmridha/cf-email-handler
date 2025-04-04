@@ -1,4 +1,4 @@
-﻿import { ProviderType } from "../enums/provider";
+﻿import { ProviderType } from "../enums/provider-type";
 import { BaseDto } from "./base";
 import { TransportSmtpConfig, TransportApiConfig } from "./transport";
 

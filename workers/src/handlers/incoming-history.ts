@@ -1,7 +1,7 @@
 import { Hono } from 'hono';
 import { AppContext } from '../interfaces/context';
 import { jwt } from 'hono/jwt';
-import { IncomingHistoryDto } from '@/dtos/incoming-history.dto';
+import { IncomingHistoryDto } from '@/dtos/incoming-history';
 
 const app = new Hono<{ Bindings: AppContext }>();
 

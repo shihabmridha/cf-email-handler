@@ -14,10 +14,10 @@ import { ProviderConfigRepository } from './repositories/provider-config';
 import { EmailRouteService } from './services/email-route';
 import { MailService } from './services/mail';
 import { ProviderConfigService } from './services/provider/config';
-import { IncomingHistoryRepository } from './repositories/incoming-history.repository';
-import { IncomingHistoryService } from './services/incoming-history.service';
-import { SettingsRepository } from './repositories/settings.repository';
-import { SettingsService } from './services/settings.service';
+import { IncomingHistoryRepository } from './repositories/incoming-history';
+import { IncomingHistoryService } from './services/incoming-history';
+import { SettingsRepository } from './repositories/settings';
+import { SettingsService } from './services/settings';
 
 export class Container {
   private readonly _config: Configuration;
@@ -90,7 +90,7 @@ export class Container {
   }
 
   getEmailRouteService(): EmailRouteService {
-    return this.get('emailRouteService', () => new EmailRouteService(this._config, this.getEmailRouteRepository()));
+    return this.get('emailRouteService', () => new EmailRouteService(this.getEmailRouteRepository(), this.getSettingsRepository()));
   }
 
   getIncomingHistoryRepository(): IncomingHistoryRepository {

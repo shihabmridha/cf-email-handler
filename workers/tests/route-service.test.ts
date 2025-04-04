@@ -1,21 +1,12 @@
 import { expect, test, describe, mock } from "bun:test";
-import config from '../wrangler.toml';
-import { WranglerConfig } from "../src/interfaces/wrangler-config.js";
-const wranglerConfig = config as WranglerConfig;
-
 import { EmailClass } from "@/enums/email-class";
 import { EmailRouteService } from "../src/services/email-route";
-import { Configuration } from "../src/config";
 import { IEmailRouteRepository } from "../src/interfaces/repositories/email-route";
 import { EmailRouteEntity } from "../src/entities/email-route";
-
+import { ISettingsRepository } from "@/interfaces/repositories/settings";
 
 describe.skip("Route Service", () => {
   test("should get unknown destination when no route is found", async () => {
-    const env = {
-      ...wranglerConfig.vars
-    };
-    const config = new Configuration(env);
 
     const mockEmailRouteRepository = {
       getByEmail: mock(() => {
@@ -51,7 +42,13 @@ describe.skip("Route Service", () => {
       }),
     } as unknown as IEmailRouteRepository;
 
-    const routeService = new EmailRouteService(config, mockEmailRouteRepository);
+    const mockSettingsRepository = {
+      getByKey: mock(() => {
+        return Promise.resolve({ value: "forward@test.com" });
+      }),
+    } as unknown as ISettingsRepository;
+
+    const routeService = new EmailRouteService(mockEmailRouteRepository, mockSettingsRepository);
     const destination = await routeService.getDestination("test@test.com", EmailClass.OTP);
     expect(destination).toBe("unknown@test.com");
   });

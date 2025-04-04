@@ -1,5 +1,5 @@
-import { IncomingHistoryDto } from '@/dtos/incoming-history.dto';
-import { IncomingHistoryRepository } from '@/repositories/incoming-history.repository';
+import { IncomingHistoryDto } from '@/dtos/incoming-history';
+import { IncomingHistoryRepository } from '@/repositories/incoming-history';
 import { IncomingHistoryEntity } from '@/entities/incoming-history';
 import { Mapper } from '@/lib/mapper';
 

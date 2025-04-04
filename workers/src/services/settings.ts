@@ -1,6 +1,6 @@
-import { SettingsDto } from '@/dtos/settings.dto';
-import { SettingsRepository } from '@/repositories/settings.repository';
-import { SettingsEntity } from '@/entities/settings.entity';
+import { SettingsDto } from '@/dtos/settings';
+import { SettingsRepository } from '@/repositories/settings';
+import { SettingsEntity } from '@/entities/settings';
 import { Mapper } from '@/lib/mapper';
 
 export class SettingsService {

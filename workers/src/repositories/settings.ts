@@ -1,7 +1,7 @@
 import { IDatabase } from "../interfaces/database";
 import { BaseRepository } from "./base";
 import { ISettingsRepository } from "../interfaces/repositories/settings";
-import { SettingsEntity } from "../entities/settings.entity";
+import { SettingsEntity } from "../entities/settings";
 
 export class SettingsRepository extends BaseRepository<SettingsEntity> implements ISettingsRepository {
   constructor(db: IDatabase) {

@@ -1,6 +1,6 @@
 import { Expose, Transform } from "class-transformer";
 import { BaseEntity } from "./base";
-import { ProviderType } from "@/enums/provider";
+import { ProviderType } from "@/enums/provider-type";
 
 export class ProviderConfigEntity extends BaseEntity {
   @Expose()

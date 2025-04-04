@@ -1,12 +1,12 @@
-import { LoginDto } from '@/shared/dtos/auth';
+import { LoginDto, LoginResponse } from '@/shared/dtos/auth';
 import { DraftDto } from '@/shared/dtos/draft';
 import { EmailRouteDto } from '@/shared/dtos/email-route';
 import { ProviderConfigDto } from '@/shared/dtos/provider';
 import { SendMailDto } from '@/shared/dtos/mail';
 import { ProviderType } from '@/shared/enums/provider';
 import { IncomingHistoryDto } from '@/shared/dtos/incoming-history.dto';
-import { Settings } from '@/shared/enums/settings';
 import { SettingsDto } from '@/shared/dtos/settings.dto';
+import { SettingKeys } from '@/shared/enums/settings-key';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -17,278 +17,215 @@ export class ApiError extends Error {
   }
 }
 
-async function handleResponse(response: Response) {
-  if (!response.ok) {
-    const error = await response.json().catch(() => ({ error: 'An error occurred' }));
-    throw new ApiError(response.status, error.error || 'An error occurred');
+class ApiClient {
+  private baseUrl = API_BASE_URL;
+  private authToken: string | null = null;
+
+  constructor() {
+    // Initialize authToken from localStorage if available
+    if (this.isLocalStorageAvailable()) {
+      this.authToken = localStorage.getItem('auth_token');
+    }
   }
 
-  const contentType = response.headers.get('Content-Type');
-  if (!contentType?.includes('application/json')) {
-    return null;
+  private isLocalStorageAvailable(): boolean {
+    if (typeof window === 'undefined') {
+      return false;
+    }
+    try {
+      localStorage.setItem('test', 'test');
+      localStorage.removeItem('test');
+      return true;
+    } catch {
+      return false;
+    }
   }
 
-  try {
-    return await response.json();
-  } catch {
-    return null;
-  }
-}
+  private async request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
+    const headers = new Headers(options.headers);
+    if (this.authToken) {
+      headers.set('Authorization', `Bearer ${this.authToken}`);
+    }
+    headers.set('Content-Type', 'application/json');
 
-export interface LoginResponse {
-  token: string;
-}
+    const response = await fetch(`${this.baseUrl}${endpoint}`, {
+      ...options,
+      headers,
+    });
 
-function isLocalStorageAvailable(): boolean {
-  if (typeof window === 'undefined') {
-    return false;
-  }
-  try {
-    localStorage.setItem('test', 'test');
-    localStorage.removeItem('test');
-    return true;
-  } catch {
-    return false;
-  }
-}
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({ error: 'An error occurred' }));
+      throw new ApiError(response.status, error.error || 'An error occurred');
+    }
 
-export const apiClient = {
+    const contentType = response.headers.get('Content-Type');
+    if (!contentType?.includes('application/json')) {
+      return null as T;
+    }
+
+    try {
+      return await response.json();
+    } catch {
+      return null as T;
+    }
+  }
+
+  // Auth
   async login(data: LoginDto): Promise<LoginResponse> {
-    const response = await fetch(`${API_BASE_URL}/auth/login`, {
+    return this.request<LoginResponse>('/auth/login', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
       body: JSON.stringify(data),
     });
-    return handleResponse(response);
-  },
+  }
 
   setAuthToken(token: string) {
-    if (isLocalStorageAvailable()) {
+    this.authToken = token;
+    if (this.isLocalStorageAvailable()) {
       localStorage.setItem('auth_token', token);
     }
-  },
+  }
 
   getAuthToken(): string | null {
-    if (!isLocalStorageAvailable()) {
-      return null;
-    }
-    return localStorage.getItem('auth_token');
-  },
+    return this.authToken;
+  }
 
   removeAuthToken() {
-    if (isLocalStorageAvailable()) {
+    this.authToken = null;
+    if (this.isLocalStorageAvailable()) {
       localStorage.removeItem('auth_token');
     }
-  },
+  }
 
   async verifyToken(): Promise<boolean> {
     try {
-      const response = await fetch(`${API_BASE_URL}/auth/verify`, {
+      const response = await fetch(`${this.baseUrl}/auth/verify`, {
         headers: {
-          'Authorization': `Bearer ${this.getAuthToken()}`,
+          'Authorization': `Bearer ${this.authToken}`,
         },
       });
       return response.ok;
     } catch {
       return false;
     }
-  },
+  }
 
   async isAuthenticated(): Promise<boolean> {
-    const token = this.getAuthToken();
-    if (!token) {
+    if (!this.authToken) {
       return false;
     }
     return this.verifyToken();
-  },
+  }
+
+  async getSetting(key: SettingKeys): Promise<SettingsDto | null> {
+    return this.request<SettingsDto>(`/settings/${key}`);
+  }
+
+  async updateSetting(data: SettingsDto): Promise<void> {
+    return this.request<void>('/settings', {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
+  }
 
   // Email Route API calls
   async getEmailRoutes(): Promise<{ routes: EmailRouteDto[] }> {
-    const response = await fetch(`${API_BASE_URL}/email-route`, {
-      headers: {
-        'Authorization': `Bearer ${this.getAuthToken()}`,
-      },
-    });
-    return handleResponse(response);
-  },
+    return this.request<{ routes: EmailRouteDto[] }>('/email-route');
+  }
 
   async createEmailRoute(data: Omit<EmailRouteDto, 'id' | 'received' | 'sent' | 'createdAt' | 'updatedAt'>): Promise<void> {
-    const response = await fetch(`${API_BASE_URL}/email-route`, {
+    return this.request<void>('/email-route', {
       method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${this.getAuthToken()}`,
-        'Content-Type': 'application/json',
-      },
       body: JSON.stringify(data),
     });
-    return handleResponse(response);
-  },
+  }
 
   async updateEmailRoute(id: number, data: Omit<EmailRouteDto, 'id' | 'received' | 'sent' | 'createdAt' | 'updatedAt'>): Promise<void> {
-    const response = await fetch(`${API_BASE_URL}/email-route/${id}`, {
+    return this.request<void>(`/email-route/${id}`, {
       method: 'PUT',
-      headers: {
-        'Authorization': `Bearer ${this.getAuthToken()}`,
-        'Content-Type': 'application/json',
-      },
       body: JSON.stringify(data),
     });
-    return handleResponse(response);
-  },
+  }
 
   async deleteEmailRoute(id: number): Promise<void> {
-    const response = await fetch(`${API_BASE_URL}/email-route/${id}`, {
+    return this.request<void>(`/email-route/${id}`, {
       method: 'DELETE',
-      headers: {
-        'Authorization': `Bearer ${this.getAuthToken()}`,
-      },
     });
-    return handleResponse(response);
-  },
-
-  async getForwardToEmail(): Promise<SettingsDto> {
-    const response = await fetch(`${API_BASE_URL}/settings/${Settings.EMAIL_FORWARD_TO}`, {
-      headers: {
-        'Authorization': `Bearer ${this.getAuthToken()}`,
-      },
-    });
-    return handleResponse(response);
-  },
+  }
 
   // Provider API calls
   async getProviders(): Promise<ProviderConfigDto[]> {
-    const response = await fetch(`${API_BASE_URL}/provider-configs`, {
-      headers: {
-        'Authorization': `Bearer ${this.getAuthToken()}`,
-      },
-    });
-    const data = await handleResponse(response);
-    return data.providers;
-  },
+    const response = await this.request<{ providers: ProviderConfigDto[] }>('/provider-configs');
+    return response.providers;
+  }
 
   async getProviderByType(type: ProviderType): Promise<ProviderConfigDto | null> {
-    const response = await fetch(`${API_BASE_URL}/provider-configs/type/${type}`, {
-      headers: {
-        'Authorization': `Bearer ${this.getAuthToken()}`,
-      },
-    });
-    const data = await handleResponse(response);
-    if (!data || !data.provider) {
-      return null;
-    }
-    return data.provider;
-  },
+    const response = await this.request<{ provider: ProviderConfigDto | null }>(`/provider-configs/type/${type}`);
+    return response.provider;
+  }
 
   async createProvider(data: Omit<ProviderConfigDto, 'id' | 'createdAt' | 'updatedAt'>): Promise<void> {
-    const response = await fetch(`${API_BASE_URL}/provider-configs`, {
+    return this.request<void>('/provider-configs', {
       method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${this.getAuthToken()}`,
-        'Content-Type': 'application/json',
-      },
       body: JSON.stringify(data),
     });
-    return handleResponse(response);
-  },
+  }
 
   async updateProvider(id: number, data: Partial<ProviderConfigDto>): Promise<void> {
-    const response = await fetch(`${API_BASE_URL}/provider-configs/${id}`, {
+    return this.request<void>(`/provider-configs/${id}`, {
       method: 'PUT',
-      headers: {
-        'Authorization': `Bearer ${this.getAuthToken()}`,
-        'Content-Type': 'application/json',
-      },
       body: JSON.stringify(data),
     });
-    return handleResponse(response);
-  },
+  }
 
   async deleteProvider(id: number): Promise<void> {
-    const response = await fetch(`${API_BASE_URL}/provider-configs/${id}`, {
+    return this.request<void>(`/provider-configs/${id}`, {
       method: 'DELETE',
-      headers: {
-        'Authorization': `Bearer ${this.getAuthToken()}`,
-      },
     });
-    return handleResponse(response);
-  },
+  }
 
   async testProvider(id: number): Promise<void> {
-    const response = await fetch(`${API_BASE_URL}/provider-configs/${id}/test`, {
+    return this.request<void>(`/provider-configs/${id}/test`, {
       method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${this.getAuthToken()}`,
-      },
     });
-    return handleResponse(response);
-  },
+  }
 
+  // Draft API calls
   async getDrafts(): Promise<{ drafts: DraftDto[] }> {
-    const response = await fetch(`${API_BASE_URL}/drafts`, {
-      headers: {
-        'Authorization': `Bearer ${this.getAuthToken()}`,
-      },
-    });
-    return handleResponse(response);
-  },
+    return this.request<{ drafts: DraftDto[] }>('/drafts');
+  }
 
   async createDraft(data: Omit<DraftDto, 'id' | 'createdAt' | 'updatedAt'>): Promise<void> {
-    const response = await fetch(`${API_BASE_URL}/drafts`, {
+    return this.request<void>('/drafts', {
       method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${this.getAuthToken()}`,
-        'Content-Type': 'application/json',
-      },
       body: JSON.stringify(data),
     });
-    return handleResponse(response);
-  },
+  }
 
   async updateDraft(id: number, data: Omit<DraftDto, 'id' | 'createdAt' | 'updatedAt'>): Promise<void> {
-    const response = await fetch(`${API_BASE_URL}/drafts/${id}`, {
+    return this.request<void>(`/drafts/${id}`, {
       method: 'PUT',
-      headers: {
-        'Authorization': `Bearer ${this.getAuthToken()}`,
-        'Content-Type': 'application/json',
-      },
       body: JSON.stringify(data),
     });
-    return handleResponse(response);
-  },
+  }
 
   async deleteDraft(id: number): Promise<void> {
-    const response = await fetch(`${API_BASE_URL}/drafts/${id}`, {
+    return this.request<void>(`/drafts/${id}`, {
       method: 'DELETE',
-      headers: {
-        'Authorization': `Bearer ${this.getAuthToken()}`,
-      },
     });
-    return handleResponse(response);
-  },
+  }
 
+  // Mail API calls
   async sendEmail(data: SendMailDto): Promise<void> {
-    const response = await fetch(`${API_BASE_URL}/email/send`, {
+    return this.request<void>('/email/send', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${this.getAuthToken()}`,
-      },
       body: JSON.stringify(data),
     });
+  }
 
-    if (!response.ok) {
-      throw new Error('Failed to send email');
-    }
-  },
-
+  // History API calls
   async getIncomingHistory(): Promise<{ histories: IncomingHistoryDto[] }> {
-    const response = await fetch(`${API_BASE_URL}/incoming-history`, {
-      headers: {
-        'Authorization': `Bearer ${this.getAuthToken()}`,
-      },
-    });
-    return handleResponse(response);
-  },
-};
+    return this.request<{ histories: IncomingHistoryDto[] }>('/incoming-history');
+  }
+}
+
+export const apiClient = new ApiClient();

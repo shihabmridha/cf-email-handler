@@ -1,6 +1,6 @@
 ﻿import { HTTPException } from "hono/http-exception";
 import { ProviderConfigDto } from "@/dtos/provider";
-import { ProviderType } from "@/enums/provider";
+import { ProviderType } from "@/enums/provider-type";
 import { Mapper } from "../../lib/mapper";
 import { ProviderConfigEntity } from "../../entities/provider-config";
 import { IProviderConfigRepository } from '../../interfaces/repositories/provider-config';

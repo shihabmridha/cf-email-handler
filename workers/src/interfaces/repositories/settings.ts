@@ -1,4 +1,4 @@
-import { SettingsEntity } from '../../entities/settings.entity';
+import { SettingsEntity } from '../../entities/settings';
 import { IBaseRepository } from './base';
 
 export interface ISettingsRepository extends IBaseRepository<SettingsEntity> {

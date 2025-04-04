@@ -1,4 +1,4 @@
-import { ProviderType } from "@/enums/provider";
+import { ProviderType } from "@/enums/provider-type";
 import { TransportApiConfig, TransportSmtpConfig } from "@/dtos/transport";
 import { Provider } from "../../interfaces/provider";
 import { ResendProviderService } from "./resend";
