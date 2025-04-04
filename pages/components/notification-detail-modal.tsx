@@ -6,7 +6,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { IncomingHistoryDto } from '@/shared/dtos/incoming-history.dto';
+import { IncomingHistoryDto } from '@/shared/dtos/incoming-history';
 import { Mail, User, Send, ArrowRight, Clock } from 'lucide-react';
 
 interface NotificationDetailModalProps {

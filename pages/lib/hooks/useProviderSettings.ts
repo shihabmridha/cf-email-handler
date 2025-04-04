@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { ProviderConfigDto } from '@/shared/dtos/provider';
-import { ProviderType } from '@/shared/enums/provider';
+import { ProviderType } from '@/shared/enums/provider-type';
 import { apiClient } from '@/lib/api-client';
 
 export function useProviderSettings(type: ProviderType) {

@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { ProviderSettingsForm } from '@/components/provider-settings-form';
-import { ProviderType } from '@/shared/enums/provider';
+import { ProviderType } from '@/shared/enums/provider-type';
 import { ProviderConfigDto } from '@/shared/dtos/provider';
 import { useProviders } from '@/lib/hooks/useProviders';
 import {

@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useSettings } from '@/lib/hooks/useSettings';
 import { SettingKeys } from '@/shared/enums/settings-key';
-import { SettingsDto } from '@/shared/dtos/settings.dto';
+import { SettingsDto } from '@/shared/dtos/settings';
 import { useState } from 'react';
 import { useToast } from '@/components/ui/use-toast';
 

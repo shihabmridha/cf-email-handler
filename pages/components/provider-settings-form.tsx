@@ -8,7 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ProviderConfigDto } from '@/shared/dtos/provider';
 import { ApiError } from '@/lib/api-client';
 import { toast } from '@/components/ui/use-toast';
-import { ProviderType } from '@/shared/enums/provider';
+import { ProviderType } from '@/shared/enums/provider-type';
 import { Eye, EyeOff } from 'lucide-react';
 
 interface ProviderSettingsFormProps {

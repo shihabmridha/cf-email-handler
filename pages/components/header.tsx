@@ -9,7 +9,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { useEffect, useState } from 'react';
-import { IncomingHistoryDto } from '@/shared/dtos/incoming-history.dto';
+import { IncomingHistoryDto } from '@/shared/dtos/incoming-history';
 import { apiClient } from '@/lib/api-client';
 import { NotificationDetailModal } from './notification-detail-modal';
 import { formatDateTime } from '../lib/utils/date';

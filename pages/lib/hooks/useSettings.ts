@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { SettingKeys } from '@/shared/enums/settings-key';
-import { SettingsDto } from '@/shared/dtos/settings.dto';
+import { SettingsDto } from '@/shared/dtos/settings';
 import { apiClient } from '@/lib/api-client';
 
 export function useSettings() {

@@ -3,9 +3,9 @@ import { DraftDto } from '@/shared/dtos/draft';
 import { EmailRouteDto } from '@/shared/dtos/email-route';
 import { ProviderConfigDto } from '@/shared/dtos/provider';
 import { SendMailDto } from '@/shared/dtos/mail';
-import { ProviderType } from '@/shared/enums/provider';
-import { IncomingHistoryDto } from '@/shared/dtos/incoming-history.dto';
-import { SettingsDto } from '@/shared/dtos/settings.dto';
+import { ProviderType } from '@/shared/enums/provider-type';
+import { IncomingHistoryDto } from '@/shared/dtos/incoming-history';
+import { SettingsDto } from '@/shared/dtos/settings';
 import { SettingKeys } from '@/shared/enums/settings-key';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
