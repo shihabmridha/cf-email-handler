@@ -204,6 +204,24 @@ components:
             html:
               type: string
 
+    SettingsDto:
+      type: object
+      required:
+        - key
+        - value
+      properties:
+        key:
+          type: string
+        value:
+          type: string
+        description:
+          type: string
+
+    SettingsResponseDto:
+      allOf:
+        - $ref: '#/components/schemas/BaseDto'
+        - $ref: '#/components/schemas/SettingsDto'
+
 paths:
   /login:
     post:
@@ -527,4 +545,109 @@ paths:
       responses:
         '201':
           description: Incoming email history record created
+          content: {}
+
+  /settings:
+    get:
+      summary: Get all settings
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: List of settings
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  settings:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/SettingsResponseDto'
+
+    post:
+      summary: Create a new setting
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SettingsDto'
+      responses:
+        '201':
+          description: Setting created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  setting:
+                    $ref: '#/components/schemas/SettingsResponseDto'
+
+  /settings/{key}:
+    get:
+      summary: Get a setting by key
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: key
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Setting details
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  setting:
+                    $ref: '#/components/schemas/SettingsResponseDto'
+        '404':
+          description: Setting not found
+
+    put:
+      summary: Update a setting
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: key
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SettingsDto'
+      responses:
+        '200':
+          description: Setting updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  setting:
+                    $ref: '#/components/schemas/SettingsResponseDto'
+
+    delete:
+      summary: Delete a setting
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: key
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Setting deleted
           content: {}

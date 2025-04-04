@@ -1,0 +1,18 @@
+-- Migration number: 0006 	 2024-04-03T19:14:32.776Z
+CREATE TABLE IF NOT EXISTS settings
+(
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    key TEXT NOT NULL UNIQUE,
+    value TEXT NOT NULL,
+    description TEXT,
+    createdAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updatedAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_settings_key ON settings(key);
+
+CREATE TRIGGER IF NOT EXISTS update_settings_updated_at
+    AFTER UPDATE ON settings
+BEGIN
+    UPDATE settings SET updatedAt = CURRENT_TIMESTAMP WHERE id = NEW.id;
+END;

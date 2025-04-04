@@ -6,7 +6,7 @@ import draftHandler from "./handlers/draft";
 import providerConfigHandler from "./handlers/provider-config";
 import emailHandler from "./handlers/mail";
 import emailRouteHandler from "./handlers/email-route";
-import configHandler from "./handlers/config";
+import settingsHandler from "./handlers/settings";
 import incomingHistoryHandler from "./handlers/incoming-history";
 import { Container } from './container';
 import { AppContext } from './interfaces/context';
@@ -38,9 +38,8 @@ api.route('/drafts', draftHandler);
 api.route('/provider-configs', providerConfigHandler);
 api.route('/email', emailHandler);
 api.route('/email-route', emailRouteHandler);
-api.route('/config', configHandler);
 api.route('/incoming-history', incomingHistoryHandler);
-
+api.route('/settings', settingsHandler);
 app.route('/api', api);
 
 export default app;

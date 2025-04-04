@@ -16,6 +16,8 @@ import { MailService } from './services/mail';
 import { ProviderConfigService } from './services/provider/config';
 import { IncomingHistoryRepository } from './repositories/incoming-history.repository';
 import { IncomingHistoryService } from './services/incoming-history.service';
+import { SettingsRepository } from './repositories/settings.repository';
+import { SettingsService } from './services/settings.service';
 
 export class Container {
   private readonly _config: Configuration;
@@ -53,6 +55,10 @@ export class Container {
 
   getProviderConfigRepository(): ProviderConfigRepository {
     return this.get('providerConfigRepository', () => new ProviderConfigRepository(this._db));
+  }
+
+  getSettingsRepository(): SettingsRepository {
+    return this.get('settingsRepository', () => new SettingsRepository(this._db));
   }
 
   getMailService(): MailService {
@@ -93,5 +99,9 @@ export class Container {
 
   getIncomingHistoryService(): IncomingHistoryService {
     return this.get('incomingHistoryService', () => new IncomingHistoryService(this.getIncomingHistoryRepository()));
+  }
+
+  getSettingsService(): SettingsService {
+    return this.get('settingsService', () => new SettingsService(this.getSettingsRepository()));
   }
 }
