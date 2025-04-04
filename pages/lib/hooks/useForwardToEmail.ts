@@ -13,7 +13,8 @@ export function useForwardToEmail() {
       setIsLoading(true);
       setError(null);
       const data = await apiClient.getForwardToEmail();
-      setEmail(data.email);
+      console.log(data);
+      setEmail(data.value);
     } catch (err) {
       if (err instanceof ApiError) {
         setError(err.message);

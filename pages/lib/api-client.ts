@@ -5,6 +5,8 @@ import { ProviderConfigDto } from '@/shared/dtos/provider';
 import { SendMailDto } from '@/shared/dtos/mail';
 import { ProviderType } from '@/shared/enums/provider';
 import { IncomingHistoryDto } from '@/shared/dtos/incoming-history.dto';
+import { Settings } from '@/shared/enums/settings';
+import { SettingsDto } from '@/shared/dtos/settings.dto';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -35,10 +37,6 @@ async function handleResponse(response: Response) {
 
 export interface LoginResponse {
   token: string;
-}
-
-export interface ForwardToEmailResponse {
-  email: string;
 }
 
 function isLocalStorageAvailable(): boolean {
@@ -150,8 +148,8 @@ export const apiClient = {
     return handleResponse(response);
   },
 
-  async getForwardToEmail(): Promise<ForwardToEmailResponse> {
-    const response = await fetch(`${API_BASE_URL}/config/forward-to`, {
+  async getForwardToEmail(): Promise<SettingsDto> {
+    const response = await fetch(`${API_BASE_URL}/settings/${Settings.EMAIL_FORWARD_TO}`, {
       headers: {
         'Authorization': `Bearer ${this.getAuthToken()}`,
       },
@@ -227,7 +225,6 @@ export const apiClient = {
     return handleResponse(response);
   },
 
-  // Draft API calls
   async getDrafts(): Promise<{ drafts: DraftDto[] }> {
     const response = await fetch(`${API_BASE_URL}/drafts`, {
       headers: {
