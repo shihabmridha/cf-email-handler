@@ -2,5 +2,6 @@ export enum EmailClass {
   UNKNOWN = 'UNKNOWN',
   OTP = 'OTP',
   INVOICE = 'INVOICE',
+  TRANSACTIONAL = 'TRANSACTIONAL',
   PROMOTIONAL = 'PROMOTIONAL',
 }

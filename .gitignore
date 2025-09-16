@@ -31,6 +31,15 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
+# vercel
+.vercel
+.next
+pages/out
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
+
 # misc
 .DS_Store
 wrangler.toml

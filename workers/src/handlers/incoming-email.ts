@@ -13,7 +13,6 @@ export async function parseEmail(message: ForwardableEmailMessage) {
     content,
     from: message.from,
     to: rawMessage.to?.[0]?.address ?? '',
-    // @ts-expect-error - to ignore the lint error
     subject: message.headers.get('subject') ?? '',
     forward: message.forward.bind(message),
     drop: () => {

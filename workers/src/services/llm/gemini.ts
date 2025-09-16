@@ -12,17 +12,13 @@ interface GeminiResponse {
 }
 
 export class GeminiService implements LlmService {
-  private readonly url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent';
+  private readonly url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent';
   private readonly key: string;
   private readonly maxRetries = 3;
   private readonly delayInMs = 500;
 
   constructor(config: Configuration) {
     this.key = config.geminiKey;
-  }
-
-  private async delay(ms: number): Promise<void> {
-    return new Promise(resolve => setTimeout(resolve, ms));
   }
 
   async ask(prompt: string): Promise<string> {
@@ -46,7 +42,7 @@ export class GeminiService implements LlmService {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
 
-        const data = await response.json<GeminiResponse>();
+        const data = await response.json() as GeminiResponse;
         return data.candidates[0].content.parts[0].text;
       } catch (error) {
         lastError = error instanceof Error ? error : new Error(String(error));
@@ -54,7 +50,7 @@ export class GeminiService implements LlmService {
 
         if (attempt < this.maxRetries) {
           console.log(`Retrying in ${this.delayInMs}ms...`);
-          await this.delay(this.delayInMs);
+          await new Promise(resolve => setTimeout(resolve, this.delayInMs));
         }
       }
     }

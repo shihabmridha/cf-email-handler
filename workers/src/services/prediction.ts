@@ -52,18 +52,34 @@ export class PredictionService {
 
   async extractEmailClassAndData(emailContent: string): Promise<VerificationData> {
     const prompt = `
-      Analyze the following email content and extract key information:
-      1. Create a one-sentence summary of the email's purpose.
-      2. If the email contains an OTP or verification code, extract ONLY the numeric or alphanumeric code and set it to OTP property and set class to OTP and summary must include the OTP.
-      3. If the email contains a verification or login link, extract ONLY the complete URL and set it to OTP property and set class to OTP and summary must include the URL.
-      4. If the email is invoice or payment slip set class to "INVOICE" and summary must include the amount.
-      5. If the email is promotional/marketing set class to "PROMOTIONAL".
+      ### Your role
+      You are an expert in email classification and data extraction. You can read raw content of an email.
+      You can understand the context of the email. You can classify the email confidently because you are an expert.
 
-      Format your response exactly as follows, with NO additional text:
-      {"class": "OTP/INVOICE/PROMOTIONAL/UNKNOWN", "otp": "CODE_HERE_OR_EMPTY/URL_HERE_OR_EMPTY", "summary": "BRIEF_SUMMARY_HERE"}
+      ### Instructions
+      You need to analyze the email content provided below and extract key information. You always return the response in following JSON format:
+      {"class": "EMAIL_CLASS", "otp": "CODE_OR_URL", "summary": "BRIEF_SUMMARY_HERE"}
 
-      Email content:
+      Important: the response must only contain valid JSON string, nothing else.
+
+      JSON property definition:
+      - class: the type of the email (see all the email classes below)
+      - otp: the OTP or verification code or login link
+      - summary: a couple of sentences summary of the email's purpose
+
+      All the email classes:
+      - UNKNOWN: the email is not classified
+      - OTP: the email contains an OTP or verification code (OTP code, Verification code, Login link, Verify link, etc)
+      - INVOICE: the email is an invoice or payment slip (example: purchase slip, shoping invoice, etc)
+      - TRANSACTIONAL: the email is a transactional email (example: bank payment, bank transfer, etc)
+      - PROMOTIONAL: the email is a promotional email (example: marketing email, newsletter, offer, etc)
+
+      ### Email content
       ${emailContent}\n
+
+      ### Your task
+      Your task is to analyze the email content, classify it, extract the OTP/Verification information if present, create short summary and
+      response in the expected JSON format. Make sure to validate your response. You must not ask any question. You must response with a valid JSON.
     `;
 
     let lastError: Error | null = null;
