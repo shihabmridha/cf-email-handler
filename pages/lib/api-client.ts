@@ -8,8 +8,6 @@ import { IncomingHistoryDto } from '@/shared/dtos/incoming-history';
 import { SettingsDto } from '@/shared/dtos/settings';
 import { SettingKeys } from '@/shared/enums/settings-key';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
-
 export class ApiError extends Error {
   constructor(public status: number, message: string) {
     super(message);
@@ -18,7 +16,7 @@ export class ApiError extends Error {
 }
 
 class ApiClient {
-  private baseUrl = API_BASE_URL;
+  private baseUrl = process.env.NEXT_PUBLIC_API_URL;
   private authToken: string | null = null;
 
   constructor() {
@@ -223,8 +221,9 @@ class ApiClient {
   }
 
   // History API calls
-  async getIncomingHistory(): Promise<{ histories: IncomingHistoryDto[] }> {
-    return this.request<{ histories: IncomingHistoryDto[] }>('/incoming-history');
+  async getIncomingHistory(page?: number): Promise<{ histories: IncomingHistoryDto[] }> {
+    const url = page ? `/incoming-history?page=${page}` : '/incoming-history';
+    return this.request<{ histories: IncomingHistoryDto[] }>(url);
   }
 }
 

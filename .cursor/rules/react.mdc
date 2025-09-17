@@ -1,11 +1,7 @@
 ---
-description: 
-globs: 
-alwaysApply: true
----
----
 description: React best practices and patterns for modern web applications
-globs: **/*.tsx, **/*.jsx, pages/components/**/*
+globs: pages/**/*.tsx,pages/**/*.ts
+alwaysApply: false
 ---
 
 # React Best Practices
@@ -64,4 +60,4 @@ globs: **/*.tsx, **/*.jsx, pages/components/**/*
 - Implement proper directory structure
 - Keep styles close to components
 - Use proper imports/exports
-- Document complex component logic 
+- Document complex component logic

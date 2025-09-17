@@ -1,6 +1,6 @@
 ---
-description: 
-globs: 
+description: Clean code guideline
+globs:
 alwaysApply: true
 ---
 # Clean Code Guidelines

@@ -10,6 +10,7 @@ import { SettingKeys } from '@/shared/enums/settings-key';
 import { SettingsDto } from '@/shared/dtos/settings';
 import { useState } from 'react';
 import { useToast } from '@/components/ui/use-toast';
+import { PageHeader } from '@/components/page-header';
 
 export default function GeneralSettingsPage() {
   const {
@@ -60,47 +61,48 @@ export default function GeneralSettingsPage() {
   };
 
   return (
-    <div className="container mx-auto py-10">
-      <div className="max-w-3xl mx-auto space-y-6">
-        <h1 className="text-2xl font-bold">General Settings</h1>
+    <div className="py-6 space-y-6">
+      <PageHeader
+        title="General Settings"
+        description="Set defaults like forwarding address and signature"
+      />
 
-        <div className="space-y-2">
-          <Label htmlFor="forwardTo">Forward To Email</Label>
-          {isLoading ? (
-            <Skeleton className="h-10 w-full" />
-          ) : error ? (
-            <div className="text-sm text-red-500">{error}</div>
-          ) : (
-            <Input
-              id="forwardTo"
-              value={forwardTo}
-              onChange={(e) => setForwardTo(e.target.value)}
-              placeholder="Enter email address to forward emails to"
-            />
-          )}
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="signature">Signature</Label>
-          {isLoading ? (
-            <Skeleton className="h-[100px] w-full" />
-          ) : error ? (
-            <div className="text-sm text-red-500">{error}</div>
-          ) : (
-            <Textarea
-              id="signature"
-              value={signature}
-              onChange={(e) => setSignature(e.target.value)}
-              placeholder="Enter your email signature"
-              className="min-h-[100px]"
-            />
-          )}
-        </div>
-
-        <Button onClick={handleSave} disabled={isLoading || isSaving}>
-          {isSaving ? 'Saving...' : 'Save General Settings'}
-        </Button>
+      <div className="space-y-2">
+        <Label htmlFor="forwardTo">Forward To Email</Label>
+        {isLoading ? (
+          <Skeleton className="h-10 w-full" />
+        ) : error ? (
+          <div className="text-sm text-red-500">{error}</div>
+        ) : (
+          <Input
+            id="forwardTo"
+            value={forwardTo}
+            onChange={(e) => setForwardTo(e.target.value)}
+            placeholder="Enter email address to forward emails to"
+          />
+        )}
       </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="signature">Signature</Label>
+        {isLoading ? (
+          <Skeleton className="h-[100px] w-full" />
+        ) : error ? (
+          <div className="text-sm text-red-500">{error}</div>
+        ) : (
+          <Textarea
+            id="signature"
+            value={signature}
+            onChange={(e) => setSignature(e.target.value)}
+            placeholder="Enter your email signature"
+            className="min-h-[100px]"
+          />
+        )}
+      </div>
+
+      <Button onClick={handleSave} disabled={isLoading || isSaving}>
+        {isSaving ? 'Saving...' : 'Save General Settings'}
+      </Button>
     </div>
   );
 }

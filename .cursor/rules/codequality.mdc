@@ -1,11 +1,11 @@
 ---
-description: 
-globs: 
+description: Code quality guideline
+globs:
 alwaysApply: true
 ---
 ---
 description: Code Quality Guidelines
-globs: 
+globs:
 ---
 # Code Quality Guidelines
 

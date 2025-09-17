@@ -10,6 +10,7 @@ import ComposeLoading from './compose/loading';
 import DraftLoading from './draft/loading';
 import RoutesLoading from './routes/loading';
 import ProvidersLoading from './providers/loading';
+import NotificationsLoading from './notifications/loading';
 
 function getLoadingComponent(pathname: string) {
   switch (pathname) {
@@ -21,6 +22,8 @@ function getLoadingComponent(pathname: string) {
       return <RoutesLoading />;
     case '/providers':
       return <ProvidersLoading />;
+    case '/notifications':
+      return <NotificationsLoading />;
     default:
       return <ComposeLoading />;
   }
@@ -56,7 +59,7 @@ export default function AuthenticatedLayout({
       <Header />
       <div className="flex h-[calc(100vh-3.5rem)]">
         <Sidebar />
-        <main className="flex-1 overflow-y-auto bg-muted/10">
+        <main className="flex-1 overflow-y-auto bg-muted/10 px-6">
           <Suspense fallback={getLoadingComponent(pathname)}>
             {children}
           </Suspense>

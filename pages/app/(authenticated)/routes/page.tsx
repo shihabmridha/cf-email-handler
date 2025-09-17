@@ -30,6 +30,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import { PageHeader } from '@/components/page-header';
 
 export default function RoutesPage() {
   const {
@@ -106,18 +107,21 @@ export default function RoutesPage() {
   };
 
   return (
-    <div className="container mx-auto py-10">
-      <div className="flex justify-between items-center mb-8">
-        <h1 className="text-2xl font-bold">Email Routes</h1>
-        <Button
-          variant="default"
-          onClick={() => setIsOpen(true)}
-          disabled={loading}
-          className="cursor-pointer"
-        >
-          Add Route
-        </Button>
-      </div>
+    <div className="py-6 space-y-6">
+      <PageHeader
+        title="Email Routes"
+        description="Create and manage email routing rules"
+        actions={
+          <Button
+            variant="default"
+            onClick={() => setIsOpen(true)}
+            disabled={loading}
+            className="cursor-pointer"
+          >
+            Add Route
+          </Button>
+        }
+      />
 
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
         <DialogContent>
@@ -165,6 +169,7 @@ export default function RoutesPage() {
                   <SelectItem value={EmailClass.UNKNOWN}>Unknown</SelectItem>
                   <SelectItem value={EmailClass.OTP}>OTP</SelectItem>
                   <SelectItem value={EmailClass.INVOICE}>Invoice</SelectItem>
+                  <SelectItem value={EmailClass.TRANSACTIONAL}>Transactional</SelectItem>
                   <SelectItem value={EmailClass.PROMOTIONAL}>
                     Promotional
                   </SelectItem>
@@ -204,159 +209,198 @@ export default function RoutesPage() {
         </DialogContent>
       </Dialog>
 
-      <div className="rounded-lg border bg-card">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Email</TableHead>
-              <TableHead>Destination</TableHead>
-              <TableHead>Type</TableHead>
-              <TableHead>Enabled</TableHead>
-              <TableHead>Drop</TableHead>
-              <TableHead>Received</TableHead>
-              <TableHead>Sent</TableHead>
-              <TableHead>Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {routes.map((route) => (
-              <TableRow key={route.id}>
-                <TableCell>
-                  {route.isEditing ? (
-                    <Input
-                      type="email"
-                      value={route.email}
-                      onChange={(e) =>
-                        updateRouteLocal(route.id, { email: e.target.value })
-                      }
-                      disabled={loading}
-                    />
-                  ) : (
-                    route.email
-                  )}
-                </TableCell>
-                <TableCell>
-                  {route.isEditing ? (
-                    <Input
-                      type="text"
-                      value={route.destination}
-                      onChange={(e) =>
-                        updateRouteLocal(route.id, {
-                          destination: e.target.value,
-                        })
-                      }
-                      disabled={loading}
-                    />
-                  ) : (
-                    route.destination
-                  )}
-                </TableCell>
-                <TableCell>
-                  {route.isEditing ? (
-                    <Select
-                      value={route.type}
-                      onValueChange={(value: EmailClass) =>
-                        updateRouteLocal(route.id, { type: value })
-                      }
-                      disabled={loading}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select type" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value={EmailClass.UNKNOWN}>
-                          Unknown
-                        </SelectItem>
-                        <SelectItem value={EmailClass.OTP}>OTP</SelectItem>
-                        <SelectItem value={EmailClass.INVOICE}>
-                          Invoice
-                        </SelectItem>
-                        <SelectItem value={EmailClass.PROMOTIONAL}>
-                          Promotional
-                        </SelectItem>
-                      </SelectContent>
-                    </Select>
-                  ) : (
-                    route.type
-                  )}
-                </TableCell>
-                <TableCell>
-                  <Switch
-                    checked={route.enabled}
-                    onCheckedChange={async (checked: boolean) => {
-                      if (route.isEditing) {
-                        updateRouteLocal(route.id, { enabled: checked });
-                      } else {
-                        await handleSaveRoute(
-                          route,
-                          { enabled: checked },
-                          false,
-                        );
-                      }
-                    }}
-                    disabled={loading}
-                  />
-                </TableCell>
-                <TableCell>
-                  <Switch
-                    checked={route.drop}
-                    onCheckedChange={async (checked: boolean) => {
-                      if (route.isEditing) {
-                        updateRouteLocal(route.id, { drop: checked });
-                      } else {
-                        await handleSaveRoute(route, { drop: checked }, false);
-                      }
-                    }}
-                    disabled={loading}
-                  />
-                </TableCell>
-                <TableCell>{route.received}</TableCell>
-                <TableCell>{route.sent}</TableCell>
-                <TableCell className="space-x-2">
-                  {route.isEditing ? (
-                    <>
-                      <Button
-                        variant="default"
-                        onClick={() => handleSaveRoute(route)}
-                        disabled={loading}
-                        className="cursor-pointer"
-                      >
-                        Save
-                      </Button>
-                      <Button
-                        variant="outline"
-                        onClick={() => setRouteEditing(route.id, false)}
-                        disabled={loading}
-                        className="cursor-pointer"
-                      >
-                        Cancel
-                      </Button>
-                    </>
-                  ) : (
-                    <>
-                      <Button
-                        variant="outline"
-                        onClick={() => setRouteEditing(route.id, true)}
-                        disabled={loading}
-                        className="cursor-pointer"
-                      >
-                        Edit
-                      </Button>
-                      <Button
-                        variant="destructive"
-                        onClick={() => handleDeleteRoute(route.id)}
-                        disabled={loading}
-                        className="cursor-pointer"
-                      >
-                        Delete
-                      </Button>
-                    </>
-                  )}
-                </TableCell>
+      <div className="rounded-xl border border-border/50 bg-card/50 backdrop-blur-sm shadow-lg overflow-hidden">
+        <div className="max-h-[70vh] overflow-auto">
+          <Table>
+            <TableHeader className="sticky top-0 bg-muted/30 backdrop-blur-md z-10">
+              <TableRow>
+                <TableHead>Email</TableHead>
+                <TableHead>Destination</TableHead>
+                <TableHead>Type</TableHead>
+                <TableHead>Enabled</TableHead>
+                <TableHead>Drop</TableHead>
+                <TableHead>Received</TableHead>
+                <TableHead>Sent</TableHead>
+                <TableHead>Actions</TableHead>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+            </TableHeader>
+            <TableBody>
+              {routes.map((route) => (
+                <TableRow key={route.id}>
+                  <TableCell className="font-semibold text-foreground">
+                    {route.isEditing ? (
+                      <Input
+                        type="email"
+                        value={route.email}
+                        onChange={(e) =>
+                          updateRouteLocal(route.id, { email: e.target.value })
+                        }
+                        disabled={loading}
+                        className="h-8"
+                      />
+                    ) : (
+                      <div className="flex items-center space-x-2">
+                        <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                        <span>{route.email}</span>
+                      </div>
+                    )}
+                  </TableCell>
+                  <TableCell className="text-muted-foreground">
+                    {route.isEditing ? (
+                      <Input
+                        type="text"
+                        value={route.destination}
+                        onChange={(e) =>
+                          updateRouteLocal(route.id, {
+                            destination: e.target.value,
+                          })
+                        }
+                        disabled={loading}
+                        className="h-8"
+                      />
+                    ) : (
+                      route.destination
+                    )}
+                  </TableCell>
+                  <TableCell>
+                    {route.isEditing ? (
+                      <Select
+                        value={route.type}
+                        onValueChange={(value: EmailClass) =>
+                          updateRouteLocal(route.id, { type: value })
+                        }
+                        disabled={loading}
+                      >
+                        <SelectTrigger className="h-8">
+                          <SelectValue placeholder="Select type" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value={EmailClass.UNKNOWN}>
+                            Unknown
+                          </SelectItem>
+                          <SelectItem value={EmailClass.OTP}>OTP</SelectItem>
+                          <SelectItem value={EmailClass.INVOICE}>
+                            Invoice
+                          </SelectItem>
+                          <SelectItem value={EmailClass.PROMOTIONAL}>
+                            Promotional
+                          </SelectItem>
+                        </SelectContent>
+                      </Select>
+                    ) : (
+                      <span className="inline-flex items-center px-2 py-1 text-xs font-medium bg-muted rounded-full">
+                        {route.type}
+                      </span>
+                    )}
+                  </TableCell>
+                  <TableCell>
+                    <Switch
+                      checked={route.enabled}
+                      onCheckedChange={async (checked: boolean) => {
+                        if (route.isEditing) {
+                          updateRouteLocal(route.id, { enabled: checked });
+                        } else {
+                          await handleSaveRoute(
+                            route,
+                            { enabled: checked },
+                            false,
+                          );
+                        }
+                      }}
+                      disabled={loading}
+                    />
+                  </TableCell>
+                  <TableCell>
+                    <Switch
+                      checked={route.drop}
+                      onCheckedChange={async (checked: boolean) => {
+                        if (route.isEditing) {
+                          updateRouteLocal(route.id, { drop: checked });
+                        } else {
+                          await handleSaveRoute(route, { drop: checked }, false);
+                        }
+                      }}
+                      disabled={loading}
+                    />
+                  </TableCell>
+                  <TableCell className="text-muted-foreground">
+                    <span className="text-xs">{route.received}</span>
+                  </TableCell>
+                  <TableCell className="text-muted-foreground">
+                    <span className="text-xs">{route.sent}</span>
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex items-center space-x-2">
+                      {route.isEditing ? (
+                        <>
+                          <Button
+                            variant="default"
+                            size="sm"
+                            onClick={() => handleSaveRoute(route)}
+                            disabled={loading}
+                            className="cursor-pointer"
+                          >
+                            Save
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setRouteEditing(route.id, false)}
+                            disabled={loading}
+                            className="cursor-pointer"
+                          >
+                            Cancel
+                          </Button>
+                        </>
+                      ) : (
+                        <>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setRouteEditing(route.id, true)}
+                            disabled={loading}
+                            className="cursor-pointer opacity-60 group-hover:opacity-100 transition-opacity"
+                          >
+                            Edit
+                          </Button>
+                          <Button
+                            variant="destructive"
+                            size="sm"
+                            onClick={() => handleDeleteRoute(route.id)}
+                            disabled={loading}
+                            className="cursor-pointer opacity-60 group-hover:opacity-100 transition-opacity"
+                          >
+                            Delete
+                          </Button>
+                        </>
+                      )}
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))}
+              {routes.length === 0 && (
+                <TableRow>
+                  <TableCell
+                    colSpan={8}
+                    className="text-center py-12"
+                  >
+                    <div className="flex flex-col items-center space-y-3">
+                      <div className="w-12 h-12 bg-muted/30 rounded-full flex items-center justify-center">
+                        <svg className="w-6 h-6 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 8l7.89 7.89a2 2 0 002.83 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                        </svg>
+                      </div>
+                      <div className="text-center">
+                        <h3 className="text-sm font-medium text-foreground">No email routes found</h3>
+                        <p className="text-xs text-muted-foreground mt-1">Add your first route to start managing email forwarding</p>
+                      </div>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        </div>
       </div>
     </div>
   );

@@ -8,6 +8,7 @@ import { DraftDto } from '@/shared/dtos/draft';
 import { SendMailDto } from '@/shared/dtos/mail';
 import { apiClient } from '@/lib/api-client';
 import { useState } from 'react';
+import { PageHeader } from '@/components/page-header';
 
 export default function ComposePage() {
   const { saveDraft } = useDrafts();
@@ -77,15 +78,20 @@ export default function ComposePage() {
   };
 
   return (
-    <div className="p-6 space-y-4 max-w-3xl mx-auto">
-      <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold">Compose Email</h1>
-        <EmailProviderDropdown
-          value={selectedProvider}
-          onChange={setSelectedProvider}
-        />
+    <div className="py-6 space-y-6">
+      <PageHeader
+        title="Compose Email"
+        description="Write a new email and send using a selected provider"
+        actions={
+          <EmailProviderDropdown
+            value={selectedProvider}
+            onChange={setSelectedProvider}
+          />
+        }
+      />
+      <div className="rounded-lg border bg-card p-4 md:p-6">
+        <EmailForm onSave={handleSave} onSend={handleSend} />
       </div>
-      <EmailForm onSave={handleSave} onSend={handleSend} />
     </div>
   );
 }

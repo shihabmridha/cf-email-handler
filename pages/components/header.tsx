@@ -1,8 +1,7 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
-import { Bell, Moon, Sun, User } from 'lucide-react';
-import { useTheme } from '@/components/theme-provider';
+import { Bell, User, ArrowRight } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -13,9 +12,10 @@ import { IncomingHistoryDto } from '@/shared/dtos/incoming-history';
 import { apiClient } from '@/lib/api-client';
 import { NotificationDetailModal } from './notification-detail-modal';
 import { formatDateTime } from '../lib/utils/date';
+import { useRouter } from 'next/navigation';
 
 export function Header() {
-  const { theme, setTheme } = useTheme();
+  const router = useRouter();
   const [notifications, setNotifications] = useState<IncomingHistoryDto[]>([]);
   const [selectedNotification, setSelectedNotification] =
     useState<IncomingHistoryDto | null>(null);
@@ -26,8 +26,8 @@ export function Header() {
       try {
         const data = await apiClient.getIncomingHistory();
         setNotifications(data.histories);
-      } catch (error) {
-        console.error('Failed to fetch notifications:', error);
+      } catch {
+        // Silently fail to avoid noisy logs in UI; notifications are non-blocking
       }
     };
 
@@ -39,27 +39,18 @@ export function Header() {
     setIsModalOpen(true);
   };
 
+  const handleSeeMore = () => {
+    router.push('/notifications');
+  };
+
   return (
     <>
-      <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <header className="sticky top-0 z-50 w-full border-b bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60 shadow-sm">
         <div className="flex h-14 items-center justify-between px-6">
-          <div className="flex items-center">
-            <h1 className="text-lg font-semibold">Email Platform</h1>
+          <div className="flex items-center gap-2">
+            <h1 className="text-lg font-semibold tracking-tight">Email Platform</h1>
           </div>
           <div className="flex items-center gap-1">
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-8 w-8"
-              onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}
-            >
-              {theme === 'light' ? (
-                <Moon className="h-4 w-4" />
-              ) : (
-                <Sun className="h-4 w-4" />
-              )}
-              <span className="sr-only">Toggle theme</span>
-            </Button>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="icon" className="h-8 w-8">
@@ -103,6 +94,19 @@ export function Header() {
                     ))
                   )}
                 </div>
+                {notifications.length > 0 && (
+                  <div className="border-t bg-muted/20 p-2">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={handleSeeMore}
+                      className="w-full justify-between text-xs font-medium text-muted-foreground hover:text-foreground"
+                    >
+                      See all notifications
+                      <ArrowRight className="h-3 w-3" />
+                    </Button>
+                  </div>
+                )}
               </DropdownMenuContent>
             </DropdownMenu>
             <Button variant="ghost" size="icon" className="h-8 w-8">

@@ -1,3 +1,9 @@
+---
+description: Project info
+globs:
+alwaysApply: true
+---
+
 # Instructions
 
 This document outlines the expectations and guidelines for editing and developing the Next.js front-end project. Please follow these instructions to ensure consistency, maintainability, and quality across the codebase.
@@ -53,3 +59,4 @@ cf-email-handler/
 - **Responsive Design:** Ensure that the UI is responsive and accessible across devices and use shadcn.
 - **State Management:** Use React hooks (e.g., `useState`, `useEffect`) or joti if needed.
 - **Styling:** Use tailwind css for styling.
+

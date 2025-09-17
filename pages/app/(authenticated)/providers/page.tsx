@@ -23,6 +23,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import { PageHeader } from '@/components/page-header';
 
 export default function ProvidersPage() {
   const { providers, loading, error, refresh } = useProviders();
@@ -127,66 +128,107 @@ export default function ProvidersPage() {
   }
 
   return (
-    <div className="container mx-auto py-10">
-      <div className="flex justify-between items-center mb-8">
-        <h1 className="text-2xl font-bold">Email Providers</h1>
-        <Button
-          variant="default"
-          onClick={handleCreate}
-          disabled={loading}
-          className="cursor-pointer"
-        >
-          Create Provider
-        </Button>
-      </div>
+    <div className="py-6 space-y-6">
+      <PageHeader
+        title="Email Providers"
+        description="Configure and manage email providers"
+        actions={
+          <Button
+            variant="default"
+            onClick={handleCreate}
+            disabled={loading}
+            className="cursor-pointer"
+          >
+            Create Provider
+          </Button>
+        }
+      />
 
-      <div className="rounded-lg border bg-card">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Name</TableHead>
-              <TableHead>Type</TableHead>
-              <TableHead>Domain</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead>Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {providers.map((provider) => {
-              const config = getProviderConfig(provider.type);
-              return (
-                <TableRow key={provider.id}>
-                  <TableCell>{provider.name}</TableCell>
-                  <TableCell>{config.name}</TableCell>
-                  <TableCell>{provider.domain}</TableCell>
-                  <TableCell>
-                    {provider.enabled ? 'Active' : 'Inactive'}
-                  </TableCell>
-                  <TableCell className="space-x-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleEdit(provider)}
-                      disabled={loading}
-                      className="cursor-pointer"
-                    >
-                      <Pencil className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant="destructive"
-                      size="sm"
-                      onClick={() => handleDelete(provider)}
-                      disabled={loading}
-                      className="cursor-pointer"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
+      <div className="rounded-xl border border-border/50 bg-card/50 backdrop-blur-sm shadow-lg overflow-hidden">
+        <div className="max-h-[70vh] overflow-auto">
+          <Table>
+            <TableHeader className="sticky top-0 bg-muted/30 backdrop-blur-md z-10">
+              <TableRow>
+                <TableHead>Name</TableHead>
+                <TableHead>Type</TableHead>
+                <TableHead>Domain</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead>Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {providers.map((provider) => {
+                const config = getProviderConfig(provider.type);
+                return (
+                  <TableRow key={provider.id}>
+                    <TableCell className="font-semibold text-foreground">
+                      <div className="flex items-center space-x-2">
+                        <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                        <span>{provider.name}</span>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <span className="inline-flex items-center px-2 py-1 text-xs font-medium bg-muted rounded-full">
+                        {config.name}
+                      </span>
+                    </TableCell>
+                    <TableCell className="text-muted-foreground">{provider.domain}</TableCell>
+                    <TableCell>
+                      <span className={`inline-flex items-center px-2 py-1 text-xs font-medium rounded-full ${provider.enabled
+                        ? 'bg-green-100 text-green-800'
+                        : 'bg-red-100 text-red-800'
+                        }`}>
+                        {provider.enabled ? 'Active' : 'Inactive'}
+                      </span>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center space-x-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleEdit(provider)}
+                          disabled={loading}
+                          className="cursor-pointer opacity-60 group-hover:opacity-100 transition-opacity"
+                        >
+                          <Pencil className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="destructive"
+                          size="sm"
+                          onClick={() => handleDelete(provider)}
+                          disabled={loading}
+                          className="cursor-pointer opacity-60 group-hover:opacity-100 transition-opacity"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
+              {providers.length === 0 && (
+                <TableRow>
+                  <TableCell
+                    colSpan={5}
+                    className="text-center py-12"
+                  >
+                    <div className="flex flex-col items-center space-y-3">
+                      <div className="w-12 h-12 bg-muted/30 rounded-full flex items-center justify-center">
+                        <svg className="w-6 h-6 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                        </svg>
+                      </div>
+                      <div className="text-center">
+                        <h3 className="text-sm font-medium text-foreground">No email providers found</h3>
+                        <p className="text-xs text-muted-foreground mt-1">Create your first provider to start sending emails</p>
+                      </div>
+                    </div>
                   </TableCell>
                 </TableRow>
-              );
-            })}
-          </TableBody>
-        </Table>
+              )}
+            </TableBody>
+          </Table>
+        </div>
       </div>
 
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
