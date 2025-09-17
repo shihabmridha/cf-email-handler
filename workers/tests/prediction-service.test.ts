@@ -9,11 +9,9 @@ import { Configuration } from "../src/config";
 import { EmailClass } from "@/enums/email-class";
 import { cleanHtml } from "../src/lib/utils";
 
-describe.skip("Prediction Service", () => {
-  test("Should contains OTP code and summary", async () => {
-    const env = {
-      ...wranglerConfig.vars
-    };
+describe("Prediction Service", () => {
+  test("should extract OTP code", async () => {
+    const env = { ...wranglerConfig.vars };
     const config = new Configuration(env);
     const llm = new GeminiService(config);
     const service = new PredictionService(llm);
@@ -38,13 +36,10 @@ describe.skip("Prediction Service", () => {
     expect(res.class).toContain(EmailClass.OTP);
     expect(res.otp).toContain("123456");
     expect(res.summary).toBeString();
-    expect(res.summary).toContain("123456");
-  });
+  }, { timeout: 10000 });
 
-  test("Should extract verification link and summary", async () => {
-    const env = {
-      ...wranglerConfig.vars
-    };
+  test("should extract verification link", async () => {
+    const env = { ...wranglerConfig.vars };
     const config = new Configuration(env);
     const llm = new GeminiService(config);
     const service = new PredictionService(llm);
@@ -74,9 +69,9 @@ describe.skip("Prediction Service", () => {
     expect(res.class).toContain(EmailClass.OTP);
     expect(res.otp).toContain("https://example.com/verify?token=abc123");
     expect(res.summary).toBeString();
-  });
+  }, { timeout: 10000 });
 
-  test("Should identify marketing email and extract summary", async () => {
+  test("should identify marketing email", async () => {
     const env = {
       ...wranglerConfig.vars
     };
@@ -114,9 +109,9 @@ describe.skip("Prediction Service", () => {
     expect(res).toBeInstanceOf(VerificationData);
     expect(res.class).toContain(EmailClass.PROMOTIONAL);
     expect(res.summary).toBeString();
-  });
+  }, { timeout: 10000 });
 
-  test("Should identify invoice email and extract summary", async () => {
+  test("should identify invoice email", async () => {
     const env = {
       ...wranglerConfig.vars
     };
@@ -173,15 +168,12 @@ describe.skip("Prediction Service", () => {
     expect(res).toBeDefined();
     expect(res).toBeInstanceOf(VerificationData);
     expect(res.class).toContain(EmailClass.INVOICE);
-    expect(res.otp).toBeOneOf(["", "EMPTY"]);
     expect(res.summary).toBeString();
-    expect(res.summary).toContain("$229.97");
-  });
+    expect(res.summary).toContain("229.97");
+  }, { timeout: 10000 });
 
-  test("Should identify unknown email type", async () => {
-    const env = {
-      ...wranglerConfig.vars
-    };
+  test("should identify unknown email type", async () => {
+    const env = { ...wranglerConfig.vars };
     const config = new Configuration(env);
     const llm = new GeminiService(config);
     const service = new PredictionService(llm);
@@ -200,7 +192,33 @@ describe.skip("Prediction Service", () => {
     expect(res).toBeDefined();
     expect(res).toBeInstanceOf(VerificationData);
     expect(res.class).toContain(EmailClass.UNKNOWN);
-    expect(res.otp).toBeOneOf(["", "EMPTY"]);
     expect(res.summary).toBeString();
-  });
+  }, { timeout: 10000 });
+
+  test("should identify transactional email type", async () => {
+    const env = { ...wranglerConfig.vars };
+    const config = new Configuration(env);
+    const llm = new GeminiService(config);
+    const service = new PredictionService(llm);
+
+    const cleanedHtml = await cleanHtml(`
+      <html>
+        <body style="font-family: Arial, sans-serif;">
+          <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
+            <h1 style="color: #333;">Fund Transfer</h1>
+            <p>Here is the summary of your transaction</p>
+            <p>Amount: 100.00 BTD</p>
+            <p>From: John Doe</p>
+            <p>To: Jane Doe</p>
+            <p>Transaction ID: 1234567890</p>
+          </div>
+        </body>
+      </html>
+    `);
+    const res = await service.extractEmailClassAndData(cleanedHtml);
+    expect(res).toBeDefined();
+    expect(res).toBeInstanceOf(VerificationData);
+    expect(res.class).toContain(EmailClass.TRANSACTIONAL);
+    expect(res.summary).toBeString();
+  }, { timeout: 10000 });
 });

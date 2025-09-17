@@ -7,11 +7,14 @@ export class DiscordService {
     this._config = config;
   }
 
-  async sendMessage(from: string, subject: string, summary: string): Promise<void> {
+  async sendMessage(from: string, subject: string, summary: string, otp?: string): Promise<void> {
     const message = {
       username: "Robot",
-      content: `From: ${from}.\nSubject: ${subject}.\nSummary: ${summary ?? 'Could not generate summary.'}`,
+      content: `From: ${from}.\nSubject: ${subject}.`,
     };
+
+    if (otp) message.content += `\nOTP: ${otp}.`;
+    message.content += `\nSummary: ${summary ?? 'Could not generate summary.'}`;
 
     await fetch(this._config.discordHookUrl, {
       method: 'POST',

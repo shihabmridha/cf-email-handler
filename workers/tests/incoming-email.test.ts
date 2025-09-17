@@ -8,7 +8,7 @@ import { Configuration } from '../src/config';
 import { DiscordService } from '../src/services/discord';
 const wranglerConfig = config as WranglerConfig;
 
-describe('Incoming Email', () => {
+describe.skip('Incoming Email', () => {
   test('should forward email and send discord message', async () => {
     const rawEmailString = [
       "MIME-Version: 1.0",

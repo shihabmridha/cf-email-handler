@@ -9,7 +9,7 @@ export class VerificationData {
 
 export class PredictionService {
   private readonly llm: LlmService;
-  private readonly maxRetries = 3;
+  private readonly maxRetries = 2;
 
   constructor(llm: LlmService) {
     this.llm = llm;
@@ -19,22 +19,18 @@ export class PredictionService {
     return response.replace(/^```json\n/, '').replace(/\n```$/, '');
   }
 
-  private validateResponse(json: VerificationData): boolean {
+  private isValidateResponse(json: VerificationData): boolean {
     if (!json || typeof json !== 'object') return false;
 
     switch (json.class) {
       case EmailClass.INVOICE:
         return Boolean(json.summary && /\d+(\.\d+)?/.test(json.summary));
 
-      case EmailClass.OTP: {
-        const hasValidClass = json.class === EmailClass.OTP;
-        const hasValidOtp = Boolean(json.otp && json.otp.length > 0);
-        const hasValidSummary = Boolean(json.summary && (
-          json.summary.toLowerCase().includes(json.otp.toLowerCase())
-        ));
+      case EmailClass.OTP:
+        return Boolean(json.otp && json.otp.length > 0 && json.summary && json.summary.length > 0);
 
-        return hasValidClass && hasValidOtp && hasValidSummary;
-      }
+      case EmailClass.TRANSACTIONAL:
+        return Boolean(json.summary && json.summary.length > 0);
 
       case EmailClass.PROMOTIONAL:
         return Boolean(json.summary && json.summary.length > 0);
@@ -68,11 +64,11 @@ export class PredictionService {
       - summary: a couple of sentences summary of the email's purpose
 
       All the email classes:
-      - UNKNOWN: the email is not classified
-      - OTP: the email contains an OTP or verification code (OTP code, Verification code, Login link, Verify link, etc)
-      - INVOICE: the email is an invoice or payment slip (example: purchase slip, shoping invoice, etc)
-      - TRANSACTIONAL: the email is a transactional email (example: bank payment, bank transfer, etc)
-      - PROMOTIONAL: the email is a promotional email (example: marketing email, newsletter, offer, etc)
+      - UNKNOWN: the email is not classified.
+      - OTP: the email contains an OTP or verification code (OTP code, Verification code, Login link, Verify link, etc).
+      - INVOICE: the email is an invoice or payment slip (example: purchase slip, shoping invoice, etc). Must include the amount in the summary.
+      - TRANSACTIONAL: the email is a transactional email (example: bank payment, bank transfer, etc). Registration, login attempt etc are not transactional.
+      - PROMOTIONAL: the email is a promotional email (example: marketing email, newsletter, offer, etc).
 
       ### Email content
       ${emailContent}\n
@@ -86,15 +82,15 @@ export class PredictionService {
     let lastValidResponse: VerificationData | null = null;
     const result = new VerificationData();
 
-    for (let attempt = 0; attempt <= this.maxRetries; attempt++) {
+    for (let attempt = 1; attempt <= this.maxRetries; attempt++) {
       const response = await this.llm.ask(prompt);
       const cleanedResponse = this.cleanupLLMResponse(response);
-      console.log(`Prediction response (attempt ${attempt + 1}):`, cleanedResponse);
+      console.log(`Prediction response (attempt ${attempt}):`, cleanedResponse);
 
       try {
         const json = JSON.parse(cleanedResponse);
 
-        if (this.validateResponse(json)) {
+        if (this.isValidateResponse(json)) {
           result.class = json.class || EmailClass.UNKNOWN;
           result.otp = json.otp || '';
           result.summary = json.summary || '';
@@ -110,7 +106,7 @@ export class PredictionService {
         lastError = new Error('Response validation failed');
       } catch (error) {
         lastError = error instanceof Error ? error : new Error(String(error));
-        console.error(`Attempt ${attempt + 1} failed:`, lastError);
+        console.error(`Attempt ${attempt} failed:`, lastError);
       }
 
       if (attempt < this.maxRetries) {
@@ -120,6 +116,7 @@ export class PredictionService {
     }
 
     console.error('All attempts failed. Returning last received response.');
+
     if (lastValidResponse) {
       return lastValidResponse;
     }
