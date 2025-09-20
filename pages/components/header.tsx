@@ -1,7 +1,7 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
-import { Bell, User, ArrowRight } from 'lucide-react';
+import { Clock, User, ArrowRight } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -10,37 +10,37 @@ import {
 import { useEffect, useState } from 'react';
 import { IncomingHistoryDto } from '@/shared/dtos/incoming-history';
 import { apiClient } from '@/lib/api-client';
-import { NotificationDetailModal } from './notification-detail-modal';
+import { HistoryDetailModal } from './history-detail-modal';
 import { formatDateTime } from '../lib/utils/date';
 import { useRouter } from 'next/navigation';
 
 export function Header() {
   const router = useRouter();
-  const [notifications, setNotifications] = useState<IncomingHistoryDto[]>([]);
-  const [selectedNotification, setSelectedNotification] =
+  const [historyItems, setHistoryItems] = useState<IncomingHistoryDto[]>([]);
+  const [selectedHistory, setSelectedHistory] =
     useState<IncomingHistoryDto | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
-    const fetchNotifications = async () => {
+    const fetchHistory = async () => {
       try {
         const data = await apiClient.getIncomingHistory();
-        setNotifications(data.histories);
+        setHistoryItems(data.histories);
       } catch {
-        // Silently fail to avoid noisy logs in UI; notifications are non-blocking
+        // Silently fail to avoid noisy logs in UI; history is non-blocking
       }
     };
 
-    fetchNotifications();
+    fetchHistory();
   }, []);
 
-  const handleNotificationClick = (notification: IncomingHistoryDto) => {
-    setSelectedNotification(notification);
+  const handleHistoryClick = (history: IncomingHistoryDto) => {
+    setSelectedHistory(history);
     setIsModalOpen(true);
   };
 
   const handleSeeMore = () => {
-    router.push('/notifications');
+    router.push('/history');
   };
 
   return (
@@ -54,47 +54,47 @@ export function Header() {
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="icon" className="h-8 w-8">
-                  <Bell className="h-4 w-4" />
-                  <span className="sr-only">Notifications</span>
+                  <Clock className="h-4 w-4" />
+                  <span className="sr-only">History</span>
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-80">
                 <div className="p-2">
-                  <h4 className="text-sm font-medium">Recent Notifications</h4>
+                  <h4 className="text-sm font-medium">Recent History</h4>
                 </div>
                 <div className="max-h-[300px] overflow-y-auto">
-                  {notifications.length === 0 ? (
+                  {historyItems.length === 0 ? (
                     <div className="p-2 text-sm text-muted-foreground">
-                      No notifications
+                      No history records
                     </div>
                   ) : (
-                    notifications.map((notification) => (
+                    historyItems.map((history) => (
                       <div
-                        key={notification.id}
+                        key={history.id}
                         className="p-2 hover:bg-accent cursor-pointer border-b last:border-b-0"
-                        onClick={() => handleNotificationClick(notification)}
+                        onClick={() => handleHistoryClick(history)}
                       >
                         <div className="flex justify-between items-start gap-2">
                           <div className="flex-1 min-w-0">
                             <div className="text-sm font-medium break-words line-clamp-1">
-                              {notification.subject}
+                              {history.subject}
                             </div>
                             <div className="text-xs text-muted-foreground truncate">
-                              From: {notification.fromEmail}
+                              From: {history.fromEmail}
                             </div>
                             <div className="text-xs text-muted-foreground truncate">
-                              To: {notification.toEmail}
+                              To: {history.toEmail}
                             </div>
                           </div>
                           <div className="text-xs text-muted-foreground whitespace-nowrap">
-                            {formatDateTime(notification.createdAt)}
+                            {formatDateTime(history.createdAt)}
                           </div>
                         </div>
                       </div>
                     ))
                   )}
                 </div>
-                {notifications.length > 0 && (
+                {historyItems.length > 0 && (
                   <div className="border-t bg-muted/20 p-2">
                     <Button
                       variant="ghost"
@@ -102,7 +102,7 @@ export function Header() {
                       onClick={handleSeeMore}
                       className="w-full justify-between text-xs font-medium text-muted-foreground hover:text-foreground"
                     >
-                      See all notifications
+                      See full history
                       <ArrowRight className="h-3 w-3" />
                     </Button>
                   </div>
@@ -116,8 +116,8 @@ export function Header() {
           </div>
         </div>
       </header>
-      <NotificationDetailModal
-        notification={selectedNotification}
+      <HistoryDetailModal
+        history={selectedHistory}
         open={isModalOpen}
         onOpenChange={setIsModalOpen}
       />

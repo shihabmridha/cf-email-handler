@@ -9,25 +9,25 @@ import {
 import { IncomingHistoryDto } from '@/shared/dtos/incoming-history';
 import { Mail, User, Send, ArrowRight, Clock } from 'lucide-react';
 
-interface NotificationDetailModalProps {
-  notification: IncomingHistoryDto | null;
+interface HistoryDetailModalProps {
+  history: IncomingHistoryDto | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
 
-export function NotificationDetailModal({
-  notification,
+export function HistoryDetailModal({
+  history,
   open,
   onOpenChange,
-}: NotificationDetailModalProps) {
-  if (!notification) return null;
+}: HistoryDetailModalProps) {
+  if (!history) return null;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[600px]">
         <DialogHeader className="pb-4 border-b">
           <DialogTitle className="text-xl font-semibold break-words">
-            {notification.subject}
+            {history.subject}
           </DialogTitle>
         </DialogHeader>
         <div className="space-y-6 py-4">
@@ -37,13 +37,13 @@ export function NotificationDetailModal({
               Date & Time
             </div>
             <div className="text-sm break-all bg-muted/50 p-3 rounded-md">
-              {new Date(notification.createdAt).toLocaleDateString('en-GB', {
+              {new Date(history.createdAt).toLocaleDateString('en-GB', {
                 day: '2-digit',
                 month: 'long',
                 year: 'numeric',
               })}
               ,{' '}
-              {new Date(notification.createdAt).toLocaleTimeString('en-GB', {
+              {new Date(history.createdAt).toLocaleTimeString('en-GB', {
                 hour: '2-digit',
                 minute: '2-digit',
                 hour12: true,
@@ -56,7 +56,7 @@ export function NotificationDetailModal({
               From
             </div>
             <div className="text-sm break-all bg-muted/50 p-3 rounded-md">
-              {notification.fromEmail}
+              {history.fromEmail}
             </div>
           </div>
           <div className="space-y-3">
@@ -65,28 +65,36 @@ export function NotificationDetailModal({
               To
             </div>
             <div className="text-sm break-all bg-muted/50 p-3 rounded-md">
-              {notification.toEmail}
+              {history.toEmail}
             </div>
           </div>
-          {notification.destination && (
+          <div className="space-y-3">
+            <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+              Email Class
+            </div>
+            <div className="text-sm break-all bg-muted/50 p-3 rounded-md">
+              {history.emailClass}
+            </div>
+          </div>
+          {history.destination && (
             <div className="space-y-3">
               <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
                 <Send className="h-4 w-4" />
                 Destination
               </div>
               <div className="text-sm break-all bg-muted/50 p-3 rounded-md">
-                {notification.destination}
+                {history.destination}
               </div>
             </div>
           )}
-          {notification.summary && (
+          {history.summary && (
             <div className="space-y-3">
               <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
                 <ArrowRight className="h-4 w-4" />
                 Summary
               </div>
               <div className="text-sm break-all whitespace-pre-wrap bg-muted/50 p-3 rounded-md">
-                {notification.summary}
+                {history.summary}
               </div>
             </div>
           )}

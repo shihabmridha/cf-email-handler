@@ -3,12 +3,12 @@ import { PageHeader } from '@/components/page-header';
 import { Button } from '@/components/ui/button';
 import { RefreshCw } from 'lucide-react';
 
-export default function NotificationsLoading() {
+export default function HistoryLoading() {
     return (
         <div className="py-6 space-y-6">
             <PageHeader
-                title="Notifications"
-                description="View all incoming email notifications"
+                title="History"
+                description="Review all incoming email history"
                 actions={
                     <Button variant="outline" disabled>
                         <RefreshCw className="h-4 w-4 mr-2" />
@@ -37,5 +37,4 @@ export default function NotificationsLoading() {
         </div>
     );
 }
-
 

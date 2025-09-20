@@ -10,7 +10,7 @@ import ComposeLoading from './compose/loading';
 import DraftLoading from './draft/loading';
 import RoutesLoading from './routes/loading';
 import ProvidersLoading from './providers/loading';
-import NotificationsLoading from './notifications/loading';
+import HistoryLoading from './history/loading';
 
 function getLoadingComponent(pathname: string) {
   switch (pathname) {
@@ -22,8 +22,8 @@ function getLoadingComponent(pathname: string) {
       return <RoutesLoading />;
     case '/providers':
       return <ProvidersLoading />;
-    case '/notifications':
-      return <NotificationsLoading />;
+    case '/history':
+      return <HistoryLoading />;
     default:
       return <ComposeLoading />;
   }

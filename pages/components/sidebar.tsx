@@ -3,7 +3,7 @@
 import { usePathname, useRouter } from 'next/navigation';
 import { cn } from '@/lib/utils/class';
 import { Button } from '@/components/ui/button';
-import { Mail, FileText, Route, Users, LogOut, Settings, Bell } from 'lucide-react';
+import { Mail, FileText, Route, Users, LogOut, Settings, Clock } from 'lucide-react';
 import { apiClient } from '@/lib/api-client';
 import { useEffect } from 'react';
 
@@ -75,8 +75,8 @@ export function Sidebar() {
           <NavLink href="/draft" icon={<FileText className="h-4 w-4" />}>
             Draft
           </NavLink>
-          <NavLink href="/notifications" icon={<Bell className="h-4 w-4" />}>
-            Notifications
+          <NavLink href="/history" icon={<Clock className="h-4 w-4" />}>
+            History
           </NavLink>
           <NavLink href="/routes" icon={<Route className="h-4 w-4" />}>
             Routes

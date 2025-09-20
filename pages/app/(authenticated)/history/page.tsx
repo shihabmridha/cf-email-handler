@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { IncomingHistoryDto } from '@/shared/dtos/incoming-history';
 import { apiClient } from '@/lib/api-client';
-import { NotificationDetailModal } from '@/components/notification-detail-modal';
+import { HistoryDetailModal } from '@/components/history-detail-modal';
 import { formatDateTime } from '@/lib/utils/date';
 import {
     Table,
@@ -16,18 +16,18 @@ import {
 } from '@/components/ui/table';
 import { PageHeader } from '@/components/page-header';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Bell, Mail, User, Clock, RefreshCw } from 'lucide-react';
+import { Mail, User, Clock, RefreshCw } from 'lucide-react';
 
-export default function NotificationsPage() {
-    const [notifications, setNotifications] = useState<IncomingHistoryDto[]>([]);
-    const [selectedNotification, setSelectedNotification] = useState<IncomingHistoryDto | null>(null);
+export default function HistoryPage() {
+    const [historyEntries, setHistoryEntries] = useState<IncomingHistoryDto[]>([]);
+    const [selectedHistory, setSelectedHistory] = useState<IncomingHistoryDto | null>(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [currentPage, setCurrentPage] = useState(1);
     const [isLoadingMore, setIsLoadingMore] = useState(false);
 
-    const fetchNotifications = async (page: number = 1, append: boolean = false) => {
+    const fetchHistory = async (page: number = 1, append: boolean = false) => {
         try {
             if (!append) setLoading(true);
             else setIsLoadingMore(true);
@@ -35,15 +35,15 @@ export default function NotificationsPage() {
             const data = await apiClient.getIncomingHistory(page);
 
             if (append) {
-                setNotifications(prev => [...prev, ...data.histories]);
+                setHistoryEntries(prev => [...prev, ...data.histories]);
             } else {
-                setNotifications(data.histories);
+                setHistoryEntries(data.histories);
             }
 
             setError(null);
         } catch (err) {
-            console.error('Failed to fetch notifications:', err);
-            setError('Failed to load notifications');
+            console.error('Failed to fetch history:', err);
+            setError('Failed to load history');
         } finally {
             setLoading(false);
             setIsLoadingMore(false);
@@ -51,31 +51,31 @@ export default function NotificationsPage() {
     };
 
     useEffect(() => {
-        fetchNotifications();
+        fetchHistory();
     }, []);
 
-    const handleNotificationClick = (notification: IncomingHistoryDto) => {
-        setSelectedNotification(notification);
+    const handleHistoryClick = (history: IncomingHistoryDto) => {
+        setSelectedHistory(history);
         setIsModalOpen(true);
     };
 
     const handleLoadMore = () => {
         const nextPage = currentPage + 1;
         setCurrentPage(nextPage);
-        fetchNotifications(nextPage, true);
+        fetchHistory(nextPage, true);
     };
 
     const handleRefresh = () => {
         setCurrentPage(1);
-        fetchNotifications(1, false);
+        fetchHistory(1, false);
     };
 
     if (loading) {
         return (
             <div className="py-6 space-y-6">
                 <PageHeader
-                    title="Notifications"
-                    description="View all incoming email notifications"
+                    title="History"
+                    description="Review all incoming email history"
                     actions={
                         <Button variant="outline" disabled>
                             <RefreshCw className="h-4 w-4 mr-2" />
@@ -106,8 +106,8 @@ export default function NotificationsPage() {
         return (
             <div className="py-6 space-y-6">
                 <PageHeader
-                    title="Notifications"
-                    description="View all incoming email notifications"
+                    title="History"
+                    description="Review all incoming email history"
                     actions={
                         <Button variant="outline" onClick={handleRefresh}>
                             <RefreshCw className="h-4 w-4 mr-2" />
@@ -129,8 +129,8 @@ export default function NotificationsPage() {
         <>
             <div className="py-6 space-y-6">
                 <PageHeader
-                    title="Notifications"
-                    description="View all incoming email notifications"
+                    title="History"
+                    description="Review all incoming email history"
                     actions={
                         <Button variant="outline" onClick={handleRefresh} disabled={loading}>
                             <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
@@ -153,36 +153,36 @@ export default function NotificationsPage() {
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
-                                {notifications.map((notification) => (
-                                    <TableRow key={notification.id}>
+                                {historyEntries.map((history) => (
+                                    <TableRow key={history.id}>
                                         <TableCell className="font-semibold text-foreground">
                                             <div className="flex items-center gap-2">
                                                 <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                                                <span className="truncate max-w-[200px]" title={notification.subject}>
-                                                    {notification.subject}
+                                                <span className="truncate max-w-[200px]" title={history.subject}>
+                                                    {history.subject}
                                                 </span>
                                             </div>
                                         </TableCell>
                                         <TableCell>
                                             <div className="flex items-center gap-2">
                                                 <User className="h-4 w-4 text-muted-foreground" />
-                                                <span className="truncate max-w-[150px]" title={notification.fromEmail}>
-                                                    {notification.fromEmail}
+                                                <span className="truncate max-w-[150px]" title={history.fromEmail}>
+                                                    {history.fromEmail}
                                                 </span>
                                             </div>
                                         </TableCell>
                                         <TableCell>
                                             <div className="flex items-center gap-2">
                                                 <Mail className="h-4 w-4 text-muted-foreground" />
-                                                <span className="truncate max-w-[150px]" title={notification.toEmail}>
-                                                    {notification.toEmail}
+                                                <span className="truncate max-w-[150px]" title={history.toEmail}>
+                                                    {history.toEmail}
                                                 </span>
                                             </div>
                                         </TableCell>
                                         <TableCell className="text-muted-foreground">
-                                            {notification.destination && (
+                                            {history.destination && (
                                                 <span className="inline-flex items-center px-2 py-1 text-xs font-medium bg-muted rounded-full">
-                                                    {notification.destination}
+                                                    {history.destination}
                                                 </span>
                                             )}
                                         </TableCell>
@@ -190,7 +190,7 @@ export default function NotificationsPage() {
                                             <div className="flex items-center gap-2">
                                                 <Clock className="h-4 w-4" />
                                                 <time className="text-xs">
-                                                    {formatDateTime(notification.createdAt)}
+                                                    {formatDateTime(history.createdAt)}
                                                 </time>
                                             </div>
                                         </TableCell>
@@ -199,7 +199,7 @@ export default function NotificationsPage() {
                                                 <Button
                                                     variant="outline"
                                                     size="sm"
-                                                    onClick={() => handleNotificationClick(notification)}
+                                                    onClick={() => handleHistoryClick(history)}
                                                     className="cursor-pointer"
                                                 >
                                                     View Details
@@ -208,7 +208,7 @@ export default function NotificationsPage() {
                                         </TableCell>
                                     </TableRow>
                                 ))}
-                                {notifications.length === 0 && (
+                                {historyEntries.length === 0 && (
                                     <TableRow>
                                         <TableCell
                                             colSpan={6}
@@ -216,10 +216,10 @@ export default function NotificationsPage() {
                                         >
                                             <div className="flex flex-col items-center space-y-3">
                                                 <div className="w-12 h-12 bg-muted/30 rounded-full flex items-center justify-center">
-                                                    <Bell className="w-6 h-6 text-muted-foreground" />
+                                                    <Clock className="w-6 h-6 text-muted-foreground" />
                                                 </div>
                                                 <div className="text-center">
-                                                    <h3 className="text-sm font-medium text-foreground">No notifications found</h3>
+                                                    <h3 className="text-sm font-medium text-foreground">No history records found</h3>
                                                     <p className="text-xs text-muted-foreground mt-1">When emails are received, they&apos;ll appear here</p>
                                                 </div>
                                             </div>
@@ -229,7 +229,7 @@ export default function NotificationsPage() {
                             </TableBody>
                         </Table>
                     </div>
-                    {notifications.length > 0 && (
+                    {historyEntries.length > 0 && (
                         <div className="border-t bg-muted/20 p-4 flex justify-center">
                             <Button
                                 variant="outline"
@@ -251,8 +251,8 @@ export default function NotificationsPage() {
                 </div>
             </div>
 
-            <NotificationDetailModal
-                notification={selectedNotification}
+            <HistoryDetailModal
+                history={selectedHistory}
                 open={isModalOpen}
                 onOpenChange={setIsModalOpen}
             />

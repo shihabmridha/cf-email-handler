@@ -28,7 +28,6 @@ export class DraftService {
 
   async update(id: string, dto: DraftDto): Promise<DraftDto> {
     const entity = Mapper.dtoToEntity(DraftEntity, dto);
-    console.log(dto, entity);
     const updatedEntity = await this._draftRepository.update(parseInt(id), entity);
 
     return Mapper.entityToDto(DraftDto, updatedEntity);

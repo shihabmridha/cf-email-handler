@@ -37,14 +37,12 @@ export async function processEmail(
 
   const predict = container.getPredictionService();
   const emailData = await predict.extractEmailClassAndData(content);
-  console.log('Email data:', JSON.stringify(emailData, null, 2));
 
   if (!emailData.class) {
     return;
   }
 
   const emailType = EmailClass[emailData.class as keyof typeof EmailClass];
-  console.log('Email type:', emailType);
 
   const emailRouteService = container.getEmailRouteService();
   const discordService = container.getDiscordService();

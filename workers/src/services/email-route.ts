@@ -75,7 +75,7 @@ export class EmailRouteService {
 
     const forwardTo = await this._settingsRepository.getByKey(SettingKeys.EMAIL_FORWARD_TO);
 
-    console.log('No matching route found, using default email:', forwardTo?.value);
+    console.log(`No matching route found (${email}, ${type}), using default email: ${forwardTo?.value}`);
     return forwardTo?.value ?? null;
   }
 

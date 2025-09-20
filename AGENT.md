@@ -1,9 +1,3 @@
----
-description: Project info
-globs:
-alwaysApply: true
----
-
 ## Project Overview
 
 - **Framework:** Next.js for front-end and Hono for backend with D1 sqlite database.
@@ -33,7 +27,7 @@ cf-email-handler/
 - All the API related code must be in the workers directory
 - When integrating with API, must comply with relavent OpenApi spec located in workers/openapi.yaml
 - Never use console.log, instead try to fix the issue.
-- Always use bun instead of npm to install packages.
+- Always use bun instead of npm.
 
 ## Coding Standards
 
