@@ -1,44 +1,46 @@
 'use client';
 
-import { useState, useEffect, useRef, useCallback } from 'react';
-import { apiClient } from '@/lib/api-client';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { apiClient, ApiError } from '@/lib/api-client';
 import { ProviderConfigDto } from '@/shared/dtos/provider';
+
+const getErrorMessage = (error: unknown) => {
+  if (error instanceof ApiError) {
+    return error.message;
+  }
+  if (error instanceof Error) {
+    return error.message;
+  }
+  return 'Failed to load providers';
+};
 
 export function useProviders() {
   const [providers, setProviders] = useState<ProviderConfigDto[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const initialLoadDone = useRef(false);
+  const hasFetched = useRef(false);
 
   const fetchProviders = useCallback(async () => {
-    let mounted = true;
     setLoading(true);
+    setError(null);
 
     try {
-      const providers = await apiClient.getProviders();
-      if (mounted) {
-        setProviders(providers);
-        setError(null);
-      }
-    } catch {
-      if (mounted) {
-        setError('Failed to load providers');
-      }
+      const nextProviders = await apiClient.getProviders();
+      setProviders(nextProviders);
+    } catch (err) {
+      setError(getErrorMessage(err));
+      throw err;
     } finally {
-      if (mounted) {
-        setLoading(false);
-      }
+      setLoading(false);
     }
-
-    return () => {
-      mounted = false;
-    };
   }, []);
 
   useEffect(() => {
-    if (!initialLoadDone.current) {
-      fetchProviders();
-      initialLoadDone.current = true;
+    if (!hasFetched.current) {
+      fetchProviders().catch(() => {
+        // error state handled in fetchProviders
+      });
+      hasFetched.current = true;
     }
   }, [fetchProviders]);
 
@@ -46,6 +48,6 @@ export function useProviders() {
     providers,
     loading,
     error,
-    refresh: fetchProviders
+    refresh: fetchProviders,
   };
 }

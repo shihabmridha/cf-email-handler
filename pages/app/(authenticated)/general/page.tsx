@@ -49,10 +49,13 @@ export default function GeneralSettingsPage() {
         description: 'Settings saved successfully',
       });
     } catch (saveError) {
-      console.error('Failed to save settings:', saveError);
+      const message =
+        saveError instanceof Error
+          ? saveError.message
+          : 'Failed to save settings';
       toast({
         title: 'Error',
-        description: 'Failed to save settings',
+        description: message,
         variant: 'destructive',
       });
     } finally {

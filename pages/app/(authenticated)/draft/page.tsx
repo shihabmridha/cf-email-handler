@@ -1,9 +1,7 @@
 'use client';
 
+import { useMemo, useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { useDrafts } from '@/lib/hooks/useDrafts';
-import { DraftDto } from '@/shared/dtos/draft';
-import { useState } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -11,8 +9,8 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import {
   Table,
   TableBody,
@@ -21,50 +19,73 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import { useToast } from '@/components/ui/use-toast';
+import { useDrafts } from '@/lib/hooks/useDrafts';
+import { DraftDto } from '@/shared/dtos/draft';
 import { PageHeader } from '@/components/page-header';
+import { TableEmptyState } from '@/components/table-empty-state';
+import { FileText, Loader2 } from 'lucide-react';
+
+const createEmptyDraft = (userId = 0): Partial<DraftDto> => ({
+  subject: '',
+  body: '',
+  sender: '',
+  recipients: [],
+  cc: '',
+  userId,
+});
 
 export default function DraftPage() {
-  const { drafts, loading, error, saveDraft, deleteDraft } = useDrafts();
+  const { drafts, loading, error, saveDraft, deleteDraft, fetchDrafts } =
+    useDrafts();
   const [isOpen, setIsOpen] = useState(false);
   const [selectedDraft, setSelectedDraft] = useState<DraftDto | null>(null);
-  const [formData, setFormData] = useState<Partial<DraftDto>>({
-    subject: '',
-    body: '',
-    sender: '',
-    recipients: [],
-    cc: '',
-    userId: 0,
-  });
+  const [formData, setFormData] = useState<Partial<DraftDto>>(createEmptyDraft());
+  const { toast } = useToast();
+
+  const draftDialogTitle = useMemo(
+    () => (selectedDraft ? 'Edit Draft' : 'New Draft'),
+    [selectedDraft],
+  );
+
+  const resetForm = (userId = formData.userId ?? 0) => {
+    setSelectedDraft(null);
+    setFormData(createEmptyDraft(userId));
+  };
 
   const handleSave = async () => {
     try {
-      if (!formData.subject) {
+      if (!formData.subject?.trim()) {
         throw new Error('Subject is required');
       }
 
       const draftToSave: DraftDto = {
         ...formData,
         id: selectedDraft?.id,
-        userId: selectedDraft?.userId || formData.userId || 0,
+        userId: selectedDraft?.userId ?? formData.userId ?? 0,
         sender: formData.sender?.trim() || undefined,
-        recipients: formData.recipients || [],
+        recipients: Array.isArray(formData.recipients)
+          ? formData.recipients
+          : [],
         cc: formData.cc?.trim() || undefined,
         body: formData.body?.trim() || undefined,
       } as DraftDto;
 
       await saveDraft(draftToSave);
+      resetForm(draftToSave.userId);
       setIsOpen(false);
-      setSelectedDraft(null);
-      setFormData({
-        subject: '',
-        body: '',
-        sender: '',
-        recipients: [],
-        cc: '',
-        userId: formData.userId,
+      toast({
+        title: 'Draft saved',
+        description: 'Your draft has been stored successfully.',
       });
     } catch (err) {
-      console.error('Failed to save draft:', err);
+      const message =
+        err instanceof Error ? err.message : 'Failed to save draft';
+      toast({
+        title: 'Unable to save draft',
+        description: message,
+        variant: 'destructive',
+      });
     }
   };
 
@@ -81,15 +102,7 @@ export default function DraftPage() {
   };
 
   const handleNew = () => {
-    setSelectedDraft(null);
-    setFormData({
-      subject: '',
-      body: '',
-      sender: '',
-      recipients: [],
-      cc: '',
-      userId: formData.userId,
-    });
+    resetForm(formData.userId ?? 0);
     setIsOpen(true);
   };
 
@@ -98,31 +111,60 @@ export default function DraftPage() {
       .split(',')
       .map((email) => email.trim())
       .filter(Boolean);
+
     setFormData((prev) => ({
       ...prev,
       recipients,
     }));
   };
 
+  const handleDelete = async (id: number) => {
+    try {
+      await deleteDraft(id);
+      toast({
+        title: 'Draft deleted',
+        description: 'The draft has been removed.',
+      });
+    } catch (err) {
+      const message =
+        err instanceof Error ? err.message : 'Failed to delete draft';
+      toast({
+        title: 'Unable to delete draft',
+        description: message,
+        variant: 'destructive',
+      });
+    }
+  };
+
   if (loading) {
     return (
-      <div className="p-6 flex justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+      <div className="flex justify-center p-6">
+        <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="p-6 text-center text-red-500">
-        <p>{error}</p>
+      <div className="space-y-4 p-6 text-center">
+        <p className="text-sm text-red-500">{error}</p>
+        <Button
+          variant="outline"
+          onClick={() => {
+            fetchDrafts().catch(() => {
+              /* handled in hook */
+            });
+          }}
+        >
+          Try Again
+        </Button>
       </div>
     );
   }
 
   return (
     <>
-      <div className="py-6 space-y-6">
+      <div className="space-y-6 py-6">
         <PageHeader
           title="Drafts"
           description="Manage your saved drafts"
@@ -137,10 +179,10 @@ export default function DraftPage() {
           }
         />
 
-        <div className="rounded-xl border border-border/50 bg-card/50 backdrop-blur-sm shadow-lg overflow-hidden">
+        <div className="overflow-hidden rounded-xl border border-border/50 bg-card/50 shadow-lg backdrop-blur-sm">
           <div className="max-h-[70vh] overflow-auto">
             <Table>
-              <TableHeader className="sticky top-0 bg-muted/30 backdrop-blur-md z-10">
+              <TableHeader className="sticky top-0 z-10 bg-muted/30 backdrop-blur-md">
                 <TableRow>
                   <TableHead>Subject</TableHead>
                   <TableHead>From</TableHead>
@@ -155,14 +197,13 @@ export default function DraftPage() {
                   <TableRow key={draft.id}>
                     <TableCell className="font-semibold text-foreground">
                       <div className="flex items-center space-x-2">
-                        <div className="w-2 h-2 bg-indigo-500 rounded-full"></div>
+                        <div className="h-2 w-2 rounded-full bg-indigo-500" />
                         <span>{draft.subject}</span>
                       </div>
                     </TableCell>
                     <TableCell>{draft.sender || '-'}</TableCell>
                     <TableCell>
-                      {Array.isArray(draft.recipients) &&
-                        draft.recipients.length > 0
+                      {Array.isArray(draft.recipients) && draft.recipients.length > 0
                         ? draft.recipients.join(', ')
                         : '-'}
                     </TableCell>
@@ -178,15 +219,15 @@ export default function DraftPage() {
                           variant="outline"
                           size="sm"
                           onClick={() => handleEdit(draft)}
-                          className="cursor-pointer opacity-60 group-hover:opacity-100 transition-opacity"
+                          className="cursor-pointer opacity-60 transition-opacity group-hover:opacity-100"
                         >
                           Edit
                         </Button>
                         <Button
                           variant="destructive"
                           size="sm"
-                          onClick={() => deleteDraft(draft.id)}
-                          className="cursor-pointer opacity-60 group-hover:opacity-100 transition-opacity"
+                          onClick={() => handleDelete(draft.id)}
+                          className="cursor-pointer opacity-60 transition-opacity group-hover:opacity-100"
                         >
                           Delete
                         </Button>
@@ -195,24 +236,12 @@ export default function DraftPage() {
                   </TableRow>
                 ))}
                 {drafts.length === 0 && (
-                  <TableRow>
-                    <TableCell
-                      colSpan={6}
-                      className="text-center py-12"
-                    >
-                      <div className="flex flex-col items-center space-y-3">
-                        <div className="w-12 h-12 bg-muted/30 rounded-full flex items-center justify-center">
-                          <svg className="w-6 h-6 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                          </svg>
-                        </div>
-                        <div className="text-center">
-                          <h3 className="text-sm font-medium text-foreground">No drafts found</h3>
-                          <p className="text-xs text-muted-foreground mt-1">Create your first draft to get started</p>
-                        </div>
-                      </div>
-                    </TableCell>
-                  </TableRow>
+                  <TableEmptyState
+                    colSpan={6}
+                    icon={<FileText className="h-5 w-5 text-muted-foreground" />}
+                    title="No drafts found"
+                    description="Create your first draft to get started"
+                  />
                 )}
               </TableBody>
             </Table>
@@ -223,9 +252,7 @@ export default function DraftPage() {
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>
-              {selectedDraft ? 'Edit Draft' : 'New Draft'}
-            </DialogTitle>
+            <DialogTitle>{draftDialogTitle}</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
             <div>
@@ -301,7 +328,10 @@ export default function DraftPage() {
             <div className="flex justify-end space-x-2">
               <Button
                 variant="outline"
-                onClick={() => setIsOpen(false)}
+                onClick={() => {
+                  resetForm();
+                  setIsOpen(false);
+                }}
                 className="cursor-pointer"
               >
                 Cancel

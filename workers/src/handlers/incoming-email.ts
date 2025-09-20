@@ -9,6 +9,9 @@ export async function parseEmail(message: ForwardableEmailMessage) {
     ? await cleanHtml(rawMessage.html)
     : rawMessage.text ?? '';
 
+  console.log('Raw to: ', JSON.stringify(rawMessage.to, null, 2));
+  console.log('Raw cc: ', JSON.stringify(rawMessage.cc, null, 2));
+
   return {
     content,
     from: message.from,
@@ -29,9 +32,7 @@ export async function processEmail(
   const { content, from, subject, forward, drop } = parsedEmail;
   let { to } = parsedEmail;
 
-  const config = container.getConfig();
-
-  if (to === '') to = config.emailForwardTo;
+  if (to === '') to = 'Unknown';
 
   console.log(`Received email from ${from} to ${to} with subject ${subject}`);
 

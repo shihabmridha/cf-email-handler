@@ -6,6 +6,7 @@ import { EmailRouteEntity } from '@/entities/email-route';
 import { IEmailRouteRepository } from '@/interfaces/repositories/email-route';
 import { SettingKeys } from '@/enums/settings-key';
 import { ISettingsRepository } from '@/interfaces/repositories/settings';
+
 export class EmailRouteService {
   private readonly _emailRouteRepository: IEmailRouteRepository;
   private readonly _settingsRepository: ISettingsRepository;
@@ -64,7 +65,8 @@ export class EmailRouteService {
   async getDestination(email: string, type: EmailClass): Promise<string | null> {
     const routes = await this._emailRouteRepository.getByEmail(email);
 
-    const routeToUse = routes.find(r => r.type === type) || routes.find(r => r.type === EmailClass.UNKNOWN);
+    const activeRoutes = routes.filter(route => route.enabled);
+    const routeToUse = activeRoutes.find(r => r.type === type) || activeRoutes.find(r => r.type === EmailClass.UNKNOWN);
     if (routeToUse?.drop) {
       return null;
     }

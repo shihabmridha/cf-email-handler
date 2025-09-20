@@ -1,100 +1,165 @@
-import { EmailRouteDto } from "@/shared/dtos/email-route";
-import { useState, useEffect, useCallback, useRef } from "react";
-import { apiClient } from '@/lib/api-client';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { EmailRouteDto } from '@/shared/dtos/email-route';
+import { apiClient, ApiError } from '@/lib/api-client';
 
 interface EditableEmailRouteDto extends EmailRouteDto {
   isEditing: boolean;
 }
 
+const getErrorMessage = (error: unknown) => {
+  if (error instanceof ApiError) {
+    return error.message;
+  }
+  if (error instanceof Error) {
+    return error.message;
+  }
+  return 'An unexpected error occurred';
+};
+
 export function useEmailRoutes() {
   const [routes, setRoutes] = useState<EditableEmailRouteDto[]>([]);
-  const [loading, setLoading] = useState(true);
-  const initialLoadDone = useRef(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const hasFetched = useRef(false);
 
   const loadRoutes = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+
     try {
-      setLoading(true);
       const response = await apiClient.getEmailRoutes();
-      setRoutes(response.routes.map(route => ({
-        ...route,
-        isEditing: false
-      })));
+      setRoutes(
+        response.routes.map((route) => ({
+          ...route,
+          isEditing: false,
+        })),
+      );
+    } catch (err) {
+      setError(getErrorMessage(err));
+      throw err;
     } finally {
       setLoading(false);
     }
   }, []);
 
   useEffect(() => {
-    if (!initialLoadDone.current) {
-      loadRoutes();
-      initialLoadDone.current = true;
+    if (!hasFetched.current) {
+      loadRoutes().catch(() => {
+        // error state handled above
+      });
+      hasFetched.current = true;
     }
   }, [loadRoutes]);
 
-  const createRoute = async (data: Pick<EmailRouteDto, 'email' | 'destination' | 'type' | 'enabled'>) => {
-    setLoading(true);
-    try {
-      await apiClient.createEmailRoute({
-        ...data,
-        userId: 0,
-        drop: false,
-      });
-      await loadRoutes();
-    } finally {
-      setLoading(false);
-    }
-  };
+  const createRoute = useCallback(
+    async (
+      data: Pick<EmailRouteDto, 'email' | 'destination' | 'type' | 'enabled'>,
+    ) => {
+      setLoading(true);
+      setError(null);
 
-  const updateRoute = async (id: number, data: Partial<EmailRouteDto>, shouldRefresh = true) => {
-    setLoading(true);
-    try {
-      const route = routes.find(r => r.id === id);
-      if (!route) throw new Error('Route not found');
-
-      await apiClient.updateEmailRoute(id, {
-        ...route,
-        ...data,
-      });
-
-      if (shouldRefresh) {
+      try {
+        await apiClient.createEmailRoute({
+          ...data,
+          userId: 0,
+          drop: false,
+        });
         await loadRoutes();
-      } else {
-        setRoutes(routes.map(r => r.id === id ? { ...r, ...data } : r));
+      } catch (err) {
+        setError(getErrorMessage(err));
+        throw err;
+      } finally {
+        setLoading(false);
       }
-    } finally {
-      setLoading(false);
-    }
-  };
+    },
+    [loadRoutes],
+  );
 
-  const deleteRoute = async (id: number) => {
-    setLoading(true);
-    try {
-      await apiClient.deleteEmailRoute(id);
-      await loadRoutes();
-    } finally {
-      setLoading(false);
-    }
-  };
+  const updateRoute = useCallback(
+    async (id: number, data: Partial<EmailRouteDto>, shouldRefresh = true) => {
+      setLoading(true);
+      setError(null);
 
-  const setRouteEditing = (id: number, isEditing: boolean) => {
-    setRoutes(routes.map(r => ({
-      ...r,
-      isEditing: r.id === id ? isEditing : r.isEditing
-    })));
-  };
+      try {
+        const current = routes.find((route) => route.id === id);
+        if (!current) {
+          throw new Error('Route not found');
+        }
 
-  const updateRouteLocal = (id: number, updates: Partial<EmailRouteDto>) => {
-    setRoutes(routes.map(r => r.id === id ? { ...r, ...updates } : r));
-  };
+        await apiClient.updateEmailRoute(id, {
+          ...current,
+          ...data,
+        });
+
+        if (shouldRefresh) {
+          await loadRoutes();
+        } else {
+          setRoutes((prev) =>
+            prev.map((route) =>
+              route.id === id
+                ? {
+                    ...route,
+                    ...data,
+                  }
+                : route,
+            ),
+          );
+        }
+      } catch (err) {
+        setError(getErrorMessage(err));
+        throw err;
+      } finally {
+        setLoading(false);
+      }
+    },
+    [loadRoutes, routes],
+  );
+
+  const deleteRoute = useCallback(
+    async (id: number) => {
+      setLoading(true);
+      setError(null);
+
+      try {
+        await apiClient.deleteEmailRoute(id);
+        setRoutes((prev) => prev.filter((route) => route.id !== id));
+      } catch (err) {
+        setError(getErrorMessage(err));
+        throw err;
+      } finally {
+        setLoading(false);
+      }
+    },
+    [],
+  );
+
+  const setRouteEditing = useCallback((id: number, isEditing: boolean) => {
+    setRoutes((prev) =>
+      prev.map((route) => ({
+        ...route,
+        isEditing: route.id === id ? isEditing : route.isEditing,
+      })),
+    );
+  }, []);
+
+  const updateRouteLocal = useCallback(
+    (id: number, updates: Partial<EmailRouteDto>) => {
+      setRoutes((prev) =>
+        prev.map((route) => (route.id === id ? { ...route, ...updates } : route)),
+      );
+    },
+    [],
+  );
 
   return {
     routes,
     loading,
+    error,
     createRoute,
     updateRoute,
     deleteRoute,
     setRouteEditing,
     updateRouteLocal,
-    refresh: loadRoutes
+    refresh: loadRoutes,
   };
 }

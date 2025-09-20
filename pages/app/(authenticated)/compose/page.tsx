@@ -67,7 +67,6 @@ export default function ComposePage() {
         description: 'Email sent successfully',
       });
     } catch (error) {
-      console.error('Failed to send email:', error);
       toast({
         title: 'Error',
         description:

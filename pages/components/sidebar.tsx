@@ -24,7 +24,6 @@ const NavLink = ({ href, children, icon }: NavLinkProps) => {
   }, [router, href]);
 
   const handleClick = () => {
-    console.log('NavLink clicked:', href);
     router.push(href);
   };
 

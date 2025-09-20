@@ -18,6 +18,7 @@ node_modules/
 
 # env
 .env
+.env.development
 .env.production
 .dev.vars
 .wrangler.toml

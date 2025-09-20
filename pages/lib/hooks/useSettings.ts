@@ -1,7 +1,17 @@
-import { useState, useEffect } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { SettingKeys } from '@/shared/enums/settings-key';
 import { SettingsDto } from '@/shared/dtos/settings';
-import { apiClient } from '@/lib/api-client';
+import { apiClient, ApiError } from '@/lib/api-client';
+
+const getErrorMessage = (error: unknown, fallback: string) => {
+  if (error instanceof ApiError) {
+    return error.message;
+  }
+  if (error instanceof Error) {
+    return error.message;
+  }
+  return fallback;
+};
 
 export function useSettings() {
   const [forwardTo, setForwardTo] = useState('');
@@ -9,55 +19,58 @@ export function useSettings() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    const loadSettings = async () => {
-      try {
-        setIsLoading(true);
-        setError(null);
+  const loadSettings = useCallback(async () => {
+    setIsLoading(true);
+    setError(null);
 
-        const [forwardToSetting, signatureSetting] = await Promise.allSettled([
-          apiClient.getSetting(SettingKeys.EMAIL_FORWARD_TO),
-          apiClient.getSetting(SettingKeys.EMAIL_SIGNATURE)
-        ]);
+    try {
+      const [forwardToSetting, signatureSetting] = await Promise.allSettled([
+        apiClient.getSetting(SettingKeys.EMAIL_FORWARD_TO),
+        apiClient.getSetting(SettingKeys.EMAIL_SIGNATURE),
+      ]);
 
-        if (forwardToSetting.status === 'fulfilled') {
-          setForwardTo(forwardToSetting.value?.value || '');
-        }
-
-        if (signatureSetting.status === 'fulfilled') {
-          setSignature(signatureSetting.value?.value || '');
-        }
-      } catch (err) {
-        setError('Failed to load settings');
-        console.error('Error loading settings:', err);
-      } finally {
-        setIsLoading(false);
+      if (forwardToSetting.status === 'fulfilled') {
+        setForwardTo(forwardToSetting.value?.value || '');
       }
-    };
 
-    loadSettings();
+      if (signatureSetting.status === 'fulfilled') {
+        setSignature(signatureSetting.value?.value || '');
+      }
+    } catch (err) {
+      setError(getErrorMessage(err, 'Failed to load settings'));
+    } finally {
+      setIsLoading(false);
+    }
   }, []);
 
-  const updateSetting = async (data: SettingsDto) => {
+  useEffect(() => {
+    loadSettings().catch(() => {
+      // loadSettings already sets the error state
+    });
+  }, [loadSettings]);
+
+  const updateSetting = useCallback(async (data: SettingsDto) => {
+    setIsLoading(true);
+    setError(null);
+
     try {
-      setIsLoading(true);
-      setError(null);
       await apiClient.updateSetting(data);
 
-      // Update local state based on the setting key
       if (data.key === SettingKeys.EMAIL_FORWARD_TO) {
         setForwardTo(data.value);
-      } else if (data.key === SettingKeys.EMAIL_SIGNATURE) {
+      }
+
+      if (data.key === SettingKeys.EMAIL_SIGNATURE) {
         setSignature(data.value);
       }
     } catch (err) {
-      setError('Failed to update setting');
-      console.error('Error updating setting:', err);
+      const message = getErrorMessage(err, 'Failed to update setting');
+      setError(message);
       throw err;
     } finally {
       setIsLoading(false);
     }
-  };
+  }, []);
 
   return {
     forwardTo,
@@ -66,6 +79,7 @@ export function useSettings() {
     setSignature,
     updateSetting,
     isLoading,
-    error
+    error,
+    reload: loadSettings,
   };
 }

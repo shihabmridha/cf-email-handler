@@ -12,9 +12,9 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { Pencil, Trash2 } from 'lucide-react';
+import { Pencil, Trash2, Shield } from 'lucide-react';
 import { apiClient } from '@/lib/api-client';
-import { toast } from '@/components/ui/use-toast';
+import { useToast } from '@/components/ui/use-toast';
 import {
   Table,
   TableBody,
@@ -24,6 +24,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { PageHeader } from '@/components/page-header';
+import { TableEmptyState } from '@/components/table-empty-state';
 
 export default function ProvidersPage() {
   const { providers, loading, error, refresh } = useProviders();
@@ -31,6 +32,7 @@ export default function ProvidersPage() {
     useState<ProviderConfigDto | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isCreateMode, setIsCreateMode] = useState(false);
+  const { toast } = useToast();
 
   const handleCreate = () => {
     setIsCreateMode(true);
@@ -54,10 +56,11 @@ export default function ProvidersPage() {
           description: 'Provider deleted successfully',
         });
       } catch (err) {
-        console.error('Failed to delete provider:', err);
+        const message =
+          err instanceof Error ? err.message : 'Failed to delete provider';
         toast({
           title: 'Error',
-          description: 'Failed to delete provider',
+          description: message,
           variant: 'destructive',
         });
       }
@@ -94,10 +97,11 @@ export default function ProvidersPage() {
       await refresh();
       setIsDialogOpen(false);
     } catch (err) {
-      console.error('Failed to save provider:', err);
+      const message =
+        err instanceof Error ? err.message : 'Failed to save provider';
       toast({
         title: 'Error',
-        description: 'Failed to save provider',
+        description: message,
         variant: 'destructive',
       });
     }
@@ -123,10 +127,6 @@ export default function ProvidersPage() {
     }
   };
 
-  if (error) {
-    return <div className="text-red-500">{error}</div>;
-  }
-
   return (
     <div className="py-6 space-y-6">
       <PageHeader
@@ -143,6 +143,25 @@ export default function ProvidersPage() {
           </Button>
         }
       />
+
+      {error && (
+        <div className="rounded-lg border border-destructive/40 bg-destructive/10 p-4 text-sm text-destructive">
+          <div className="flex items-center justify-between">
+            <span>{error}</span>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                refresh().catch(() => {
+                  /* handled via hook */
+                });
+              }}
+            >
+              Retry
+            </Button>
+          </div>
+        </div>
+      )}
 
       <div className="rounded-xl border border-border/50 bg-card/50 backdrop-blur-sm shadow-lg overflow-hidden">
         <div className="max-h-[70vh] overflow-auto">
@@ -207,24 +226,12 @@ export default function ProvidersPage() {
                 );
               })}
               {providers.length === 0 && (
-                <TableRow>
-                  <TableCell
-                    colSpan={5}
-                    className="text-center py-12"
-                  >
-                    <div className="flex flex-col items-center space-y-3">
-                      <div className="w-12 h-12 bg-muted/30 rounded-full flex items-center justify-center">
-                        <svg className="w-6 h-6 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                        </svg>
-                      </div>
-                      <div className="text-center">
-                        <h3 className="text-sm font-medium text-foreground">No email providers found</h3>
-                        <p className="text-xs text-muted-foreground mt-1">Create your first provider to start sending emails</p>
-                      </div>
-                    </div>
-                  </TableCell>
-                </TableRow>
+                <TableEmptyState
+                  colSpan={5}
+                  icon={<Shield className="h-5 w-5 text-muted-foreground" />}
+                  title="No email providers found"
+                  description="Create your first provider to start sending emails"
+                />
               )}
             </TableBody>
           </Table>

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { IncomingHistoryDto } from '@/shared/dtos/incoming-history';
 import { apiClient } from '@/lib/api-client';
@@ -17,6 +17,8 @@ import {
 import { PageHeader } from '@/components/page-header';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Mail, User, Clock, RefreshCw } from 'lucide-react';
+import { useToast } from '@/components/ui/use-toast';
+import { TableEmptyState } from '@/components/table-empty-state';
 
 export default function HistoryPage() {
     const [historyEntries, setHistoryEntries] = useState<IncomingHistoryDto[]>([]);
@@ -26,33 +28,66 @@ export default function HistoryPage() {
     const [error, setError] = useState<string | null>(null);
     const [currentPage, setCurrentPage] = useState(1);
     const [isLoadingMore, setIsLoadingMore] = useState(false);
+    const { toast } = useToast();
+    const toastRef = useRef(toast);
+    const isMountedRef = useRef(true);
 
-    const fetchHistory = async (page: number = 1, append: boolean = false) => {
-        try {
-            if (!append) setLoading(true);
-            else setIsLoadingMore(true);
+    useEffect(() => {
+        toastRef.current = toast;
+    }, [toast]);
 
-            const data = await apiClient.getIncomingHistory(page);
+    useEffect(() => {
+        isMountedRef.current = true;
+        return () => {
+            isMountedRef.current = false;
+        };
+    }, []);
 
-            if (append) {
-                setHistoryEntries(prev => [...prev, ...data.histories]);
-            } else {
-                setHistoryEntries(data.histories);
+    const fetchHistory = useCallback(
+        async (page = 1, append = false) => {
+            try {
+                if (append) {
+                    if (isMountedRef.current) {
+                        setIsLoadingMore(true);
+                    }
+                } else {
+                    if (isMountedRef.current) {
+                        setLoading(true);
+                    }
+                }
+
+                const data = await apiClient.getIncomingHistory(page);
+
+                if (isMountedRef.current) {
+                    setHistoryEntries((prev) =>
+                        append ? [...prev, ...data.histories] : data.histories,
+                    );
+                    setError(null);
+                }
+            } catch (err) {
+                const message =
+                    err instanceof Error ? err.message : 'Failed to load history';
+                if (isMountedRef.current) {
+                    setError(message);
+                }
+                toastRef.current({
+                    title: 'Unable to load history',
+                    description: message,
+                    variant: 'destructive',
+                });
+            } finally {
+                if (isMountedRef.current) {
+                    setLoading(false);
+                    setIsLoadingMore(false);
+                }
             }
-
-            setError(null);
-        } catch (err) {
-            console.error('Failed to fetch history:', err);
-            setError('Failed to load history');
-        } finally {
-            setLoading(false);
-            setIsLoadingMore(false);
-        }
-    };
+        },
+        [],
+    );
 
     useEffect(() => {
         fetchHistory();
-    }, []);
+    }, [fetchHistory]);
 
     const handleHistoryClick = (history: IncomingHistoryDto) => {
         setSelectedHistory(history);
@@ -209,22 +244,12 @@ export default function HistoryPage() {
                                     </TableRow>
                                 ))}
                                 {historyEntries.length === 0 && (
-                                    <TableRow>
-                                        <TableCell
-                                            colSpan={6}
-                                            className="text-center py-12"
-                                        >
-                                            <div className="flex flex-col items-center space-y-3">
-                                                <div className="w-12 h-12 bg-muted/30 rounded-full flex items-center justify-center">
-                                                    <Clock className="w-6 h-6 text-muted-foreground" />
-                                                </div>
-                                                <div className="text-center">
-                                                    <h3 className="text-sm font-medium text-foreground">No history records found</h3>
-                                                    <p className="text-xs text-muted-foreground mt-1">When emails are received, they&apos;ll appear here</p>
-                                                </div>
-                                            </div>
-                                        </TableCell>
-                                    </TableRow>
+                                    <TableEmptyState
+                                        colSpan={6}
+                                        icon={<Clock className="h-5 w-5 text-muted-foreground" />}
+                                        title="No history records found"
+                                        description="When emails are received, they'll appear here"
+                                    />
                                 )}
                             </TableBody>
                         </Table>

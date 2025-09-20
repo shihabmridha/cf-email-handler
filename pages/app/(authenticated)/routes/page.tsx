@@ -31,11 +31,14 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { PageHeader } from '@/components/page-header';
+import { TableEmptyState } from '@/components/table-empty-state';
+import { Mail } from 'lucide-react';
 
 export default function RoutesPage() {
   const {
     routes,
     loading,
+    error,
     createRoute,
     updateRoute,
     deleteRoute,
@@ -61,10 +64,12 @@ export default function RoutesPage() {
         title: 'Success',
         description: 'Route added successfully',
       });
-    } catch {
+    } catch (err) {
+      const message =
+        err instanceof Error ? err.message : 'Failed to add route';
       toast({
         title: 'Error',
-        description: 'Failed to add route',
+        description: message,
         variant: 'destructive',
       });
     }
@@ -81,10 +86,12 @@ export default function RoutesPage() {
         title: 'Success',
         description: 'Route updated successfully',
       });
-    } catch {
+    } catch (err) {
+      const message =
+        err instanceof Error ? err.message : 'Failed to update route';
       toast({
         title: 'Error',
-        description: 'Failed to update route',
+        description: message,
         variant: 'destructive',
       });
     }
@@ -97,10 +104,12 @@ export default function RoutesPage() {
         title: 'Success',
         description: 'Route deleted successfully',
       });
-    } catch {
+    } catch (err) {
+      const message =
+        err instanceof Error ? err.message : 'Failed to delete route';
       toast({
         title: 'Error',
-        description: 'Failed to delete route',
+        description: message,
         variant: 'destructive',
       });
     }
@@ -122,6 +131,12 @@ export default function RoutesPage() {
           </Button>
         }
       />
+
+      {error && (
+        <div className="rounded-lg border border-destructive/40 bg-destructive/10 p-4 text-sm text-destructive">
+          {error}
+        </div>
+      )}
 
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
         <DialogContent>
@@ -379,24 +394,12 @@ export default function RoutesPage() {
                 </TableRow>
               ))}
               {routes.length === 0 && (
-                <TableRow>
-                  <TableCell
-                    colSpan={8}
-                    className="text-center py-12"
-                  >
-                    <div className="flex flex-col items-center space-y-3">
-                      <div className="w-12 h-12 bg-muted/30 rounded-full flex items-center justify-center">
-                        <svg className="w-6 h-6 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 8l7.89 7.89a2 2 0 002.83 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                        </svg>
-                      </div>
-                      <div className="text-center">
-                        <h3 className="text-sm font-medium text-foreground">No email routes found</h3>
-                        <p className="text-xs text-muted-foreground mt-1">Add your first route to start managing email forwarding</p>
-                      </div>
-                    </div>
-                  </TableCell>
-                </TableRow>
+                <TableEmptyState
+                  colSpan={8}
+                  icon={<Mail className="h-5 w-5 text-muted-foreground" />}
+                  title="No email routes found"
+                  description="Add your first route to start managing email forwarding"
+                />
               )}
             </TableBody>
           </Table>

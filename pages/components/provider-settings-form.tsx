@@ -7,7 +7,6 @@ import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ProviderConfigDto } from '@/shared/dtos/provider';
 import { ApiError } from '@/lib/api-client';
-import { toast } from '@/components/ui/use-toast';
 import { ProviderType } from '@/shared/enums/provider-type';
 import { Eye, EyeOff } from 'lucide-react';
 
@@ -40,6 +39,7 @@ export function ProviderSettingsForm({
   });
 
   const [showApiKey, setShowApiKey] = useState(false);
+  const [formError, setFormError] = useState<string | null>(null);
 
   // Update form when provider changes
   useEffect(() => {
@@ -115,20 +115,15 @@ export function ProviderSettingsForm({
     };
 
     try {
+      setFormError(null);
       await onSave(config);
-      toast({
-        title: 'Success',
-        description: 'Provider settings saved successfully',
-      });
     } catch (error) {
-      toast({
-        title: 'Error',
-        description:
-          error instanceof ApiError
-            ? error.message
-            : 'Failed to save provider settings',
-        variant: 'destructive',
-      });
+      const message =
+        error instanceof ApiError
+          ? error.message
+          : 'Failed to save provider settings';
+      setFormError(message);
+      throw error;
     }
   };
 
@@ -149,6 +144,11 @@ export function ProviderSettingsForm({
       <h2 className="text-xl font-semibold">{providerName} Settings</h2>
 
       <form onSubmit={handleSubmit} className="space-y-6">
+        {formError && (
+          <div className="rounded-md border border-destructive/40 bg-destructive/10 p-3 text-sm text-destructive">
+            {formError}
+          </div>
+        )}
         <div className="space-y-4">
           <div>
             <Label htmlFor="name">Provider Name</Label>

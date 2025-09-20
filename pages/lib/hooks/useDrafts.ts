@@ -1,76 +1,88 @@
-import { DraftDto } from "@/shared/dtos/draft";
-import { useEffect, useState, useRef, useCallback } from "react";
-import { apiClient } from "../api-client";
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { DraftDto } from '@/shared/dtos/draft';
+import { apiClient, ApiError } from '../api-client';
 
 type DraftDataForApi = Omit<DraftDto, 'id' | 'createdAt' | 'updatedAt'>;
+
+const getErrorMessage = (error: unknown) => {
+  if (error instanceof ApiError) {
+    return error.message;
+  }
+  if (error instanceof Error) {
+    return error.message;
+  }
+  return 'An unexpected error occurred';
+};
 
 export function useDrafts() {
   const [drafts, setDrafts] = useState<DraftDto[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const initialLoadDone = useRef(false);
+  const hasFetched = useRef(false);
 
   const fetchDrafts = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+
     try {
-      setLoading(true);
-      setError(null);
       const data = await apiClient.getDrafts();
       setDrafts(data.drafts);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred');
+      setError(getErrorMessage(err));
+      throw err;
     } finally {
       setLoading(false);
     }
   }, []);
 
-  const saveDraft = async (draft: DraftDto) => {
-    try {
+  const saveDraft = useCallback(
+    async (draft: DraftDto) => {
       setLoading(true);
       setError(null);
 
-      const { id, ...draftData } = draft;
+      try {
+        const { id, ...draftPayload } = draft;
 
-      if (id) {
-        await apiClient.updateDraft(id, draftData as DraftDataForApi);
+        if (id) {
+          await apiClient.updateDraft(id, draftPayload as DraftDataForApi);
+        } else {
+          await apiClient.createDraft(draftPayload as DraftDataForApi);
+        }
 
-        setDrafts(drafts.map(d => d.id === id ? { ...d, ...draftData } : d));
-      } else {
-        await apiClient.createDraft(draftData as DraftDataForApi);
-
-        const tempDraft = {
-          ...draftData,
-          id: -1,
-        };
-        setDrafts([...drafts, tempDraft]);
+        await fetchDrafts();
+      } catch (err) {
+        const message = getErrorMessage(err);
+        setError(message);
+        throw err;
+      } finally {
+        setLoading(false);
       }
+    },
+    [fetchDrafts],
+  );
 
-      await fetchDrafts();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred');
-      throw err;
-    } finally {
-      setLoading(false);
-    }
-  };
+  const deleteDraft = useCallback(async (id: number) => {
+    setLoading(true);
+    setError(null);
 
-  const deleteDraft = async (id: number) => {
     try {
-      setLoading(true);
-      setError(null);
       await apiClient.deleteDraft(id);
-      setDrafts(drafts.filter(draft => draft.id !== id));
+      setDrafts((prev) => prev.filter((draft) => draft.id !== id));
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred');
+      const message = getErrorMessage(err);
+      setError(message);
       throw err;
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
-    if (!initialLoadDone.current) {
-      fetchDrafts();
-      initialLoadDone.current = true;
+    if (!hasFetched.current) {
+      fetchDrafts().catch(() => {
+        // error state is already set inside fetchDrafts
+      });
+      hasFetched.current = true;
     }
   }, [fetchDrafts]);
 

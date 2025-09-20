@@ -24,17 +24,17 @@ export function RichTextEditor({
 }: RichTextEditorProps) {
   const [content, setContent] = useState(initialContent);
 
-  // Memoize the onChange callback to prevent unnecessary re-renders
-  const handleContentChange = useCallback((newContent: string) => {
-    if (onChange) {
-      onChange(newContent);
-    }
-  }, [onChange]);
-
-  // Only trigger onChange when content changes
   useEffect(() => {
-    handleContentChange(content);
-  }, [content, handleContentChange]);
+    setContent((prev) => (prev === initialContent ? prev : initialContent));
+  }, [initialContent]);
+
+  const handleContentChange = useCallback(
+    (newContent: string) => {
+      setContent(newContent);
+      onChange?.(newContent);
+    },
+    [onChange],
+  );
 
   return (
     <div className="space-y-4">
@@ -42,7 +42,7 @@ export function RichTextEditor({
         <textarea
           className="w-full min-h-[240px] resize-y rounded-md border-0 p-4 outline-none focus:ring-1 focus:ring-ring"
           value={content}
-          onChange={(e) => setContent(e.target.value)}
+          onChange={(e) => handleContentChange(e.target.value)}
         />
       </div>
       {attachments.length > 0 && (

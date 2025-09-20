@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
   Select,
   SelectContent,
@@ -10,6 +10,7 @@ import {
 } from '@/components/ui/select';
 import { apiClient } from '@/lib/api-client';
 import { ProviderConfigDto } from '@/shared/dtos/provider';
+import { useToast } from '@/components/ui/use-toast';
 
 interface EmailProviderDropdownProps {
   value?: string;
@@ -22,20 +23,49 @@ export function EmailProviderDropdown({
 }: EmailProviderDropdownProps) {
   const [providers, setProviders] = useState<ProviderConfigDto[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const { toast } = useToast();
+  const toastRef = useRef(toast);
+  const isMountedRef = useRef(false);
 
   useEffect(() => {
+    toastRef.current = toast;
+  }, [toast]);
+
+  useEffect(() => {
+    isMountedRef.current = true;
+
     const fetchProviders = async () => {
       try {
         const response = await apiClient.getProviders();
+        if (!isMountedRef.current) {
+          return;
+        }
         setProviders(response);
+        setError(null);
       } catch (error) {
-        console.error('Failed to fetch providers:', error);
+        const message =
+          error instanceof Error ? error.message : 'Failed to load providers';
+        if (isMountedRef.current) {
+          setError(message);
+        }
+        toastRef.current({
+          title: 'Unable to load providers',
+          description: message,
+          variant: 'destructive',
+        });
       } finally {
-        setLoading(false);
+        if (isMountedRef.current) {
+          setLoading(false);
+        }
       }
     };
 
     fetchProviders();
+
+    return () => {
+      isMountedRef.current = false;
+    };
   }, []);
 
   if (loading) {
@@ -46,6 +76,19 @@ export function EmailProviderDropdown({
         </SelectTrigger>
         <SelectContent>
           <SelectItem value="loading">Loading...</SelectItem>
+        </SelectContent>
+      </Select>
+    );
+  }
+
+  if (error) {
+    return (
+      <Select disabled>
+        <SelectTrigger className="w-[180px] cursor-pointer">
+          <SelectValue placeholder="Providers unavailable" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="unavailable">Providers unavailable</SelectItem>
         </SelectContent>
       </Select>
     );
