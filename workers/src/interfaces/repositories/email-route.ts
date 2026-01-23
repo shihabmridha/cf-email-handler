@@ -6,7 +6,7 @@ export interface IEmailRouteRepository extends IBaseRepository<EmailRouteEntity>
   create(route: EmailRouteEntity): Promise<void>;
   update(id: number, route: EmailRouteEntity): Promise<void>;
   delete(id: number): Promise<boolean>;
-  getByEmail(email: string): Promise<EmailRouteEntity[]>;
+  getByEmail(email: string, enabledOnly?: boolean): Promise<EmailRouteEntity[]>;
   incrementReceived(email: string, emailClass: EmailClass): Promise<void>;
   incrementSent(email: string, emailClass: EmailClass): Promise<void>;
 }
