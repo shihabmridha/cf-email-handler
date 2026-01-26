@@ -6,6 +6,9 @@ import { EmailRouteEntity } from '@/entities/email-route';
 import { IEmailRouteRepository } from '@/interfaces/repositories/email-route';
 import { SettingKeys } from '@/enums/settings-key';
 import { ISettingsRepository } from '@/interfaces/repositories/settings';
+
+// Valid EmailClass values for validation
+const VALID_EMAIL_CLASSES = Object.values(EmailClass);
 export class EmailRouteService {
   private readonly _emailRouteRepository: IEmailRouteRepository;
   private readonly _settingsRepository: ISettingsRepository;
@@ -33,6 +36,10 @@ export class EmailRouteService {
       throw new HTTPException(400, { message: 'Type is required' });
     }
 
+    if (!VALID_EMAIL_CLASSES.includes(dto.type as EmailClass)) {
+      throw new HTTPException(400, { message: `Invalid email type. Must be one of: ${VALID_EMAIL_CLASSES.join(', ')}` });
+    }
+
     dto.enabled = true;
 
     const entity = Mapper.dtoToEntity(EmailRouteEntity, dto);
@@ -52,6 +59,10 @@ export class EmailRouteService {
       throw new HTTPException(400, { message: 'Type is required' });
     }
 
+    if (!VALID_EMAIL_CLASSES.includes(dto.type as EmailClass)) {
+      throw new HTTPException(400, { message: `Invalid email type. Must be one of: ${VALID_EMAIL_CLASSES.join(', ')}` });
+    }
+
     const entity = Mapper.dtoToEntity(EmailRouteEntity, dto);
 
     await this._emailRouteRepository.update(id, entity);
@@ -62,20 +73,34 @@ export class EmailRouteService {
   }
 
   async getDestination(email: string, type: EmailClass): Promise<string | null> {
+    // Only get enabled routes (enabledOnly=true is the default)
     const routes = await this._emailRouteRepository.getByEmail(email);
 
-    const routeToUse = routes.find(r => r.type === type) || routes.find(r => r.type === EmailClass.UNKNOWN);
+    // Find matching route by type, with fallback to UNKNOWN type
+    // Only consider enabled routes (already filtered by repository)
+    const routeToUse = routes.find(r => r.type === type && r.enabled)
+      || routes.find(r => r.type === EmailClass.UNKNOWN && r.enabled);
+
+    // If route exists and is marked for drop, return null
     if (routeToUse?.drop) {
+      console.log(`Route for ${email} with type ${type} is marked for drop`);
       return null;
     }
 
+    // If route exists with a destination, return it
     if (routeToUse?.destination) {
       return routeToUse.destination;
     }
 
+    // Fallback to default forward email from settings
     const forwardTo = await this._settingsRepository.getByKey(SettingKeys.EMAIL_FORWARD_TO);
 
-    console.log('No matching route found, using default email:', forwardTo?.value);
+    if (!forwardTo?.value) {
+      console.warn('No matching route found and no default forward email configured');
+    } else {
+      console.log('No matching route found, using default email:', forwardTo.value);
+    }
+
     return forwardTo?.value ?? null;
   }
 

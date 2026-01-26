@@ -25,13 +25,13 @@ export class EmailRouteRepository extends BaseRepository<EmailRouteEntity> imple
   }
 
   async update(id: number, route: EmailRouteEntity): Promise<void> {
-    const sql = `UPDATE ${this.tableName} SET email = ?, destination = ?, enabled = ?, \`drop\` = ? WHERE id = ?`;
+    const sql = `UPDATE ${this.tableName} SET email = ?, destination = ?, type = ?, enabled = ?, \`drop\` = ? WHERE id = ?`;
     const response = await this._db.prepare(sql)
-      .bind(route.email, route.destination, route.enabled, route.drop, id)
+      .bind(route.email, route.destination, route.type, route.enabled, route.drop, id)
       .run();
 
     if (!response.success) {
-      throw new Error('Failed to update provider');
+      throw new Error('Failed to update email route');
     }
   }
 
@@ -43,11 +43,20 @@ export class EmailRouteRepository extends BaseRepository<EmailRouteEntity> imple
     return response.success;
   }
 
-  async getByEmail(email: string): Promise<EmailRouteEntity[]> {
+  async getByEmail(email: string, enabledOnly: boolean = true): Promise<EmailRouteEntity[]> {
+    const sql = enabledOnly
+      ? `SELECT * FROM ${this.tableName} WHERE email = ? AND enabled = 1`
+      : `SELECT * FROM ${this.tableName} WHERE email = ?`;
+
     const result = await this._db
-      .prepare(`SELECT * FROM ${this.tableName} WHERE email = ?`)
+      .prepare(sql)
       .bind(email)
       .all<EmailRouteEntity>();
+
+    if (!result?.success) {
+      console.error('Failed to fetch routes for email:', email);
+      return [];
+    }
 
     return result?.results ?? [];
   }
