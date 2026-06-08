@@ -14,9 +14,9 @@ export class EmailRouteRepository extends BaseRepository<EmailRouteEntity> imple
   }
 
   async create(route: EmailRouteEntity): Promise<void> {
-    const sql = `INSERT INTO ${this.tableName} (userId, email, destination, type, enabled) VALUES (?, ?, ?, ?, ?)`;
+    const sql = `INSERT INTO ${this.tableName} (userId, email, destination, type, enabled, \`drop\`) VALUES (?, ?, ?, ?, ?, ?)`;
     const response = await this._db.prepare(sql)
-      .bind(route.userId, route.email, route.destination, route.type, route.enabled)
+      .bind(route.userId, route.email, route.destination, route.type, route.enabled, route.drop)
       .run();
 
     if (!response.success) {
@@ -80,6 +80,17 @@ export class EmailRouteRepository extends BaseRepository<EmailRouteEntity> imple
 
     if (!response.success) {
       throw new Error('Failed to increment sent');
+    }
+  }
+
+  async incrementSentByEmail(email: string): Promise<void> {
+    const sql = `UPDATE ${this.tableName} SET sent = sent + 1 WHERE email = ? AND enabled = 1`;
+    const response = await this._db.prepare(sql)
+      .bind(email)
+      .run();
+
+    if (!response.success) {
+      throw new Error('Failed to increment sent by email');
     }
   }
 }

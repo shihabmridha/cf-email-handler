@@ -1,9 +1,9 @@
 import PostalMime from 'postal-mime';
 import { EmailClass } from '@/enums/email-class';
+import { SettingKeys } from '@/enums/settings-key';
 import { Container } from '../container';
 import { cleanHtml } from '../lib/utils';
 
-// Valid EmailClass values for validation
 const VALID_EMAIL_CLASSES = Object.values(EmailClass);
 
 export async function parseEmail(message: ForwardableEmailMessage) {
@@ -16,7 +16,6 @@ export async function parseEmail(message: ForwardableEmailMessage) {
     content,
     from: message.from,
     to: rawMessage.to?.[0]?.address ?? '',
-    // @ts-expect-error - to ignore the lint error
     subject: message.headers.get('subject') ?? '',
     forward: message.forward.bind(message),
     drop: () => {
@@ -26,16 +25,27 @@ export async function parseEmail(message: ForwardableEmailMessage) {
   };
 }
 
+async function resolveToEmail(to: string, container: Container): Promise<string> {
+  if (to !== '') {
+    return to;
+  }
+
+  const settingsService = container.getSettingsService();
+  const forwardSetting = await settingsService.getByKey(SettingKeys.EMAIL_FORWARD_TO);
+
+  if (forwardSetting?.value) {
+    return forwardSetting.value;
+  }
+
+  return container.getConfig().emailForwardTo;
+}
+
 export async function processEmail(
   parsedEmail: ReturnType<typeof parseEmail> extends Promise<infer T> ? T : never,
   container: Container
 ) {
   const { content, from, subject, forward, drop } = parsedEmail;
-  let { to } = parsedEmail;
-
-  const config = container.getConfig();
-
-  if (to === '') to = config.emailForwardTo;
+  const to = await resolveToEmail(parsedEmail.to, container);
 
   console.log(`Received email from ${from} to ${to} with subject ${subject}`);
 
@@ -43,16 +53,15 @@ export async function processEmail(
   const incomingHistoryService = container.getIncomingHistoryService();
   const discordService = container.getDiscordService();
 
-  let emailData: { class?: string; summary?: string };
+  let emailData: { class?: string; summary?: string; otp?: string };
   try {
     emailData = await predict.extractEmailClassAndData(content);
     console.log('Email data:', JSON.stringify(emailData, null, 2));
   } catch (error) {
     console.error('Failed to classify email:', error);
-    emailData = { class: undefined, summary: undefined };
+    emailData = { class: undefined, summary: undefined, otp: undefined };
   }
 
-  // Validate the email class - if missing or invalid, default to UNKNOWN
   let emailType: EmailClass;
   if (!emailData.class || !VALID_EMAIL_CLASSES.includes(emailData.class as EmailClass)) {
     console.warn(`Invalid or missing email class: "${emailData.class}", defaulting to UNKNOWN`);
@@ -64,39 +73,33 @@ export async function processEmail(
 
   const emailRouteService = container.getEmailRouteService();
 
-  // Get destination before creating actions
-  const destination = await emailRouteService.getDestination(to, emailType);
+  const { destination, matchedRoute } = await emailRouteService.getDestination(to, emailType);
   console.log('Destination:', destination);
 
-  // Track results for error handling
   const errors: string[] = [];
 
-  // Execute Discord notification (non-critical, don't block on failure)
   try {
-    await discordService.sendMessage(from, subject, emailData.summary);
+    await discordService.sendMessage(from, subject, emailData.summary ?? '', emailType, emailData.otp);
   } catch (error) {
     console.error('Failed to send Discord notification:', error);
     errors.push('Discord notification failed');
   }
 
-  // Execute route increment (non-critical)
-  try {
-    await emailRouteService.incrementReceived(to, emailType);
-  } catch (error) {
-    console.error('Failed to increment received counter:', error);
-    errors.push('Increment counter failed');
+  if (matchedRoute) {
+    try {
+      await emailRouteService.incrementReceived(to, emailType);
+    } catch (error) {
+      console.error('Failed to increment received counter:', error);
+      errors.push('Increment counter failed');
+    }
   }
 
-  // Execute forward or drop (critical operation)
-  let forwardSuccess = false;
   try {
     if (destination) {
       await forward(destination);
-      forwardSuccess = true;
       console.log(`Email forwarded successfully to ${destination}`);
     } else {
       await drop();
-      forwardSuccess = true;
       console.log('Email dropped as per route configuration');
     }
   } catch (error) {
@@ -104,7 +107,6 @@ export async function processEmail(
     errors.push(`Forward/drop failed: ${error}`);
   }
 
-  // Always record history (critical for audit trail)
   try {
     await incomingHistoryService.create({
       id: 0,
@@ -113,7 +115,8 @@ export async function processEmail(
       subject,
       destination: destination || undefined,
       emailClass: emailType,
-      summary: emailData.summary,
+      summary: emailData.summary ?? '',
+      otp: emailData.otp,
       createdAt: new Date(),
       updatedAt: new Date()
     });
@@ -122,7 +125,6 @@ export async function processEmail(
     errors.push('History creation failed');
   }
 
-  // Log summary of any errors
   if (errors.length > 0) {
     console.error(`Email processing completed with ${errors.length} error(s):`, errors);
   } else {

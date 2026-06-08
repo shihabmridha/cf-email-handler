@@ -9,4 +9,5 @@ export interface IEmailRouteRepository extends IBaseRepository<EmailRouteEntity>
   getByEmail(email: string, enabledOnly?: boolean): Promise<EmailRouteEntity[]>;
   incrementReceived(email: string, emailClass: EmailClass): Promise<void>;
   incrementSent(email: string, emailClass: EmailClass): Promise<void>;
+  incrementSentByEmail(email: string): Promise<void>;
 }

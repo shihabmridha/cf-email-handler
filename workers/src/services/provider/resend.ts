@@ -18,7 +18,7 @@ export class ResendProviderService extends BaseProviderService<ResendApiPayload>
 
   createApiPayload(content: TransportContent): ResendApiPayload {
     return {
-      from: `${content.from} <${content.from}>`,
+      from: content.from,
       to: content.to,
       cc: content.cc,
       subject: content.subject,

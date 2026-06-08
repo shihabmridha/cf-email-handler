@@ -17,15 +17,14 @@ export class MailService {
 
     const provider = ProviderFactory.getProvider(providerConfig.type, providerConfig.smtp, providerConfig.api);
 
-    let sent = false;
-    if (providerConfig.smtp) {
-      sent = await provider.sendBySmtp(payload.content);
-    }
-
     if (providerConfig.api) {
-      sent = await provider.sendByApi(payload.content);
+      return provider.sendByApi(payload.content);
     }
 
-    return sent;
+    if (providerConfig.smtp) {
+      return provider.sendBySmtp(payload.content);
+    }
+
+    return false;
   }
 }

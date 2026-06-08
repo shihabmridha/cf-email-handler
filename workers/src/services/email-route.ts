@@ -7,8 +7,13 @@ import { IEmailRouteRepository } from '@/interfaces/repositories/email-route';
 import { SettingKeys } from '@/enums/settings-key';
 import { ISettingsRepository } from '@/interfaces/repositories/settings';
 
-// Valid EmailClass values for validation
 const VALID_EMAIL_CLASSES = Object.values(EmailClass);
+
+export interface RouteDestinationResult {
+  destination: string | null;
+  matchedRoute: EmailRouteEntity | null;
+}
+
 export class EmailRouteService {
   private readonly _emailRouteRepository: IEmailRouteRepository;
   private readonly _settingsRepository: ISettingsRepository;
@@ -72,27 +77,21 @@ export class EmailRouteService {
     await this._emailRouteRepository.delete(id);
   }
 
-  async getDestination(email: string, type: EmailClass): Promise<string | null> {
-    // Only get enabled routes (enabledOnly=true is the default)
+  async getDestination(email: string, type: EmailClass): Promise<RouteDestinationResult> {
     const routes = await this._emailRouteRepository.getByEmail(email);
 
-    // Find matching route by type, with fallback to UNKNOWN type
-    // Only consider enabled routes (already filtered by repository)
     const routeToUse = routes.find(r => r.type === type && r.enabled)
       || routes.find(r => r.type === EmailClass.UNKNOWN && r.enabled);
 
-    // If route exists and is marked for drop, return null
     if (routeToUse?.drop) {
       console.log(`Route for ${email} with type ${type} is marked for drop`);
-      return null;
+      return { destination: null, matchedRoute: routeToUse };
     }
 
-    // If route exists with a destination, return it
     if (routeToUse?.destination) {
-      return routeToUse.destination;
+      return { destination: routeToUse.destination, matchedRoute: routeToUse };
     }
 
-    // Fallback to default forward email from settings
     const forwardTo = await this._settingsRepository.getByKey(SettingKeys.EMAIL_FORWARD_TO);
 
     if (!forwardTo?.value) {
@@ -101,7 +100,7 @@ export class EmailRouteService {
       console.log('No matching route found, using default email:', forwardTo.value);
     }
 
-    return forwardTo?.value ?? null;
+    return { destination: forwardTo?.value ?? null, matchedRoute: null };
   }
 
   async incrementReceived(email: string, emailClass: EmailClass): Promise<void> {
@@ -110,5 +109,9 @@ export class EmailRouteService {
 
   async incrementSent(email: string, emailClass: EmailClass): Promise<void> {
     await this._emailRouteRepository.incrementSent(email, emailClass);
+  }
+
+  async incrementSentByEmail(email: string): Promise<void> {
+    await this._emailRouteRepository.incrementSentByEmail(email);
   }
 }

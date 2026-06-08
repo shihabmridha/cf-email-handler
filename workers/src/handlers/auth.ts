@@ -1,7 +1,7 @@
 import { LoginDto } from "@/dtos/auth";
 import { Hono } from "hono";
 import { AppContext } from '../interfaces/context';
-import { jwt } from 'hono/jwt';
+import { createJwtAuth } from '../lib/jwt';
 
 const app = new Hono<{ Bindings: AppContext }>();
 
@@ -18,11 +18,7 @@ app.post('/login', async (c) => {
 
 
 app.use('/verify', async (c, next) => {
-  const auth = jwt({
-    secret: c.env.JWT_SECRET,
-  });
-
-  return auth(c, next);
+  return createJwtAuth(c.env.JWT_SECRET)(c, next);
 });
 
 app.get('/verify', async (c) => {

@@ -1,5 +1,8 @@
-import { EmailClass } from "@/enums/email-class";
-import { LlmService } from "../interfaces/llm";
+import { generateText, Output, NoObjectGeneratedError } from 'ai';
+import type { DeepSeekLanguageModelOptions } from '@ai-sdk/deepseek';
+import type { LanguageModel } from 'ai';
+import { z } from 'zod';
+import { EmailClass } from '@/enums/email-class';
 
 export class VerificationData {
   class: string = '';
@@ -7,16 +10,18 @@ export class VerificationData {
   summary: string = '';
 }
 
+const verificationSchema = z.object({
+  class: z.nativeEnum(EmailClass),
+  otp: z.string().describe('OTP code or verification URL, or empty string'),
+  summary: z.string().describe('One-sentence summary of the email purpose'),
+});
+
 export class PredictionService {
-  private readonly llm: LlmService;
+  private readonly _model: LanguageModel;
   private readonly maxRetries = 3;
 
-  constructor(llm: LlmService) {
-    this.llm = llm;
-  }
-
-  private cleanupLLMResponse(response: string): string {
-    return response.replace(/^```json\n/, '').replace(/\n```$/, '');
+  constructor(model: LanguageModel) {
+    this._model = model;
   }
 
   private validateResponse(json: VerificationData): boolean {
@@ -50,8 +55,8 @@ export class PredictionService {
     }
   }
 
-  async extractEmailClassAndData(emailContent: string): Promise<VerificationData> {
-    const prompt = `
+  private buildPrompt(emailContent: string): string {
+    return `
       Analyze the following email content and extract key information:
       1. Create a one-sentence summary of the email's purpose.
       2. If the email contains an OTP or verification code, extract ONLY the numeric or alphanumeric code and set it to OTP property and set class to OTP and summary must include the OTP.
@@ -59,42 +64,56 @@ export class PredictionService {
       4. If the email is invoice or payment slip set class to "INVOICE" and summary must include the amount.
       5. If the email is promotional/marketing set class to "PROMOTIONAL".
 
-      Format your response exactly as follows, with NO additional text:
-      {"class": "OTP/INVOICE/PROMOTIONAL/UNKNOWN", "otp": "CODE_HERE_OR_EMPTY/URL_HERE_OR_EMPTY", "summary": "BRIEF_SUMMARY_HERE"}
-
       Email content:
-      ${emailContent}\n
+      ${emailContent}
     `;
+  }
 
-    let lastError: Error | null = null;
+  private toVerificationData(output: z.infer<typeof verificationSchema>): VerificationData {
+    const result = new VerificationData();
+    result.class = output.class || EmailClass.UNKNOWN;
+    result.otp = output.otp || '';
+    result.summary = output.summary || '';
+    return result;
+  }
+
+  async extractEmailClassAndData(emailContent: string): Promise<VerificationData> {
     let lastValidResponse: VerificationData | null = null;
     const result = new VerificationData();
 
     for (let attempt = 0; attempt <= this.maxRetries; attempt++) {
-      const response = await this.llm.ask(prompt);
-      const cleanedResponse = this.cleanupLLMResponse(response);
-      console.log(`Prediction response (attempt ${attempt + 1}):`, cleanedResponse);
-
       try {
-        const json = JSON.parse(cleanedResponse);
+        const { output } = await generateText({
+          model: this._model,
+          output: Output.object({ schema: verificationSchema }),
+          providerOptions: {
+            deepseek: {
+              thinking: { type: 'disabled' },
+            } satisfies DeepSeekLanguageModelOptions,
+          },
+          prompt: this.buildPrompt(emailContent),
+        });
 
-        if (this.validateResponse(json)) {
-          result.class = json.class || EmailClass.UNKNOWN;
-          result.otp = json.otp || '';
-          result.summary = json.summary || '';
-          return result;
+        if (!output) {
+          throw new Error('No structured output returned');
         }
 
-        lastValidResponse = new VerificationData();
-        lastValidResponse.class = json.class || EmailClass.UNKNOWN;
-        lastValidResponse.otp = json.otp || '';
-        lastValidResponse.summary = json.summary || '';
+        const json = this.toVerificationData(output);
+        console.log(`Prediction response (attempt ${attempt + 1}):`, JSON.stringify(json));
 
+        if (this.validateResponse(json)) {
+          return json;
+        }
+
+        lastValidResponse = json;
         console.error('Response validation failed');
-        lastError = new Error('Response validation failed');
       } catch (error) {
-        lastError = error instanceof Error ? error : new Error(String(error));
-        console.error(`Attempt ${attempt + 1} failed:`, lastError);
+        if (NoObjectGeneratedError.isInstance(error)) {
+          console.error(`Attempt ${attempt + 1} failed: NoObjectGeneratedError`, error.text);
+        } else {
+          const lastError = error instanceof Error ? error : new Error(String(error));
+          console.error(`Attempt ${attempt + 1} failed:`, lastError);
+        }
       }
 
       if (attempt < this.maxRetries) {

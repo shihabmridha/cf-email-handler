@@ -8,4 +8,5 @@ export class IncomingHistoryDto extends BaseDto {
   destination?: string;
   emailClass: EmailClass = EmailClass.UNKNOWN;
   summary: string = "";
+  otp?: string;
 }

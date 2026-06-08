@@ -3,8 +3,7 @@ import { UserRepository } from './repositories/user';
 import { AuthService } from './services/auth';
 import { DiscordService } from './services/discord';
 import { PredictionService } from './services/prediction';
-import { GeminiService } from './services/llm/gemini';
-import { LlmService } from './interfaces/llm';
+import { LlmFactory } from './services/llm/factory';
 import { DraftService } from './services/draft';
 import { DraftRepository } from './repositories/draft';
 import { EmailRouteRepository } from './repositories/email-route';
@@ -69,12 +68,10 @@ export class Container {
     return this.get('authService', () => new AuthService(this.getUserRepository(), this._config));
   }
 
-  getLlmService(): LlmService {
-    return this.get('llmService', () => new GeminiService(this._config));
-  }
-
   getPredictionService(): PredictionService {
-    return this.get('predictionService', () => new PredictionService(this.getLlmService()));
+    return this.get('predictionService', () =>
+      new PredictionService(LlmFactory.createModel(this._config))
+    );
   }
 
   getDiscordService(): DiscordService {
