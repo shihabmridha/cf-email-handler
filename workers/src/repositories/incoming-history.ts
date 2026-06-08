@@ -13,9 +13,9 @@ export class IncomingHistoryRepository extends BaseRepository<IncomingHistoryEnt
   }
 
   async create(data: IncomingHistoryEntity): Promise<void> {
-    const sql = `INSERT INTO ${this.tableName} (fromEmail, toEmail, subject, destination, emailClass, summary) VALUES (?, ?, ?, ?, ?, ?)`;
+    const sql = `INSERT INTO ${this.tableName} (fromEmail, toEmail, subject, destination, emailClass, summary, otp) VALUES (?, ?, ?, ?, ?, ?, ?)`;
     const response = await this._db.prepare(sql)
-      .bind(data.fromEmail, data.toEmail, data.subject, data.destination, data.emailClass, data.summary)
+      .bind(data.fromEmail, data.toEmail, data.subject, data.destination, data.emailClass, data.summary, data.otp ?? null)
       .run();
 
     if (!response.success) {
@@ -24,9 +24,9 @@ export class IncomingHistoryRepository extends BaseRepository<IncomingHistoryEnt
   }
 
   async update(id: number, data: IncomingHistoryEntity): Promise<void> {
-    const sql = `UPDATE ${this.tableName} SET fromEmail = ?, toEmail = ?, subject = ?, destination = ?, emailClass = ?, summary = ? WHERE id = ?`;
+    const sql = `UPDATE ${this.tableName} SET fromEmail = ?, toEmail = ?, subject = ?, destination = ?, emailClass = ?, summary = ?, otp = ? WHERE id = ?`;
     const response = await this._db.prepare(sql)
-      .bind(data.fromEmail, data.toEmail, data.subject, data.destination, data.emailClass, data.summary, id)
+      .bind(data.fromEmail, data.toEmail, data.subject, data.destination, data.emailClass, data.summary, data.otp ?? null, id)
       .run();
 
     if (!response.success) {

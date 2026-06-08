@@ -5,9 +5,8 @@ import { IEmailRouteRepository } from "../src/interfaces/repositories/email-rout
 import { EmailRouteEntity } from "../src/entities/email-route";
 import { ISettingsRepository } from "@/interfaces/repositories/settings";
 
-describe.skip("Route Service", () => {
+describe("Route Service", () => {
   test("should get unknown destination when no route is found", async () => {
-
     const mockEmailRouteRepository = {
       getByEmail: mock(() => {
         const entities: EmailRouteEntity[] = [
@@ -49,7 +48,24 @@ describe.skip("Route Service", () => {
     } as unknown as ISettingsRepository;
 
     const routeService = new EmailRouteService(mockEmailRouteRepository, mockSettingsRepository);
-    const destination = await routeService.getDestination("test@test.com", EmailClass.OTP);
-    expect(destination).toBe("unknown@test.com");
+    const result = await routeService.getDestination("test@test.com", EmailClass.OTP);
+    expect(result.destination).toBe("unknown@test.com");
+    expect(result.matchedRoute?.type).toBe(EmailClass.UNKNOWN);
+  });
+
+  test("should return null matchedRoute when using default forward setting", async () => {
+    const mockEmailRouteRepository = {
+      getByEmail: mock(() => Promise.resolve([])),
+    } as unknown as IEmailRouteRepository;
+
+    const mockSettingsRepository = {
+      getByKey: mock(() => Promise.resolve({ value: "forward@test.com" })),
+    } as unknown as ISettingsRepository;
+
+    const routeService = new EmailRouteService(mockEmailRouteRepository, mockSettingsRepository);
+    const result = await routeService.getDestination("test@test.com", EmailClass.OTP);
+
+    expect(result.destination).toBe("forward@test.com");
+    expect(result.matchedRoute).toBeNull();
   });
 });

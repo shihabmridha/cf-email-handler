@@ -1,17 +1,14 @@
 import { Hono } from "hono";
 import { DraftDto } from "@/dtos/draft";
 import { AppContext } from '../interfaces/context';
-import { jwt, JwtVariables } from 'hono/jwt';
+import { JwtVariables } from 'hono/jwt';
 import type { JwtPayload } from '../services/auth';
+import { createJwtAuth } from '../lib/jwt';
 
 const app = new Hono<{ Bindings: AppContext, Variables: JwtVariables<JwtPayload> }>();
 
 app.use('*', async (c, next) => {
-  const auth = jwt({
-    secret: c.env.JWT_SECRET,
-  });
-
-  return auth(c, next);
+  return createJwtAuth(c.env.JWT_SECRET)(c, next);
 });
 
 app.get('/', async (c) => {

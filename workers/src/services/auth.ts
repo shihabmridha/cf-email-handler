@@ -1,6 +1,7 @@
 import { HTTPException } from "hono/http-exception";
 import { sign } from "hono/jwt";
 import { hashText } from "../lib/utils";
+import { JWT_ALGORITHM } from "../lib/jwt";
 import { LoginDto } from "@/dtos/auth";
 import { Configuration } from "../config";
 import { IUserRepository } from '../interfaces/repositories/user';
@@ -25,7 +26,7 @@ export class AuthService {
       throw new Error('Empty payload');
     }
 
-    const token = await sign(payload, this.jwtSecret);
+    const token = await sign(payload, this.jwtSecret, JWT_ALGORITHM);
 
     return token;
   }

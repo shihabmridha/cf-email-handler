@@ -54,7 +54,11 @@ describe('Incoming Email', () => {
       reply: mock(() => Promise.resolve())
     };
 
-    const mockGetDestination = mock(() => Promise.resolve("forwarded@example.com"));
+    const mockGetDestination = mock(() => Promise.resolve({
+      destination: "forwarded@example.com",
+      matchedRoute: { id: 1 },
+    }));
+    const mockIncrementReceived = mock(() => Promise.resolve());
     const extractEmailClassAndData = mock(() => Promise.resolve({
       class: EmailClass.INVOICE,
       summary: "Email summary"
@@ -65,8 +69,12 @@ describe('Incoming Email', () => {
         extractEmailClassAndData: extractEmailClassAndData
       })),
       getConfig: mock(() => config),
+      getSettingsService: mock(() => ({
+        getByKey: mock(() => Promise.resolve(null)),
+      })),
       getEmailRouteService: mock(() => ({
-        getDestination: mockGetDestination
+        getDestination: mockGetDestination,
+        incrementReceived: mockIncrementReceived,
       })),
       getDiscordService: () => discordService,
       getIncomingHistoryService: mock(() => ({
@@ -79,6 +87,7 @@ describe('Incoming Email', () => {
 
     expect(extractEmailClassAndData).toHaveBeenCalled();
     expect(mockGetDestination).toHaveBeenCalled();
+    expect(mockIncrementReceived).toHaveBeenCalled();
     expect(mockMessage.forward).toHaveBeenCalled();
   });
 });

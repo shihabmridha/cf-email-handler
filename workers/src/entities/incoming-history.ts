@@ -21,4 +21,7 @@ export class IncomingHistoryEntity extends BaseEntity {
 
   @Expose()
   summary: string = "";
+
+  @Expose()
+  otp?: string;
 }
